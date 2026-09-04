@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: staff-bot
+    runtime: node
+    plan: starter # Free spins down after 15 min idle and has NO persistent disk;
+                  # this process holds the Discord gateway connection, spin-down
+                  # takes the bot offline, not just the dashboard. See CLAUDE.md.
+    region: ohio # Pick whatever Render region is physically closest to your
+                 # Neon project's region for lower latency; this Neon project
+                 # was created in AWS us-east-2, Render's Ohio region is the
+                 # closest match. Not critical for a Discord bot's traffic
+                 # pattern, just free to get right.
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: CLIENT_ID
+        sync: false
+      - key: GUILD_ID
+        sync: false
+      - key: DATABASE_URL
+        sync: false # Neon/Supabase connection string, NOT Render's own free
+                     # Postgres, which hard-deletes the database after 30 days
+                     # plus a 14-day grace period on the free plan.
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true # Render will generate and store a random value
+      - key: WEB_BASE_URL
+        sync: false # optional, RENDER_EXTERNAL_URL is auto-detected if unset
+      - key: DISABLE_SELF_PING
+        value: 'false'

@@ -1,0 +1,30 @@
+{
+  "name": "staff-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "prepare-icons": "node scripts/prepare-icons.js",
+    "upload-emojis": "node scripts/upload-emojis.js",
+    "generate-theme": "node scripts/generate-theme.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/rest": "^2.6.3",
+    "connect-pg-simple": "^10.0.0",
+    "discord.js": "^14.27.0",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "lucide-static": "^1.37.0",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@material/material-color-utilities": "^0.3.0"
+  }
+}
