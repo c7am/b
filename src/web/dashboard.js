@@ -1,6 +1,15 @@
 const express = require('express');
 const { ChannelType } = require('discord.js');
-const { guildListPage, staffDashboard, shiftDetailsPage } = require('./views');
+const {
+  guildListPage,
+  staffDashboard,
+  shiftDetailsPage,
+  createShiftPage,
+  shiftsListPage,
+  loaRequestPage,
+  checkInPage,
+  userProfilePage,
+} = require('./views');
 const {
   SCALAR_KEYS,
   getScalar,
@@ -15,11 +24,17 @@ const {
 const {
   getShifts,
   getShift,
+  createShift,
+  deleteShift,
   joinShift,
   leaveShift,
   getShiftMembers,
   getUserShifts,
+  checkInShift,
+  checkOutShift,
   getActiveLoa,
+  startLoa,
+  endLoa,
   getUser,
 } = require('../db/database');
 
@@ -137,6 +152,184 @@ function buildDashboardRouter(client) {
 
     await leaveShift(shiftId, userId);
     res.redirect(`/dashboard/${guild.id}/staff`);
+  }));
+
+  // Admin: List and manage shifts
+  router.get('/:guildId/shifts', requireGuildAccess, requireAdmin, asyncRoute(async (req, res) => {
+    const shifts = await getShifts(req.guild.id, { active: true });
+    res.send(shiftsListPage({
+      guild: req.guild,
+      shifts,
+      csrfToken: req.csrfToken(),
+      guildId: req.guild.id,
+    }));
+  }));
+
+  // Admin: Create shift form
+  router.get('/:guildId/create-shift', requireGuildAccess, requireAdmin, asyncRoute(async (req, res) => {
+    res.send(createShiftPage({
+      guild: req.guild,
+      csrfToken: req.csrfToken(),
+      guildId: req.guild.id,
+    }));
+  }));
+
+  // Admin: Create shift (POST)
+  router.post('/:guildId/create-shift', requireGuildAccess, requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const { name, description, startsAt, endsAt } = req.body;
+    if (!name || !startsAt || !endsAt) {
+      return res.status(400).send('Missing required fields.');
+    }
+
+    await createShift({
+      guildId: req.guild.id,
+      name,
+      startsAt: new Date(startsAt),
+      endsAt: new Date(endsAt),
+      description: description || null,
+      createdBy: req.session.user.id,
+    });
+
+    res.redirect(`/dashboard/${req.guild.id}/shifts`);
+  }));
+
+  // Admin: Delete shift
+  router.post('/:guildId/delete-shift', requireGuildAccess, requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.body.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await deleteShift(shiftId);
+    res.redirect(`/dashboard/${req.guild.id}/shifts`);
+  }));
+
+  // Staff: Check-in/check-out page
+  router.get('/:guildId/shift/:shiftId/check-in', requireGuildAccess, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    const members = await getShiftMembers(shiftId);
+    const userMember = members.find(m => m.user_id === req.session.user.id);
+    
+    if (!userMember) {
+      return res.status(403).send('You are not assigned to this shift.');
+    }
+
+    res.send(checkInPage({
+      guild: req.guild,
+      shift,
+      userMember,
+      csrfToken: req.csrfToken(),
+      guildId: req.guild.id,
+      shiftId,
+    }));
+  }));
+
+  // Staff: Check in
+  router.post('/:guildId/shift/:shiftId/check-in', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    const members = await getShiftMembers(shiftId);
+    const userMember = members.find(m => m.user_id === req.session.user.id);
+    
+    if (!userMember) {
+      return res.status(403).send('You are not assigned to this shift.');
+    }
+
+    // Update checked_in status in shift_members
+    await checkInShift(shiftId, req.session.user.id);
+    
+    res.redirect(`/dashboard/${req.guild.id}/shift/${shiftId}/check-in`);
+  }));
+
+  // Staff: Check out
+  router.post('/:guildId/shift/:shiftId/check-out', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    const members = await getShiftMembers(shiftId);
+    const userMember = members.find(m => m.user_id === req.session.user.id);
+    
+    if (!userMember) {
+      return res.status(403).send('You are not assigned to this shift.');
+    }
+
+    // Update checked_out status in shift_members
+    await checkOutShift(shiftId, req.session.user.id);
+    
+    res.redirect(`/dashboard/${req.guild.id}/shift/${shiftId}/check-in`);
+  }));
+
+  // Staff: LOA request form
+  router.get('/:guildId/loa', requireGuildAccess, asyncRoute(async (req, res) => {
+    const activeLoa = await getActiveLoa(req.guild.id, req.session.user.id);
+    res.send(loaRequestPage({
+      guild: req.guild,
+      currentLoa: activeLoa,
+      csrfToken: req.csrfToken(),
+      guildId: req.guild.id,
+      userId: req.session.user.id,
+    }));
+  }));
+
+  // Staff: Start LOA
+  router.post('/:guildId/start-loa', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+    const { reason, endsAt } = req.body;
+    if (!reason || !endsAt) {
+      return res.status(400).send('Missing required fields.');
+    }
+
+    await startLoa({
+      guildId: req.guild.id,
+      userId: req.session.user.id,
+      reason,
+      endsAt,
+    });
+
+    res.redirect(`/dashboard/${req.guild.id}/loa`);
+  }));
+
+  // Staff: End LOA
+  router.post('/:guildId/end-loa', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+    await endLoa(req.guild.id, req.session.user.id);
+    res.redirect(`/dashboard/${req.guild.id}/staff`);
+  }));
+
+  // User profile view (staff can view any user, admins can view all)
+  router.get('/:guildId/user/:userId', requireGuildAccess, asyncRoute(async (req, res) => {
+    const targetUserId = req.params.userId;
+    
+    if (!SNOWFLAKE_RE.test(targetUserId)) {
+      return res.status(400).send('Invalid user ID.');
+    }
+
+    const userInfo = await getUser(req.guild.id, targetUserId);
+    const username = userInfo.username || `User ${targetUserId}`;
+
+    res.send(userProfilePage({
+      guild: req.guild,
+      userInfo,
+      username,
+      csrfToken: req.csrfToken(),
+      guildId: req.guild.id,
+      isAdmin: req.isAdmin,
+    }));
   }));
 
   router.get('/:guildId', requireGuildAccess, asyncRoute(async (req, res) => {

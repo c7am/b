@@ -252,3 +252,370 @@ module.exports = {
   staffDashboard,
   shiftDetailsPage,
 };
+
+// ============= Create Shift Page (Admin) =============
+function createShiftPage({ guild, csrfToken, guildId }) {
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Create New Shift</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/shifts" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <div class="card-high stack" style="max-width:600px">
+    <h2 class="headline-medium">Shift Details</h2>
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/create-shift" class="stack">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      
+      <div class="field-group">
+        <label for="shift-name">Shift Name</label>
+        <input type="text" id="shift-name" name="name" required placeholder="e.g. Morning Patrol">
+      </div>
+      
+      <div class="field-group">
+        <label for="shift-desc">Description (optional)</label>
+        <textarea id="shift-desc" name="description" placeholder="e.g. Focus on downtown area" style="min-height:80px;border:1px solid var(--md-sys-color-outline);border-radius:var(--md-sys-shape-corner-small);padding:var(--space-2);background:var(--md-sys-color-surface-container);color:var(--md-sys-color-on-surface);font-family:inherit;font-size:inherit"></textarea>
+      </div>
+
+      <div class="row" style="gap:var(--space-3)">
+        <div class="field-group" style="flex:1">
+          <label for="shift-start">Start Date/Time</label>
+          <input type="datetime-local" id="shift-start" name="startsAt" required>
+        </div>
+        <div class="field-group" style="flex:1">
+          <label for="shift-end">End Date/Time</label>
+          <input type="datetime-local" id="shift-end" name="endsAt" required>
+        </div>
+      </div>
+
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+        ${icon('plus')}
+        <span>Create Shift</span>
+      </button>
+    </form>
+  </div>
+</div>`;
+  return layout({ title: 'Create Shift', body });
+}
+
+// ============= Shifts List Page (Admin) =============
+function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
+  const shiftItems = shifts.map(s => {
+    const start = new Date(s.starts_at);
+    const end = new Date(s.ends_at);
+    const now = new Date();
+    let status = 'Upcoming';
+    if (start <= now && end > now) status = 'Active';
+    if (end < now) status = 'Completed';
+
+    return `
+    <div class="shift-card">
+      <div class="shift-info">
+        <div class="shift-name">${escapeHtml(s.name)}</div>
+        <div class="shift-time">${icon('clock')} ${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        ${s.description ? `<div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">${escapeHtml(s.description)}</div>` : ''}
+        <div class="badge badge-info" style="margin-top:8px">${status}</div>
+      </div>
+      <div class="shift-actions">
+        <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text">Details</a>
+        <form method="POST" action="/dashboard/${escapeHtml(guildId)}/delete-shift" style="margin:0">
+          <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+          <input type="hidden" name="shiftId" value="${escapeHtml(s.id)}">
+          <button class="btn btn-icon btn-danger" type="submit" title="Delete shift">
+            ${icon('trash2')}
+          </button>
+        </form>
+      </div>
+    </div>`;
+  }).join('\n');
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Manage Shifts</h1>
+  <div class="row">
+    <a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:4px">
+      ${icon('chevronLeft')} Back
+    </a>
+  </div>
+</header>
+<div class="page stack">
+  <div style="display:flex;gap:var(--space-2);align-items:center">
+    <h2 class="headline-medium" style="margin:0;flex:1">Shifts</h2>
+    <a href="/dashboard/${escapeHtml(guildId)}/create-shift" class="btn btn-filled" style="gap:8px">
+      ${icon('plus')}
+      <span>New Shift</span>
+    </a>
+  </div>
+
+  ${shifts.length > 0 ? `<div style="display:flex;flex-direction:column;gap:var(--space-2)">${shiftItems}</div>` : '<div class="empty-state"><div class="empty-state-text">No shifts yet. Create one to get started.</div></div>'}
+</div>`;
+  return layout({ title: 'Manage Shifts', body });
+}
+
+// ============= LOA Request Page (Staff) =============
+function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
+  if (currentLoa) {
+    const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Leave of Absence</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <div class="info-card" style="border-left:4px solid var(--md-sys-color-error)">
+    <div class="info-card-header">
+      <div class="info-card-title">Currently on Leave</div>
+    </div>
+    <div class="info-card-body">
+      <div class="info-card-row">
+        <span class="info-card-label">Reason</span>
+        <span class="info-card-value">${escapeHtml(currentLoa.reason)}</span>
+      </div>
+      <div class="info-card-row">
+        <span class="info-card-label">Ends</span>
+        <span class="info-card-value">${formatDate(currentLoa.ends_at)}</span>
+      </div>
+    </div>
+  </div>
+
+  <form method="POST" action="/dashboard/${escapeHtml(guildId)}/end-loa" style="margin-top:var(--space-4)">
+    <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+    <button class="btn btn-filled" type="submit" style="gap:8px">
+      ${icon('checkCircle')}
+      <span>End Leave of Absence</span>
+    </button>
+  </form>
+</div>`;
+    return layout({ title: 'Leave', body });
+  }
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Request Leave of Absence</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <div class="card-high stack" style="max-width:600px">
+    <h2 class="headline-medium">Leave Details</h2>
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/start-loa" class="stack">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      
+      <div class="field-group">
+        <label for="loa-reason">Reason</label>
+        <input type="text" id="loa-reason" name="reason" required placeholder="e.g. Personal leave, vacation, illness">
+      </div>
+
+      <div class="field-group">
+        <label for="loa-end">End Date/Time</label>
+        <input type="datetime-local" id="loa-end" name="endsAt" required>
+      </div>
+
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+        ${icon('check')}
+        <span>Request Leave</span>
+      </button>
+    </form>
+  </div>
+</div>`;
+  return layout({ title: 'Leave', body });
+}
+
+// ============= Check-in/Check-out Page (Staff) =============
+function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) {
+  const start = new Date(shift.starts_at);
+  const end = new Date(shift.ends_at);
+  const now = new Date();
+  const isActive = start <= now && end > now;
+
+  if (!isActive) {
+    const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <div class="info-card" style="border-left:4px solid var(--md-sys-color-error)">
+    <div class="info-card-title">This shift is not active</div>
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:8px">
+      Shifts can only have check-in active during the shift time window.
+    </div>
+  </div>
+</div>`;
+    return layout({ title: 'Check-in', body });
+  }
+
+  const checkedIn = userMember?.checked_in || false;
+  const checkedInTime = userMember?.checked_in_at ? formatDate(userMember.checked_in_at) : null;
+  const checkedOutTime = userMember?.checked_out_at ? formatDate(userMember.checked_out_at) : null;
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <div class="info-card">
+    <div class="info-card-header">
+      <div class="info-card-title">Shift Time</div>
+      <span class="badge badge-active">Active Now</span>
+    </div>
+    <div class="info-card-body">
+      <div class="info-card-row">
+        <span class="info-card-label">Start</span>
+        <span class="info-card-value">${formatDate(shift.starts_at)}</span>
+      </div>
+      <div class="info-card-row">
+        <span class="info-card-label">End</span>
+        <span class="info-card-value">${formatDate(shift.ends_at)}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Check-in Status</h2>
+    ${checkedIn ? `
+      <div class="info-card" style="border-left:4px solid var(--md-sys-color-primary)">
+        <div class="info-card-header">
+          <div class="info-card-title">You are checked in</div>
+          ${icon('checkCircle')}
+        </div>
+        <div class="info-card-body">
+          <div class="info-card-row">
+            <span class="info-card-label">Checked in at</span>
+            <span class="info-card-value">${checkedInTime}</span>
+          </div>
+          ${checkedOutTime ? `
+            <div class="info-card-row">
+              <span class="info-card-label">Checked out at</span>
+              <span class="info-card-value">${checkedOutTime}</span>
+            </div>` : ''}
+        </div>
+      </div>
+      ${!checkedOutTime ? `
+        <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-out" style="margin-top:var(--space-3)">
+          <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+          <button class="btn btn-filled btn-danger" type="submit" style="gap:8px">
+            ${icon('check')}
+            <span>Check Out</span>
+          </button>
+        </form>` : '<div class="body-small" style="color:var(--md-sys-color-on-surface-variant)">Shift checkout already recorded.</div>'}
+    ` : `
+      <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" style="margin:0">
+        <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+        <button class="btn btn-filled" type="submit" style="gap:8px;width:100%">
+          ${icon('checkCircle')}
+          <span>Check In Now</span>
+        </button>
+      </form>
+    `}
+  </div>
+</div>`;
+  return layout({ title: 'Check-in', body });
+}
+
+// ============= User Profile Page =============
+function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmin }) {
+  const { userId, infractions, activeLoa, promotions, currentShifts } = userInfo;
+  
+  const firstLetter = username[0].toUpperCase();
+  
+  const infractionItems = infractions.slice(0, 10).map(inf => `
+    <div class="user-item">
+      <div class="user-item-main">
+        <div class="user-item-label">${escapeHtml(inf.type)} (${escapeHtml(inf.points)} pts)</div>
+        <div class="user-item-meta">By ${escapeHtml(inf.issued_by)} - ${formatDate(inf.created_at)}</div>
+        <div class="user-item-meta">${escapeHtml(inf.reason)}</div>
+      </div>
+    </div>`).join('\n');
+
+  const promotionItems = promotions.slice(0, 5).map(p => `
+    <div class="user-item">
+      <div class="user-item-main">
+        <div class="user-item-label">${escapeHtml(p.from_rank || 'Unranked')} ${icon('chevronRight')} ${escapeHtml(p.to_rank)}</div>
+        <div class="user-item-meta">By ${escapeHtml(p.issued_by)} - ${formatDate(p.created_at)}</div>
+      </div>
+    </div>`).join('\n');
+
+  const shiftItems = currentShifts.slice(0, 5).map(s => `
+    <div class="user-item">
+      <div class="user-item-main">
+        <div class="user-item-label">${escapeHtml(s.name)}</div>
+        <div class="user-item-meta">${formatDate(s.starts_at)} - ${formatDate(s.ends_at)}</div>
+      </div>
+    </div>`).join('\n');
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <div class="user-panel">
+    <div class="user-header">
+      <div class="user-avatar">${firstLetter}</div>
+      <div class="user-details">
+        <div class="user-name">${escapeHtml(username)}</div>
+        <div class="user-id">ID: ${escapeHtml(userId)}</div>
+      </div>
+    </div>
+
+    ${activeLoa ? `
+      <div class="user-section">
+        <div class="user-section-title" style="color:var(--md-sys-color-error)">On Leave of Absence</div>
+        <div class="user-item">
+          <div class="user-item-main">
+            <div class="user-item-label">Ends: ${formatDate(activeLoa.ends_at)}</div>
+            <div class="user-item-meta">${escapeHtml(activeLoa.reason)}</div>
+          </div>
+        </div>
+      </div>` : ''}
+
+    ${promotions.length > 0 ? `
+      <div class="user-section">
+        <div class="user-section-title">Promotions (${promotions.length})</div>
+        <div class="user-section-list">
+          ${promotionItems}
+        </div>
+      </div>` : ''}
+
+    ${infractions.length > 0 ? `
+      <div class="user-section">
+        <div class="user-section-title">Infractions (${infractions.length})</div>
+        <div class="user-section-list">
+          ${infractionItems}
+        </div>
+      </div>` : ''}
+
+    ${currentShifts.length > 0 ? `
+      <div class="user-section">
+        <div class="user-section-title">Assigned Shifts (${currentShifts.length})</div>
+        <div class="user-section-list">
+          ${shiftItems}
+        </div>
+      </div>` : ''}
+  </div>
+</div>`;
+  return layout({ title: 'User Profile', body });
+}
+
+module.exports = {
+  loginPage,
+  guildListPage,
+  staffDashboard,
+  shiftDetailsPage,
+  createShiftPage,
+  shiftsListPage,
+  loaRequestPage,
+  checkInPage,
+  userProfilePage,
+};

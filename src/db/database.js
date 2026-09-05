@@ -359,6 +359,24 @@ async function getUserShifts(userId, guildId) {
   return res.rows;
 }
 
+async function checkInShift(shiftId, userId) {
+  const res = await pool.query(
+    `UPDATE shift_members SET checked_in = true, checked_in_at = now() 
+     WHERE shift_id = $1 AND user_id = $2 AND NOT checked_in`,
+    [shiftId, userId]
+  );
+  return res.rowCount > 0;
+}
+
+async function checkOutShift(shiftId, userId) {
+  const res = await pool.query(
+    `UPDATE shift_members SET checked_out_at = now() 
+     WHERE shift_id = $1 AND user_id = $2 AND checked_in AND checked_out_at IS NULL`,
+    [shiftId, userId]
+  );
+  return res.rowCount > 0;
+}
+
 // ---------------------------------------------------------------------------
 // User management (view user history, infractions, LOAs, rank)
 // ---------------------------------------------------------------------------
@@ -415,5 +433,7 @@ module.exports = {
   leaveShift,
   getShiftMembers,
   getUserShifts,
+  checkInShift,
+  checkOutShift,
   getUser,
 };
