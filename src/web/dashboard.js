@@ -1,6 +1,6 @@
 const express = require('express');
 const { ChannelType } = require('discord.js');
-const { guildListPage, settingsPage } = require('./views');
+const { guildListPage, staffDashboard, shiftDetailsPage } = require('./views');
 const {
   SCALAR_KEYS,
   getScalar,
@@ -12,6 +12,16 @@ const {
   upsertInfractionType,
   removeInfractionType,
 } = require('../utils/guildConfig');
+const {
+  getShifts,
+  getShift,
+  joinShift,
+  leaveShift,
+  getShiftMembers,
+  getUserShifts,
+  getActiveLoa,
+  getUser,
+} = require('../db/database');
 
 const SNOWFLAKE_RE = /^[0-9]{15,25}$/;
 
@@ -66,6 +76,68 @@ function buildDashboardRouter(client) {
       .map((g) => ({ id: g.id, name: g.name, icon: g.icon }));
     res.send(guildListPage({ guilds: manageable, username: req.session.user.username }));
   });
+
+  // Staff dashboard - shows user's shifts and LOA status
+  router.get('/:guildId/staff', requireGuildAccess, asyncRoute(async (req, res) => {
+    const guild = req.guild;
+    const userId = req.session.user.id;
+    
+    const [shifts, activeLoa] = await Promise.all([
+      getUserShifts(userId, guild.id),
+      getActiveLoa(guild.id, userId),
+    ]);
+
+    res.send(staffDashboard({
+      guild,
+      user: { id: userId, name: req.session.user.username },
+      shifts,
+      activeLoa,
+      recentInfractions: [],
+    }));
+  }));
+
+  // Shift details - shows members and status
+  router.get('/:guildId/shift/:shiftId', requireGuildAccess, asyncRoute(async (req, res) => {
+    const guild = req.guild;
+    const shift = await getShift(parseInt(req.params.shiftId, 10));
+    
+    if (!shift || shift.guild_id !== guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    const members = await getShiftMembers(shift.id);
+    res.send(shiftDetailsPage({ guild, shift, members }));
+  }));
+
+  // Join shift
+  router.post('/:guildId/shift/:shiftId/join', requireGuildAccess, asyncRoute(async (req, res) => {
+    const guild = req.guild;
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const userId = req.session.user.id;
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await joinShift(shiftId, userId);
+    res.redirect(`/dashboard/${guild.id}/shift/${shiftId}`);
+  }));
+
+  // Leave shift
+  router.post('/:guildId/shift/:shiftId/leave', requireGuildAccess, asyncRoute(async (req, res) => {
+    const guild = req.guild;
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const userId = req.session.user.id;
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await leaveShift(shiftId, userId);
+    res.redirect(`/dashboard/${guild.id}/staff`);
+  }));
 
   router.get('/:guildId', requireGuildAccess, asyncRoute(async (req, res) => {
     res.send(await renderSettings(req));

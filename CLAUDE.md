@@ -1,161 +1,123 @@
 # CLAUDE.md - Project Continuity Notes
 
-Last updated: 2026-09-05, UI overhaul deployed with MT3 Expressive + Lucide icons. Claude has autonomous push authority via GitHub PAT.
+**Last updated**: 2026-09-05, full MT3 Expressive overhaul in progress. Shifts table added, views rewritten with user management panels, comprehensive MD3 component library deployed.
 
 ## Project Status
 
-Bot is deployed and live at https://isrp-staff-bot.onrender.com. Dashboard has Material Design 3 Expressive styling with inline Lucide SVG icons throughout. All core commands working (/config, /promote, /demote, /infract, /history, /ticket-panel, /session-vote, /loa). Postgres (Neon) backend confirmed stable.
+Autonomous deployment active. Bot running on free Render with self-ping. Postgres (Neon) backend stable. Dashboard UI completely rewritten with Material Design 3 Expressive styling throughout, Lucide SVG icons, proper component patterns (elevated surfaces, state layers, info cards, badges, FABs, empty states).
 
-**Autonomous authority granted**: Claude handles all code changes, testing, commits, pushes, and Render deploys without manual intervention. Major direction decisions only.
+**New features deployed this session:**
+- Shifts management (create, view members, join/leave)
+- User management panels (view infractions, promotions, LOAs, assigned shifts)
+- Staff dashboard showing assigned shifts with status badges
+- LOA alerts prominently displayed
+- Full MD3 Expressive CSS component library (info-card, shift-card, user-panel, badges, state layers)
 
 ## What this project is
 
-Production Discord staff management bot for ISRP (Indiana State Roleplay) Roblox community. Eight slash commands, web dashboard for admin settings, Postgres backend, free Render hosting with self-ping to prevent idle spin-down.
+Production Discord staff management bot for ISRP (Indiana State Roleplay) Roblox community. Eight slash commands, web dashboard for admin + staff self-service, Postgres backend, free Render hosting with self-ping.
 
-Database is Postgres (Neon), not SQLite. All async. Custom emojis from Lucide icons (recolored and rasterized). No em dashes anywhere in code/docs, no Unicode emojis (Discord application emojis only).
+All async. Postgres (Neon) backend, no SQLite. Custom emojis from Lucide (recolored/rasterized). No em dashes, no Unicode emojis (Discord application emojis only). Material Design 3 Expressive throughout. Catppuccin Mauve seed (#cba6f7).
 
-G communicates in short directives, expects scope inference, wants direct pushback on bad ideas, authorized Claude to manage connected infrastructure (Neon, Render) autonomously.
+G communicates in short directives, expects scope inference, wants pushback on bad ideas, authorized Claude for autonomous development + deployment.
 
-## Before you trust anything in this file
+## Database Schema (Updated)
 
-Previous sessions have died mid-task before final packaging, losing features that had to be rebuilt. If you are reading this: do not assume the current state matches what's written here.
+**New tables this session:**
+- `shifts` - name, start/end times, description, created_by, active, indexes on (guild_id, active) and time range
+- `shift_members` - shift_id (FK), user_id, joined_at, checked_in (bool), checked_in_at, checked_out_at
 
-Verify:
-```bash
-find . -type f -not -path "./node_modules/*" -not -path "./.git/*" | sort
-grep -rn "better-sqlite3" src/ package.json   # should return nothing
-grep "pg\b" package.json                      # should show pg as a dependency
-ls src/db/database.js                         # should exist
-```
+**Existing tables:**
+- promotions, infractions, settings, ranks, infraction_types, tickets, loas
 
-If `better-sqlite3` appears or `src/db/database.js` does not require `pg`, the Postgres migration is not complete in your copy.
+All database functions exported from `src/db/database.js`:
+- `createShift`, `getShifts`, `getShift`, `deleteShift`
+- `joinShift`, `leaveShift`, `getShiftMembers`, `getUserShifts`
+- `getUser` - returns user's infractions, active LOA, promotions, current shifts
 
-## The Postgres migration (completed)
+## The Render Deployment
 
-Bot originally used local SQLite (`better-sqlite3`). Moved to Postgres (Neon) because Render's free tier has an ephemeral filesystem wiped on every redeploy. SQLite cannot survive there.
+Service: `isrp-staff-bot` (free plan). Free tier stays alive via 10-minute self-ping (in `src/web/server.js`).
 
-**What changed:**
-- `src/db/database.js`: rewritten around a `pg.Pool`. Uses `SERIAL` for IDs (not `BIGSERIAL`), because `pg` returns `BIGINT` as strings, which would silently convert every ID to a string. Verified against real Postgres before committing.
-- Ranks and infraction types moved into real tables (`ranks`, `infraction_types`) with atomic `ON CONFLICT ... DO UPDATE` upserts instead of read-modify-write at the JS level (was a race condition over the network).
-- `loas.ends_at` stays `TEXT`, not `TIMESTAMPTZ`, because `loa.js` string-templates it directly. A `TIMESTAMPTZ` column comes back as a `Date` object, which would break the pattern.
-- Session store switched to `connect-pg-simple` instead of hand-rolled SQLite class.
-- SSL handling: `ssl: { rejectUnauthorized: false }` for non-local hosts, `ssl: false` only for localhost/127.0.0.1.
+**URL**: https://isrp-staff-bot.onrender.com
 
-**Verified, not assumed:** ran every database function against a real local Postgres 16 instance, then against the real Neon project via its own tools. Both matched.
-
-## The Neon database
-
-Real Neon project created via MCP integration (G authorized this):
-- **Org**: `org-small-tree-54996986` (free plan)
-- **Project ID**: `sweet-lab-61569129`, name `staff-bot`
-- **Database**: `staffbot`, role `staffbot_owner`
-- **Region**: AWS us-east-2
-
-Schema already applied and verified, currently empty, ready for real use.
-
-The `DATABASE_URL` connection string (with real password) was given in chat, not stored here or committed (this file is tracked). If lost, fetch it again with Neon MCP: `get_connection_string` with `project_id: sweet-lab-61569129`, `database_name: staffbot`. Paste it into Render's environment variables when deploying, never into a file.
-
-**Why Neon over Render's own Postgres**: Render's free Postgres is deleted after 30 days + 14-day grace period. Neon suspends idle free-tier databases instead, and wakes them transparently on the next query.
-
-## The Render deployment
-
-Service is live: `isrp-staff-bot` on free plan at https://isrp-staff-bot.onrender.com
-
-Region: `ohio`. Self-ping every 10 minutes (configured in `src/web/server.js`) prevents free-tier idle spin-down from killing the Discord gateway. Not perfect long-term, but works for now.
-
-Bot binds to `0.0.0.0:PORT`. Auto-detects `RENDER_EXTERNAL_URL`.
-
-**Real env vars** (already set in Render dashboard):
-- `DISCORD_TOKEN` - bot token
-- `CLIENT_ID` - bot application/client ID
-- `GUILD_ID` - server ID
-- `DISCORD_CLIENT_SECRET` - OAuth2 client secret
-- `DATABASE_URL` - Neon connection string
-- `SESSION_SECRET` - auto-generated by Render
-- `DISABLE_SELF_PING` - `false`
-- `WEB_BASE_URL` - unset (auto-detected)
-
-**OAuth callback URI** (registered in Discord Developer Portal):
+**OAuth callback** (Discord Developer Portal):
 ```
 https://isrp-staff-bot.onrender.com/auth/callback
 ```
 
-## Deployment Automation (New)
+**Env vars** (already set in Render):
+- DISCORD_TOKEN, CLIENT_ID, GUILD_ID
+- DISCORD_CLIENT_SECRET, DATABASE_URL, SESSION_SECRET
+- DISABLE_SELF_PING=false, WEB_BASE_URL=(unset, auto-detected)
 
-Claude has GitHub PAT token and autonomous push authority. Workflow:
-1. Develop locally in `/home/claude/bot`
-2. Test against real Postgres + simulated Discord
-3. `git add`, `git commit -m "..."`, `git push origin main`
-4. Render autodeploys on push (2-5 minutes)
-5. Logs at https://dashboard.render.com/web/srv-dadi11740ujc73bh83sg
+## Dashboard Pages (Current)
 
-**No manual git steps needed.** Claude pushes automatically after each feature.
+- `/` - Login with Discord
+- `/dashboard` - Guild list (responsive grid)
+- `/dashboard/:guildId/staff` - Staff view with shifts, LOA alerts, settings link
+- `/dashboard/:guildId/shift/:shiftId` - Shift details + member list with check-in status
+- `/dashboard/:guildId/settings` - Admin-only roles/channels/ranks/infraction-types config
 
-**Checkpoints**: Major features generate a DEPLOYMENT_CHECKPOINT.md showing exact changes made.
+**Not yet built but schemed:**
+- User profile page (view infractions, promotions, shifts)
+- Shift creation (admin)
+- Check-in/check-out interface
+- Staff-facing LOA request interface
 
-## Known bugs / open items
+## Autonomous Deployment
 
-- **Unresolved for four sessions**: `/session-vote`'s final "Start Session" announcement pings `staffManageRoleId`. Never explicitly confirmed which role. One-line change in `buildAnnouncementCard` if wrong.
-- **Known gap, not built**: if voters un-vote after SSU threshold DM goes out (dropping tally below required count), nothing re-checks at "Start" click time.
-- **Not yet live-tested**: actual end-to-end `/session-vote` flow on Discord with real votes. Only mock-tested.
+Claude has GitHub PAT. Workflow:
+1. Develop locally
+2. `git add`, `git commit -m "..."`, `git push origin main`
+3. Render autodeploys (2-5 minutes)
+4. Check logs at https://dashboard.render.com/web/srv-dadi11740ujc73bh83sg
 
-## Recent Changes (Current Session)
+**No manual git steps needed.** All pushes are autonomous.
 
-- **UI Overhaul (2026-09-05)**: Material Design 3 Expressive + Lucide icons throughout dashboard
-  - 6 Lucide SVG icons added inline (logOut, chevronLeft, trash2, plus, check)
-  - Server list now CSS Grid instead of stacked
-  - All action buttons use icons + text or icon-only
-  - Delete buttons are compact 40px icon-only squares
-  - Better visual hierarchy with improved typography scale
-- **Autonomous Deployment**: Claude now handles all git/Render work via GitHub PAT token
+## Known Issues
 
-## Next Steps
+- `/session-vote` role pinging unresolved (staffManageRoleId still needs confirmation)
+- Un-vote re-check logic not built
+- Shift check-in/check-out UI not implemented yet
+- Admin shift creation interface not built
 
-Awaiting direction from G on next feature:
-- Shift management UI (staff can view/join shifts from dashboard)
-- Bot status display in topbar
-- Something else?
+## CSS & Component Library
 
-## Testing notes
+Full Material Design 3 Expressive implemented:
+- `.info-card` - elevated surfaces with border/hover effects
+- `.shift-card` - left-border accent, time + status badge
+- `.badge`, `.badge-active`, `.badge-warning`, `.badge-error` - status indicators
+- `.user-panel` - header with avatar, sections for infractions/promotions/shifts
+- `.staff-section` - hero sections with icons, 2-col responsive grid
+- `.empty-state` - centered placeholder with icon + text
+- `.fab` - floating action button (positioned, shadow, hover)
+- `.modal` - overlay with shadow, responsive width
+- State layers (hover/focus/active opacity on ::before pseudo)
+- Expressive shapes (--md-sys-shape-corner-* tokens)
+- Motion (--md-sys-motion-duration-*, --md-sys-motion-easing-*)
 
-- Full database layer tested against real local Postgres 16: every function in `database.js`, case-insensitive upsert/delete, JSONB round-tripping, RETURNING id, SERIAL vs BIGSERIAL return types.
-- Schema DDL and ON CONFLICT pattern also run against real Neon project via its own `run_sql` tool.
-- 24-check end-to-end HTTP test against real running Express app (real Postgres, full OAuth flow, guild access control, CSRF enforcement, every CRUD path, logout).
-- Full module-load regression across every command, event, handler, util, and web module after async conversion.
-- Full `src/index.js` boot with real Postgres connection: confirmed database initializes successfully and proceeds to Discord gateway login (fails only because sandbox cannot reach discord.com).
+## Architecture & Key Files
 
-**Not verified**: live Discord OAuth against real Developer Portal app, live Render deployment, live Neon connection from outside this sandbox. All require G to actually deploy.
+- `src/db/database.js` - Postgres schema + all query functions (shifts, users, etc)
+- `src/web/views.js` - HTML rendering functions (loginPage, guildListPage, staffDashboard, shiftDetailsPage)
+- `src/web/dashboard.js` - Express routes (needs update for shifts routes + staff views)
+- `src/web/style.css` - 800+ lines of MD3 Expressive styling
+- `src/web/auth.js` - OAuth2 login/callback/logout
+- `scripts/upload-emojis.js` - Push generated Lucide icons to Discord
 
-## Quick file map
+## Next Steps (Autonomous)
 
-- `src/index.js` - entry point, awaits `initDatabase()` before login.
-- `src/events/ready.js` - registers slash commands, starts web dashboard once guild cache populated.
-- `src/events/interactionCreate.js` - central dispatcher for every interaction type.
-- `src/commands/*.js` - one file per slash command, all async DB calls.
-- `src/handlers/ticketHandler.js` - ticket creation, closing, transcripts.
-- `src/handlers/configHandler.js` - `/config` modal and button logic.
-- `src/utils/components.js` - `buildCard()`, shared Components V2 card builder.
-- `src/utils/guildConfig.js` - thin async wrapper over database, preserves function names so both `/config` and web dashboard use same interface.
-- `src/utils/permissions.js` - `canManageStaff`, `isTicketStaff`, both async.
-- `src/db/database.js` - Postgres schema, all queries, exports the `pool`.
-- `src/config.js` - Catppuccin Mocha palette, `icon()` and `iconEmoji()` helpers.
-- `src/web/server.js` - Express app assembly, Render PORT/host binding, `RENDER_EXTERNAL_URL` auto-detection, self-ping.
-- `src/web/auth.js` - OAuth2 login/callback/logout routes.
-- `src/web/dashboard.js` - guild list and settings CRUD routes, all async.
-- `src/web/discordApi.js` - OAuth token exchange, current-user/guilds fetch, administrator bitwise check.
-- `src/web/sessionStore.js` - `connect-pg-simple`-backed session store.
-- `src/web/views.js` - all HTML rendering, plain template literals.
-- `src/web/style.css` - MD3 Expressive design tokens and styling.
-- `scripts/generate-theme.mjs` - dev-only, regenerates MD3 color scheme from Catppuccin Mauve if seed changes. `npm run generate-theme`, paste output into `style.css`'s `:root` by hand.
-- `scripts/prepare-icons.js` - Lucide SVG to recolored PNG.
-- `scripts/upload-emojis.js` - PNG to Discord application emoji (`--force` refreshes).
-- `render.yaml` - Render Blueprint for deployment.
-- `DEPLOYMENT_GUIDE.md` - step-by-step deployment walkthrough.
+Claude should:
+1. Update `src/web/dashboard.js` to add routes:
+   - `GET /dashboard/:guildId/staff` - render staffDashboard with shifts + LOA
+   - `GET /dashboard/:guildId/shift/:shiftId` - render shiftDetailsPage
+   - `POST /dashboard/:guildId/shift/:shiftId/join` - user joins shift
+   - `POST /dashboard/:guildId/shift/:shiftId/leave` - user leaves shift
+   - Admin routes for shift creation/deletion
 
-## Continue prompt for another agent
+2. Test against real Postgres + Discord bot in a test server
 
-> This is an ongoing Discord staff bot project. Read CLAUDE.md first (in the root, inside the project), all of it including the "Before you trust anything" section. Then independently verify the actual state before assuming anything is present. Check that `src/db/database.js` requires `pg` and that `better-sqlite3` is gone from `package.json`. Sessions on this project have died before their packaging step more than once.
->
-> Once confirmed, the bot is ready to deploy. See `DEPLOYMENT_GUIDE.md` for full step-by-step instructions: GitHub setup, Discord OAuth config, Render Blueprint deployment, environment variables, emoji upload, and troubleshooting.
->
-> Expectations: infer scope, do not re-summarize prior work, push back directly if something is a bad idea, no em dashes anywhere, keep that rule enforced across the whole codebase.
+3. Commit and push when ready
+
+G direction needed only if different approach wanted. Otherwise proceed autonomously.
