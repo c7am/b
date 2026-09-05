@@ -9,6 +9,7 @@ const {
   loaRequestPage,
   checkInPage,
   userProfilePage,
+  settingsPage,
 } = require('./views');
 const {
   SCALAR_KEYS,
@@ -373,7 +374,8 @@ function buildDashboardRouter(client) {
       scalars,
       ranks,
       infractionTypes,
-      csrfToken: req.session.csrfToken,
+      csrfToken: req.csrfToken(),
+      guildId: guild.id,
       flash,
     });
   }

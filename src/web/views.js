@@ -619,3 +619,102 @@ module.exports = {
   checkInPage,
   userProfilePage,
 };
+
+// ============= Settings Page (Admin) =============
+function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, csrfToken, guildId, flash }) {
+  const roleOptions = roles.map(r => `<option value="${escapeHtml(r.id)}" ${scalars.modRoleId === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`).join('\n');
+  const channelOptions = textChannels.map(c => `<option value="${escapeHtml(c.id)}" ${scalars.logsChannelId === c.id ? 'selected' : ''}>#${escapeHtml(c.name)}</option>`).join('\n');
+  
+  const scalarRoleFields = [
+    { key: 'modRoleId', label: 'Moderator Role' },
+    { key: 'staffManageRoleId', label: 'Staff Manager Role' },
+  ].map(f => `
+    <div class="field-group">
+      <label for="${f.key}">${f.label}</label>
+      <select id="${f.key}" name="${f.key}">
+        <option value="">None</option>
+        ${roleOptions}
+      </select>
+    </div>`).join('\n');
+
+  const scalarChannelFields = [
+    { key: 'logsChannelId', label: 'Logs Channel' },
+    { key: 'ticketsChannelId', label: 'Tickets Channel' },
+  ].map(f => `
+    <div class="field-group">
+      <label for="${f.key}">${f.label}</label>
+      <select id="${f.key}" name="${f.key}">
+        <option value="">None</option>
+        ${channelOptions}
+      </select>
+    </div>`).join('\n');
+
+  const rankRows = ranks.map(r => `
+    <div class="list-row">
+      <span class="body-medium">
+        <strong>${escapeHtml(r.name)}</strong>
+        <span class="chip" style="margin-left:8px">Level ${escapeHtml(r.level)}</span>
+      </span>
+      <form method="POST" action="/dashboard/${escapeHtml(guild.id)}/remove-rank" style="margin:0">
+        <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+        <input type="hidden" name="name" value="${escapeHtml(r.name)}">
+        <button class="btn btn-icon btn-danger" type="submit" title="Remove rank">
+          ${icon('trash2')}
+        </button>
+      </form>
+    </div>`).join('\n');
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)} Settings</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guild.id)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  ${flash ? `<div class="flash flash-${escapeHtml(flash.type)}">${escapeHtml(flash.message)}</div>` : ''}
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Roles</h2>
+    <form method="POST" action="/dashboard/${escapeHtml(guild.id)}/roles" class="stack">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      ${scalarRoleFields}
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+        ${icon('check')}
+        <span>Save roles</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Channels</h2>
+    <form method="POST" action="/dashboard/${escapeHtml(guild.id)}/channels" class="stack">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      ${scalarChannelFields}
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+        ${icon('check')}
+        <span>Save channels</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Ranks</h2>
+    ${rankRows ? `<div>${rankRows}</div>` : '<p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">No ranks configured yet.</p>'}
+  </div>
+</div>`;
+  return layout({ title: 'Settings', body });
+}
+
+module.exports = {
+  loginPage,
+  guildListPage,
+  staffDashboard,
+  shiftDetailsPage,
+  createShiftPage,
+  shiftsListPage,
+  loaRequestPage,
+  checkInPage,
+  userProfilePage,
+  settingsPage,
+};
