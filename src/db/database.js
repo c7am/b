@@ -120,6 +120,34 @@ async function initDatabase() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_loas_guild_active ON loas(guild_id, active);
+
+    CREATE TABLE IF NOT EXISTS shifts (
+      id SERIAL PRIMARY KEY,
+      guild_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      starts_at TIMESTAMPTZ NOT NULL,
+      ends_at TIMESTAMPTZ NOT NULL,
+      description TEXT,
+      created_by TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      active BOOLEAN NOT NULL DEFAULT true
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_shifts_guild_active ON shifts(guild_id, active);
+    CREATE INDEX IF NOT EXISTS idx_shifts_time ON shifts(starts_at, ends_at);
+
+    CREATE TABLE IF NOT EXISTS shift_members (
+      id SERIAL PRIMARY KEY,
+      shift_id INTEGER NOT NULL REFERENCES shifts(id) ON DELETE CASCADE,
+      user_id TEXT NOT NULL,
+      joined_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      checked_in BOOLEAN NOT NULL DEFAULT false,
+      checked_in_at TIMESTAMPTZ,
+      checked_out_at TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_shift_members_shift ON shift_members(shift_id);
+    CREATE INDEX IF NOT EXISTS idx_shift_members_user ON shift_members(user_id);
   `);
   console.log('[db] schema ready');
 }
@@ -259,28 +287,100 @@ async function closeTicket({ channelId, closedBy, transcript }) {
 }
 
 // ---------------------------------------------------------------------------
-// Leave of absence - one active row per user per guild at a time.
+// Shifts
 // ---------------------------------------------------------------------------
-async function startLoa({ guildId, userId, reason, endsAt }) {
-  await pool.query(
-    `INSERT INTO loas (guild_id, user_id, reason, ends_at) VALUES ($1,$2,$3,$4)`,
-    [guildId, userId, reason, endsAt]
+async function createShift({ guildId, name, startsAt, endsAt, description, createdBy }) {
+  const res = await pool.query(
+    `INSERT INTO shifts (guild_id, name, starts_at, ends_at, description, created_by) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+    [guildId, name, startsAt, endsAt, description || null, createdBy]
   );
+  return res.rows[0].id;
 }
 
-async function getActiveLoa(guildId, userId) {
-  const res = await pool.query(`SELECT * FROM loas WHERE guild_id = $1 AND user_id = $2 AND active = true`, [guildId, userId]);
+async function getShifts(guildId, { active = true, upcoming = false } = {}) {
+  let query = `SELECT * FROM shifts WHERE guild_id = $1`;
+  const params = [guildId];
+  
+  if (active) {
+    query += ` AND active = true`;
+  }
+  if (upcoming) {
+    query += ` AND starts_at > now()`;
+  }
+  
+  query += ` ORDER BY starts_at DESC`;
+  const res = await pool.query(query, params);
+  return res.rows;
+}
+
+async function getShift(shiftId) {
+  const res = await pool.query(`SELECT * FROM shifts WHERE id = $1`, [shiftId]);
   return res.rows[0] || null;
 }
 
-async function endLoa(guildId, userId) {
-  const res = await pool.query(`UPDATE loas SET active = false WHERE guild_id = $1 AND user_id = $2 AND active = true`, [guildId, userId]);
+async function deleteShift(shiftId) {
+  const res = await pool.query(`UPDATE shifts SET active = false WHERE id = $1`, [shiftId]);
   return res.rowCount > 0;
 }
 
-async function getActiveLoas(guildId) {
-  const res = await pool.query(`SELECT * FROM loas WHERE guild_id = $1 AND active = true ORDER BY ends_at ASC`, [guildId]);
+async function joinShift(shiftId, userId) {
+  try {
+    await pool.query(
+      `INSERT INTO shift_members (shift_id, user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+      [shiftId, userId]
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function leaveShift(shiftId, userId) {
+  const res = await pool.query(`DELETE FROM shift_members WHERE shift_id = $1 AND user_id = $2`, [shiftId, userId]);
+  return res.rowCount > 0;
+}
+
+async function getShiftMembers(shiftId) {
+  const res = await pool.query(
+    `SELECT * FROM shift_members WHERE shift_id = $1 ORDER BY joined_at ASC`,
+    [shiftId]
+  );
   return res.rows;
+}
+
+async function getUserShifts(userId, guildId) {
+  const res = await pool.query(
+    `SELECT s.* FROM shifts s
+     INNER JOIN shift_members sm ON s.id = sm.shift_id
+     WHERE sm.user_id = $1 AND s.guild_id = $2 AND s.active = true
+     ORDER BY s.starts_at DESC`,
+    [userId, guildId]
+  );
+  return res.rows;
+}
+
+// ---------------------------------------------------------------------------
+// User management (view user history, infractions, LOAs, rank)
+// ---------------------------------------------------------------------------
+async function getUser(guildId, userId) {
+  const infractions = await pool.query(
+    `SELECT type, points, reason, issued_by, created_at FROM infractions WHERE guild_id = $1 AND user_id = $2 ORDER BY created_at DESC`,
+    [guildId, userId]
+  );
+  const loa = await getActiveLoa(guildId, userId);
+  const promotions = await pool.query(
+    `SELECT from_rank, to_rank, issued_by, reason, created_at FROM promotions WHERE guild_id = $1 AND user_id = $2 ORDER BY created_at DESC`,
+    [guildId, userId]
+  );
+  const currentShifts = await getUserShifts(userId, guildId);
+  
+  return {
+    userId,
+    infractions: infractions.rows,
+    activeLoa: loa,
+    promotions: promotions.rows,
+    currentShifts,
+  };
 }
 
 module.exports = {
@@ -307,4 +407,13 @@ module.exports = {
   getActiveLoa,
   endLoa,
   getActiveLoas,
+  createShift,
+  getShifts,
+  getShift,
+  deleteShift,
+  joinShift,
+  leaveShift,
+  getShiftMembers,
+  getUserShifts,
+  getUser,
 };
