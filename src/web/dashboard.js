@@ -38,6 +38,7 @@ const {
   endLoa,
   getUser,
 } = require('../db/database');
+const { canManageStaff } = require('../utils/permissions');
 
 const SNOWFLAKE_RE = /^[0-9]{15,25}$/;
 
@@ -61,22 +62,58 @@ function buildDashboardRouter(client) {
     next();
   }
 
-  // Only lets the request through if the logged-in user is an admin in this
-  // guild AND the bot itself is actually in that guild. Both checks matter:
-  // being admin somewhere the bot is not present should not surface a
-  // settings page for it, and the reverse (bot present but user not admin)
-  // is the whole point of the OAuth gate in the first place.
-  function requireGuildAccess(req, res, next) {
-    const { guildId } = req.params;
-    if (!req.session.adminGuildIds?.includes(guildId)) {
-      return res.status(403).send('You do not have Administrator access to that server.');
+  // Guild-membership gate for staff self-service pages (shifts, LOA,
+  // check-in). Deliberately checked live against the bot's own gateway
+  // member cache rather than trusted from the OAuth session snapshot,
+  // since someone can leave the guild or have their roles changed after
+  // logging in but before the session cookie expires (24h). Sets req.guild,
+  // req.member (a real discord.js GuildMember, not the raw OAuth partial),
+  // and req.isAdmin so every view can consistently show or hide
+  // admin-only UI without re-deriving it per route.
+  //
+  // Wrapped in its own try/catch, same reasoning as asyncRoute below: this
+  // runs as Express middleware, not through asyncRoute, and an async
+  // function that throws without being awaited by the caller becomes an
+  // unhandled rejection. Modern Node terminates the whole process on those
+  // by default, which would take the entire bot offline over one bad
+  // canManageStaff DB lookup, not just fail the one request.
+  async function requireMember(req, res, next) {
+    try {
+      const { guildId } = req.params;
+      const guild = client.guilds.cache.get(guildId);
+      if (!guild) {
+        return res.status(404).send('This bot is not in that server.');
+      }
+      let member;
+      try {
+        member = await guild.members.fetch(req.session.user.id);
+      } catch {
+        return res.status(403).send('You are not a member of that server.');
+      }
+      req.guild = guild;
+      req.member = member;
+      req.isAdmin = await canManageStaff(member, guildId);
+      next();
+    } catch (err) {
+      console.error('[dashboard] requireMember error:', err);
+      if (!res.headersSent) res.status(500).send('Something went wrong checking server access. Check the server logs.');
     }
-    const guild = client.guilds.cache.get(guildId);
-    if (!guild) {
-      return res.status(404).send('This bot is not in that server.');
-    }
-    req.guild = guild;
-    next();
+  }
+
+  // Stricter gate for admin-only pages (settings, shift creation/deletion,
+  // arbitrary user history). Reuses the exact same canManageStaff check the
+  // slash commands already enforce (configured Staff Manage role, or the
+  // Discord-native Manage Roles permission), instead of the OAuth
+  // ADMINISTRATOR bit the dashboard used previously. That mismatch meant a
+  // person who could run /promote in Discord could not reach these pages
+  // at all unless they also happened to hold full server Administrator.
+  function requireAdmin(req, res, next) {
+    requireMember(req, res, () => {
+      if (!req.isAdmin) {
+        return res.status(403).send('This page requires the Staff Manage role or Manage Roles permission.');
+      }
+      next();
+    });
   }
 
   function requireCsrf(req, res, next) {
@@ -87,14 +124,19 @@ function buildDashboardRouter(client) {
   router.use(requireAuth);
 
   router.get('/', (req, res) => {
+    // Guilds the bot is actually in, intersected with guilds this user
+    // belongs to per their last login. Not filtered to admin-only anymore,
+    // since regular staff (not just admins) need to reach their own
+    // shifts/LOA pages, not just server owners.
+    const memberIds = new Set(req.session.memberGuildIds || []);
     const manageable = client.guilds.cache
-      .filter((g) => req.session.adminGuildIds?.includes(g.id))
+      .filter((g) => memberIds.has(g.id))
       .map((g) => ({ id: g.id, name: g.name, icon: g.icon }));
     res.send(guildListPage({ guilds: manageable, username: req.session.user.username }));
   });
 
   // Staff dashboard - shows user's shifts and LOA status
-  router.get('/:guildId/staff', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.get('/:guildId/staff', requireMember, asyncRoute(async (req, res) => {
     const guild = req.guild;
     const userId = req.session.user.id;
     
@@ -108,25 +150,36 @@ function buildDashboardRouter(client) {
       user: { id: userId, name: req.session.user.username },
       shifts,
       activeLoa,
-      recentInfractions: [],
+      isAdmin: req.isAdmin,
     }));
   }));
 
   // Shift details - shows members and status
-  router.get('/:guildId/shift/:shiftId', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.get('/:guildId/shift/:shiftId', requireMember, asyncRoute(async (req, res) => {
     const guild = req.guild;
-    const shift = await getShift(parseInt(req.params.shiftId, 10));
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
     
     if (!shift || shift.guild_id !== guild.id) {
       return res.status(404).send('Shift not found.');
     }
 
-    const members = await getShiftMembers(shift.id);
-    res.send(shiftDetailsPage({ guild, shift, members }));
+    const members = await getShiftMembers(shiftId);
+    const isJoined = members.some(m => m.user_id === req.session.user.id);
+
+    res.send(shiftDetailsPage({
+      guild,
+      shift,
+      members,
+      isJoined,
+      csrfToken: req.session.csrfToken,
+      guildId: guild.id,
+      shiftId,
+    }));
   }));
 
   // Join shift
-  router.post('/:guildId/shift/:shiftId/join', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.post('/:guildId/shift/:shiftId/join', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     const guild = req.guild;
     const shiftId = parseInt(req.params.shiftId, 10);
     const userId = req.session.user.id;
@@ -141,7 +194,7 @@ function buildDashboardRouter(client) {
   }));
 
   // Leave shift
-  router.post('/:guildId/shift/:shiftId/leave', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.post('/:guildId/shift/:shiftId/leave', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     const guild = req.guild;
     const shiftId = parseInt(req.params.shiftId, 10);
     const userId = req.session.user.id;
@@ -156,27 +209,27 @@ function buildDashboardRouter(client) {
   }));
 
   // Admin: List and manage shifts
-  router.get('/:guildId/shifts', requireGuildAccess, requireAdmin, asyncRoute(async (req, res) => {
+  router.get('/:guildId/shifts', requireAdmin, asyncRoute(async (req, res) => {
     const shifts = await getShifts(req.guild.id, { active: true });
     res.send(shiftsListPage({
       guild: req.guild,
       shifts,
-      csrfToken: req.csrfToken(),
+      csrfToken: req.session.csrfToken,
       guildId: req.guild.id,
     }));
   }));
 
   // Admin: Create shift form
-  router.get('/:guildId/create-shift', requireGuildAccess, requireAdmin, asyncRoute(async (req, res) => {
+  router.get('/:guildId/create-shift', requireAdmin, asyncRoute(async (req, res) => {
     res.send(createShiftPage({
       guild: req.guild,
-      csrfToken: req.csrfToken(),
+      csrfToken: req.session.csrfToken,
       guildId: req.guild.id,
     }));
   }));
 
   // Admin: Create shift (POST)
-  router.post('/:guildId/create-shift', requireGuildAccess, requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/create-shift', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const { name, description, startsAt, endsAt } = req.body;
     if (!name || !startsAt || !endsAt) {
       return res.status(400).send('Missing required fields.');
@@ -195,7 +248,7 @@ function buildDashboardRouter(client) {
   }));
 
   // Admin: Delete shift
-  router.post('/:guildId/delete-shift', requireGuildAccess, requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/delete-shift', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const shiftId = parseInt(req.body.shiftId, 10);
     const shift = await getShift(shiftId);
     
@@ -208,7 +261,7 @@ function buildDashboardRouter(client) {
   }));
 
   // Staff: Check-in/check-out page
-  router.get('/:guildId/shift/:shiftId/check-in', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.get('/:guildId/shift/:shiftId/check-in', requireMember, asyncRoute(async (req, res) => {
     const shiftId = parseInt(req.params.shiftId, 10);
     const shift = await getShift(shiftId);
     
@@ -227,14 +280,14 @@ function buildDashboardRouter(client) {
       guild: req.guild,
       shift,
       userMember,
-      csrfToken: req.csrfToken(),
+      csrfToken: req.session.csrfToken,
       guildId: req.guild.id,
       shiftId,
     }));
   }));
 
   // Staff: Check in
-  router.post('/:guildId/shift/:shiftId/check-in', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/shift/:shiftId/check-in', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     const shiftId = parseInt(req.params.shiftId, 10);
     const shift = await getShift(shiftId);
     
@@ -256,7 +309,7 @@ function buildDashboardRouter(client) {
   }));
 
   // Staff: Check out
-  router.post('/:guildId/shift/:shiftId/check-out', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/shift/:shiftId/check-out', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     const shiftId = parseInt(req.params.shiftId, 10);
     const shift = await getShift(shiftId);
     
@@ -278,19 +331,19 @@ function buildDashboardRouter(client) {
   }));
 
   // Staff: LOA request form
-  router.get('/:guildId/loa', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.get('/:guildId/loa', requireMember, asyncRoute(async (req, res) => {
     const activeLoa = await getActiveLoa(req.guild.id, req.session.user.id);
     res.send(loaRequestPage({
       guild: req.guild,
       currentLoa: activeLoa,
-      csrfToken: req.csrfToken(),
+      csrfToken: req.session.csrfToken,
       guildId: req.guild.id,
       userId: req.session.user.id,
     }));
   }));
 
   // Staff: Start LOA
-  router.post('/:guildId/start-loa', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/start-loa', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     const { reason, endsAt } = req.body;
     if (!reason || !endsAt) {
       return res.status(400).send('Missing required fields.');
@@ -307,33 +360,56 @@ function buildDashboardRouter(client) {
   }));
 
   // Staff: End LOA
-  router.post('/:guildId/end-loa', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/end-loa', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     await endLoa(req.guild.id, req.session.user.id);
     res.redirect(`/dashboard/${req.guild.id}/staff`);
   }));
 
-  // User profile view (staff can view any user, admins can view all)
-  router.get('/:guildId/user/:userId', requireGuildAccess, asyncRoute(async (req, res) => {
+  // User profile view. Anyone can view their own profile (that is
+  // baseline staff self-service, same as checking your own shifts or
+  // LOA); viewing someone else's requires the same canManageStaff gate
+  // as the /history slash command, since infraction/promotion history
+  // is management data there too, not public.
+  router.get('/:guildId/user/:userId', requireMember, asyncRoute(async (req, res) => {
     const targetUserId = req.params.userId;
     
     if (!SNOWFLAKE_RE.test(targetUserId)) {
       return res.status(400).send('Invalid user ID.');
     }
 
+    const isSelf = targetUserId === req.session.user.id;
+    if (!isSelf && !req.isAdmin) {
+      return res.status(403).send('This page requires the Staff Manage role or Manage Roles permission.');
+    }
+
     const userInfo = await getUser(req.guild.id, targetUserId);
-    const username = userInfo.username || `User ${targetUserId}`;
+    // The bot never stores Discord usernames locally, so look the display
+    // name up live via the guild's own member cache (GuildMembers intent
+    // is already on for the bot's slash commands). Falls back to a bare
+    // user ID only if they have since left the server.
+    let username = `User ${targetUserId}`;
+    if (isSelf) {
+      username = req.session.user.username;
+    } else {
+      try {
+        const targetMember = await req.guild.members.fetch(targetUserId);
+        username = targetMember.user.username;
+      } catch {
+        // Left the server, or never was a member here, keep the fallback.
+      }
+    }
 
     res.send(userProfilePage({
       guild: req.guild,
       userInfo,
       username,
-      csrfToken: req.csrfToken(),
+      csrfToken: req.session.csrfToken,
       guildId: req.guild.id,
       isAdmin: req.isAdmin,
     }));
   }));
 
-  router.get('/:guildId', requireGuildAccess, asyncRoute(async (req, res) => {
+  router.get('/:guildId', requireAdmin, asyncRoute(async (req, res) => {
     res.send(await renderSettings(req));
   }));
 
@@ -374,13 +450,13 @@ function buildDashboardRouter(client) {
       scalars,
       ranks,
       infractionTypes,
-      csrfToken: req.csrfToken(),
+      csrfToken: req.session.csrfToken,
       guildId: guild.id,
       flash,
     });
   }
 
-  router.post('/:guildId/roles', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/roles', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     for (const key of ['staffManageRoleId', 'ticketStaffRoleId', 'sessionPingRoleId']) {
       const value = req.body[key];
       if (!value) {
@@ -395,7 +471,7 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, { type: 'success', message: 'Roles updated.' }));
   }));
 
-  router.post('/:guildId/channels', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/channels', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const logChannelId = req.body.logChannelId;
     if (!logChannelId) {
       await setScalar(req.guild.id, 'logChannelId', null);
@@ -412,7 +488,7 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, { type: 'success', message: 'Channels updated.' }));
   }));
 
-  router.post('/:guildId/add-rank', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/add-rank', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const { name, roleId, level } = req.body;
     if (!name?.trim() || !SNOWFLAKE_RE.test(roleId || '') || !/^[0-9]+$/.test(level || '')) {
       return res.send(await renderSettings(req, { type: 'error', message: 'Rank needs a name, a valid role, and a numeric level.' }));
@@ -424,14 +500,14 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, { type: 'success', message: `Rank "${name.trim()}" saved.` }));
   }));
 
-  router.post('/:guildId/remove-rank', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/remove-rank', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const removed = await removeRank(req.guild.id, req.body.name || '');
     res.send(await renderSettings(req, removed
       ? { type: 'success', message: 'Rank removed.' }
       : { type: 'error', message: 'That rank was already removed.' }));
   }));
 
-  router.post('/:guildId/add-infraction-type', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/add-infraction-type', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const { name, points } = req.body;
     // Non-negative only, matching the Discord /config modal's validation
     // (configHandler.js requires points >= 0). The dashboard should not be
@@ -443,7 +519,7 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, { type: 'success', message: `Infraction type "${name.trim()}" saved.` }));
   }));
 
-  router.post('/:guildId/remove-infraction-type', requireGuildAccess, requireCsrf, asyncRoute(async (req, res) => {
+  router.post('/:guildId/remove-infraction-type', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
     const removed = await removeInfractionType(req.guild.id, req.body.name || '');
     res.send(await renderSettings(req, removed
       ? { type: 'success', message: 'Infraction type removed.' }

@@ -3,7 +3,7 @@ const { icon, iconEmoji } = require('../config');
 const { handleTicketSelectChange, handleTicketModalSubmit, handleTicketClose } = require('../handlers/ticketHandler');
 const { handleConfigButton, handleConfigModal } = require('../handlers/configHandler');
 const { activeVotes, getVoteCard, notifyInitiatorThresholdReached, handleSsuStart, handleSsuWait, handleSsuJoinCodeModal } = require('../commands/session-vote');
-const { buildCard, V2 } = require('../utils/components');
+const { V2 } = require('../utils/components');
 
 // Every non-slash-command handler below is routed through this so a thrown
 // error still gets the user *something* useful instead of Discord's generic,

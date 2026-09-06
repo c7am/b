@@ -378,6 +378,45 @@ async function checkOutShift(shiftId, userId) {
 }
 
 // ---------------------------------------------------------------------------
+// Leave of absence. ends_at is stored as plain TEXT (YYYY-MM-DD), not
+// TIMESTAMPTZ, because commands/loa.js and the dashboard both treat it as a
+// bare calendar date typed by a human ("2026-09-15"), not a timestamp with
+// a time-of-day component, and template it directly into Discord timestamp
+// markup as `${ends_at}T00:00:00Z`. Converting it to a real TIMESTAMPTZ
+// column would silently reinterpret that string through the server's
+// timezone handling instead of treating it as the literal date typed in.
+async function startLoa({ guildId, userId, reason, endsAt }) {
+  await pool.query(
+    `INSERT INTO loas (guild_id, user_id, reason, ends_at) VALUES ($1,$2,$3,$4)`,
+    [guildId, userId, reason, endsAt]
+  );
+}
+
+async function getActiveLoa(guildId, userId) {
+  const res = await pool.query(
+    `SELECT * FROM loas WHERE guild_id = $1 AND user_id = $2 AND active = true ORDER BY starts_at DESC LIMIT 1`,
+    [guildId, userId]
+  );
+  return res.rows[0] || null;
+}
+
+async function endLoa(guildId, userId) {
+  const res = await pool.query(
+    `UPDATE loas SET active = false WHERE guild_id = $1 AND user_id = $2 AND active = true`,
+    [guildId, userId]
+  );
+  return res.rowCount > 0;
+}
+
+async function getActiveLoas(guildId) {
+  const res = await pool.query(
+    `SELECT * FROM loas WHERE guild_id = $1 AND active = true ORDER BY ends_at ASC`,
+    [guildId]
+  );
+  return res.rows;
+}
+
+// ---------------------------------------------------------------------------
 // User management (view user history, infractions, LOAs, rank)
 // ---------------------------------------------------------------------------
 async function getUser(guildId, userId) {

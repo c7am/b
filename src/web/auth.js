@@ -31,6 +31,13 @@ function buildAuthRouter({ clientId, clientSecret, baseUrl }) {
 
       req.session.user = { id: user.id, username: user.username };
       req.session.adminGuildIds = adminGuildIds;
+      // Every guild Discord says this user belongs to, admin or not. Used
+      // only to decide which guilds to list on the picker page; actual
+      // per-request access is re-checked live against the bot's own guild
+      // cache (see requireMember/requireAdmin in dashboard.js) rather than
+      // trusted from this snapshot, since a user can leave a guild or lose
+      // a role after this list was captured but before the session expires.
+      req.session.memberGuildIds = guilds.map((g) => g.id);
       // Regenerate the CSRF token on every fresh login.
       req.session.csrfToken = crypto.randomBytes(16).toString('hex');
 

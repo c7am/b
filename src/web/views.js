@@ -1,5 +1,3 @@
-const { SCALAR_KEYS } = require('../utils/guildConfig');
-
 function escapeHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -106,12 +104,11 @@ function guildListPage({ guilds, username }) {
 }
 
 // ============= Staff Dashboard (Main Page) =============
-function staffDashboard({ guild, user, shifts, activeLoa, recentInfractions }) {
+function staffDashboard({ guild, user, shifts, activeLoa, isAdmin }) {
   const shiftCards = shifts.map(s => {
     const start = new Date(s.starts_at);
     const end = new Date(s.ends_at);
     const now = new Date();
-    const isUpcoming = start > now;
     const isActive = start <= now && end > now;
     
     let status = 'Upcoming';
@@ -177,20 +174,49 @@ function staffDashboard({ guild, user, shifts, activeLoa, recentInfractions }) {
 
   <div class="staff-section">
     <div class="staff-section-header">
-      ${icon('users')}
-      <h2 class="staff-section-title">Settings & Admin</h2>
+      ${icon('alertCircle')}
+      <h2 class="staff-section-title">Leave of Absence</h2>
     </div>
-    <a href="/dashboard/${escapeHtml(guild.id)}/settings" class="btn btn-tonal" style="gap:8px;align-self:flex-start">
+    <a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn btn-tonal" style="gap:8px;align-self:flex-start">
       ${icon('check')}
-      <span>Manage Server Settings</span>
+      <span>${activeLoa ? 'Manage Leave' : 'Request Leave'}</span>
     </a>
   </div>
+
+  <div class="staff-section">
+    <div class="staff-section-header">
+      ${icon('users')}
+      <h2 class="staff-section-title">Your Profile</h2>
+    </div>
+    <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="gap:8px;align-self:flex-start">
+      ${icon('users')}
+      <span>View My History</span>
+    </a>
+  </div>
+
+  ${isAdmin ? `
+  <div class="staff-section">
+    <div class="staff-section-header">
+      ${icon('check')}
+      <h2 class="staff-section-title">Admin</h2>
+    </div>
+    <div class="row" style="gap:var(--space-2)">
+      <a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-tonal" style="gap:8px">
+        ${icon('clock')}
+        <span>Manage Shifts</span>
+      </a>
+      <a href="/dashboard/${escapeHtml(guild.id)}" class="btn btn-tonal" style="gap:8px">
+        ${icon('check')}
+        <span>Server Settings</span>
+      </a>
+    </div>
+  </div>` : ''}
 </div>`;
   return layout({ title: 'Dashboard', body });
 }
 
 // ============= Shift Details Page =============
-function shiftDetailsPage({ guild, shift, members }) {
+function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId, shiftId }) {
   const memberItems = members.map(m => `
     <div class="user-item">
       <div class="user-item-main">
@@ -202,10 +228,36 @@ function shiftDetailsPage({ guild, shift, members }) {
       </span>
     </div>`).join('\n');
 
+  const start = new Date(shift.starts_at);
+  const end = new Date(shift.ends_at);
+  const now = new Date();
+  const isActive = start <= now && end > now;
+
+  const joinLeaveAction = isJoined ? `
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/leave" style="margin:0">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <button class="btn btn-tonal btn-danger" type="submit" style="gap:8px">
+        <span>Leave Shift</span>
+      </button>
+    </form>` : `
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/join" style="margin:0">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <button class="btn btn-filled" type="submit" style="gap:8px">
+        ${icon('plus')}
+        <span>Join Shift</span>
+      </button>
+    </form>`;
+
+  const checkInLink = (isJoined && isActive) ? `
+    <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" class="btn btn-tonal" style="gap:8px">
+      ${icon('clock')}
+      <span>Check In / Out</span>
+    </a>` : '';
+
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guild.id)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -213,6 +265,7 @@ function shiftDetailsPage({ guild, shift, members }) {
   <div class="info-card">
     <div class="info-card-header">
       <div class="info-card-title">Shift Details</div>
+      ${isActive ? '<span class="badge badge-active">Active Now</span>' : ''}
     </div>
     <div class="info-card-body">
       <div class="info-card-row">
@@ -235,6 +288,11 @@ function shiftDetailsPage({ guild, shift, members }) {
     </div>
   </div>
 
+  <div class="row" style="gap:var(--space-2)">
+    ${joinLeaveAction}
+    ${checkInLink}
+  </div>
+
   <div class="staff-section">
     <div class="staff-section-header">
       ${icon('users')}
@@ -245,13 +303,6 @@ function shiftDetailsPage({ guild, shift, members }) {
 </div>`;
   return layout({ title: 'Shift Details', body });
 }
-
-module.exports = {
-  loginPage,
-  guildListPage,
-  staffDashboard,
-  shiftDetailsPage,
-};
 
 // ============= Create Shift Page (Admin) =============
 function createShiftPage({ guild, csrfToken, guildId }) {
@@ -410,8 +461,8 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
       </div>
 
       <div class="field-group">
-        <label for="loa-end">End Date/Time</label>
-        <input type="datetime-local" id="loa-end" name="endsAt" required>
+        <label for="loa-end">Return Date</label>
+        <input type="date" id="loa-end" name="endsAt" required>
       </div>
 
       <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
@@ -608,46 +659,33 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
   return layout({ title: 'User Profile', body });
 }
 
-module.exports = {
-  loginPage,
-  guildListPage,
-  staffDashboard,
-  shiftDetailsPage,
-  createShiftPage,
-  shiftsListPage,
-  loaRequestPage,
-  checkInPage,
-  userProfilePage,
-};
-
 // ============= Settings Page (Admin) =============
 function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, csrfToken, guildId, flash }) {
-  const roleOptions = roles.map(r => `<option value="${escapeHtml(r.id)}" ${scalars.modRoleId === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`).join('\n');
-  const channelOptions = textChannels.map(c => `<option value="${escapeHtml(c.id)}" ${scalars.logsChannelId === c.id ? 'selected' : ''}>#${escapeHtml(c.name)}</option>`).join('\n');
-  
+  const roleOptionsFor = (selectedId) => roles
+    .map(r => `<option value="${escapeHtml(r.id)}" ${selectedId === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`)
+    .join('\n');
+
+  // Three real scalar roles (matches SCALAR_KEYS in utils/guildConfig.js
+  // and the field names the POST /roles handler actually reads).
   const scalarRoleFields = [
-    { key: 'modRoleId', label: 'Moderator Role' },
-    { key: 'staffManageRoleId', label: 'Staff Manager Role' },
+    { key: 'staffManageRoleId', label: 'Staff Manage Role' },
+    { key: 'ticketStaffRoleId', label: 'Ticket Staff Role' },
+    { key: 'sessionPingRoleId', label: 'Session Ping Role' },
   ].map(f => `
     <div class="field-group">
       <label for="${f.key}">${f.label}</label>
       <select id="${f.key}" name="${f.key}">
         <option value="">None</option>
-        ${roleOptions}
+        ${roleOptionsFor(scalars[f.key])}
       </select>
     </div>`).join('\n');
 
-  const scalarChannelFields = [
-    { key: 'logsChannelId', label: 'Logs Channel' },
-    { key: 'ticketsChannelId', label: 'Tickets Channel' },
-  ].map(f => `
-    <div class="field-group">
-      <label for="${f.key}">${f.label}</label>
-      <select id="${f.key}" name="${f.key}">
-        <option value="">None</option>
-        ${channelOptions}
-      </select>
-    </div>`).join('\n');
+  const logChannelOptions = textChannels
+    .map(c => `<option value="${escapeHtml(c.id)}" ${scalars.logChannelId === c.id ? 'selected' : ''}>#${escapeHtml(c.name)}</option>`)
+    .join('\n');
+  const ticketCategoryOptions = categoryChannels
+    .map(c => `<option value="${escapeHtml(c.id)}" ${scalars.ticketCategoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`)
+    .join('\n');
 
   const rankRows = ranks.map(r => `
     <div class="list-row">
@@ -655,7 +693,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
         <strong>${escapeHtml(r.name)}</strong>
         <span class="chip" style="margin-left:8px">Level ${escapeHtml(r.level)}</span>
       </span>
-      <form method="POST" action="/dashboard/${escapeHtml(guild.id)}/remove-rank" style="margin:0">
+      <form method="POST" action="/dashboard/${escapeHtml(guildId)}/remove-rank" style="margin:0">
         <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
         <input type="hidden" name="name" value="${escapeHtml(r.name)}">
         <button class="btn btn-icon btn-danger" type="submit" title="Remove rank">
@@ -664,10 +702,25 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       </form>
     </div>`).join('\n');
 
+  const infractionTypeRows = infractionTypes.map(t => `
+    <div class="list-row">
+      <span class="body-medium">
+        <strong>${escapeHtml(t.name)}</strong>
+        <span class="chip" style="margin-left:8px">${escapeHtml(t.points)} pts</span>
+      </span>
+      <form method="POST" action="/dashboard/${escapeHtml(guildId)}/remove-infraction-type" style="margin:0">
+        <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+        <input type="hidden" name="name" value="${escapeHtml(t.name)}">
+        <button class="btn btn-icon btn-danger" type="submit" title="Remove infraction type">
+          ${icon('trash2')}
+        </button>
+      </form>
+    </div>`).join('\n');
+
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)} Settings</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guild.id)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -676,7 +729,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
 
   <div class="card-high stack">
     <h2 class="headline-medium">Roles</h2>
-    <form method="POST" action="/dashboard/${escapeHtml(guild.id)}/roles" class="stack">
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/roles" class="stack">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
       ${scalarRoleFields}
       <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
@@ -688,9 +741,22 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
 
   <div class="card-high stack">
     <h2 class="headline-medium">Channels</h2>
-    <form method="POST" action="/dashboard/${escapeHtml(guild.id)}/channels" class="stack">
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/channels" class="stack">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-      ${scalarChannelFields}
+      <div class="field-group">
+        <label for="logChannelId">Log Channel</label>
+        <select id="logChannelId" name="logChannelId">
+          <option value="">None</option>
+          ${logChannelOptions}
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="ticketCategoryId">Ticket Category</label>
+        <select id="ticketCategoryId" name="ticketCategoryId">
+          <option value="">None</option>
+          ${ticketCategoryOptions}
+        </select>
+      </div>
       <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
         ${icon('check')}
         <span>Save channels</span>
@@ -701,6 +767,51 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
   <div class="card-high stack">
     <h2 class="headline-medium">Ranks</h2>
     ${rankRows ? `<div>${rankRows}</div>` : '<p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">No ranks configured yet.</p>'}
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/add-rank" class="stack" style="margin-top:var(--space-3)">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <div class="row" style="gap:var(--space-2);align-items:flex-end">
+        <div class="field-group" style="flex:1;margin-bottom:0">
+          <label for="rank-name">Name</label>
+          <input type="text" id="rank-name" name="name" required placeholder="e.g. Sergeant">
+        </div>
+        <div class="field-group" style="flex:1;margin-bottom:0">
+          <label for="rank-role">Role</label>
+          <select id="rank-role" name="roleId" required>
+            ${roleOptionsFor(null)}
+          </select>
+        </div>
+        <div class="field-group" style="width:100px;margin-bottom:0">
+          <label for="rank-level">Level</label>
+          <input type="text" id="rank-level" name="level" required placeholder="1" inputmode="numeric" pattern="[0-9]+">
+        </div>
+        <button class="btn btn-filled" type="submit" style="gap:8px;height:48px">
+          ${icon('plus')}
+          <span>Add</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Infraction Types</h2>
+    ${infractionTypeRows ? `<div>${infractionTypeRows}</div>` : '<p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">No infraction types configured yet.</p>'}
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/add-infraction-type" class="stack" style="margin-top:var(--space-3)">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <div class="row" style="gap:var(--space-2);align-items:flex-end">
+        <div class="field-group" style="flex:1;margin-bottom:0">
+          <label for="infraction-name">Name</label>
+          <input type="text" id="infraction-name" name="name" required placeholder="e.g. Minor RDM">
+        </div>
+        <div class="field-group" style="width:100px;margin-bottom:0">
+          <label for="infraction-points">Points</label>
+          <input type="text" id="infraction-points" name="points" required placeholder="1" inputmode="numeric" pattern="[0-9]+">
+        </div>
+        <button class="btn btn-filled" type="submit" style="gap:8px;height:48px">
+          ${icon('plus')}
+          <span>Add</span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>`;
   return layout({ title: 'Settings', body });
