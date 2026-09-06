@@ -15,8 +15,14 @@ function buildApp(client, config) {
   app.set('trust proxy', 1);
 
   app.use(express.urlencoded({ extended: false }));
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.get('/static/style.css', (req, res) => {
+  // Every page's <link> tag requests /style.css directly (see views.js
+  // layout()). This used to be mounted at /static/style.css instead, a
+  // path nothing on any page ever actually requested, so every single
+  // page on the site has been loading with zero CSS applied: no Material
+  // Design 3 styling, no fonts, no colors, no layout, just raw unstyled
+  // browser HTML. That is almost certainly the real explanation behind
+  // the whole site looking "empty."
+  app.get('/style.css', (req, res) => {
     res.sendFile(path.join(__dirname, 'style.css'));
   });
 
