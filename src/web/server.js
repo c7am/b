@@ -4,7 +4,7 @@ const path = require('path');
 const { buildSessionStore } = require('./sessionStore');
 const { buildAuthRouter } = require('./auth');
 const { buildDashboardRouter } = require('./dashboard');
-const { loginPage } = require('./views');
+const { loginPage, privacyPolicyPage, termsOfServicePage } = require('./views');
 
 function buildApp(client, config) {
   const app = express();
@@ -43,6 +43,10 @@ function buildApp(client, config) {
     if (req.session.user) return res.redirect('/dashboard');
     res.send(loginPage());
   });
+
+  // Public, no login required, same as any site's footer legal pages.
+  app.get('/privacy', (req, res) => res.send(privacyPolicyPage()));
+  app.get('/terms', (req, res) => res.send(termsOfServicePage()));
 
   app.use('/auth', buildAuthRouter(config));
   app.use('/dashboard', buildDashboardRouter(client));

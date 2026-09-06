@@ -43,6 +43,14 @@ function layout({ title, body, showNav = true }) {
 <body>
   <div class="page-wrapper">
     ${body}
+    <footer class="site-footer">
+      <div class="site-footer-links">
+        <a href="/privacy">Privacy Policy</a>
+        <span class="site-footer-dot">&middot;</span>
+        <a href="/terms">Terms of Service</a>
+      </div>
+      <div class="site-footer-copy">ISRP Staff Bot</div>
+    </footer>
   </div>
 </body>
 </html>`;
@@ -50,17 +58,40 @@ function layout({ title, body, showNav = true }) {
 
 // ============= Login Page =============
 function loginPage() {
+  const features = [
+    { icon: 'clock', text: 'Track shifts and check in or out' },
+    { icon: 'alertCircle', text: 'Request and manage leave of absence' },
+    { icon: 'users', text: 'View your staff record and history' },
+  ];
+
+  const featureRows = features.map(f => `
+    <div class="login-feature">
+      <span class="login-feature-icon">${icon(f.icon)}</span>
+      <span>${escapeHtml(f.text)}</span>
+    </div>`).join('\n');
+
   const body = `
 <div class="center-page">
-  <div class="card stack shape-large" style="width:100%;max-width:400px;text-align:center;padding:var(--space-4)">
-    <h1 class="headline-large">Staff Bot Dashboard</h1>
-    <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
-      Sign in with Discord to manage settings, view shifts, and check your availability.
-    </p>
-    <a class="btn btn-filled btn-full-width" href="/auth/login" style="gap:8px;margin-top:var(--space-3)">
+  <div class="card stack shape-large" style="width:100%;max-width:420px;padding:var(--space-5)">
+    <div style="text-align:center">
+      <h1 class="headline-large">ISRP Staff Bot</h1>
+      <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
+        Sign in with Discord to get started.
+      </p>
+    </div>
+
+    <div class="login-features">
+      ${featureRows}
+    </div>
+
+    <a class="btn btn-filled btn-full-width" href="/auth/login" style="gap:8px;margin-top:var(--space-2)">
       ${icon('check')}
       <span>Login with Discord</span>
     </a>
+
+    <p class="body-small" style="text-align:center;color:var(--md-sys-color-outline);margin-top:var(--space-2)">
+      By continuing, you agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
+    </p>
   </div>
 </div>`;
   return layout({ title: 'Login', body });
@@ -828,4 +859,102 @@ module.exports = {
   checkInPage,
   userProfilePage,
   settingsPage,
+  privacyPolicyPage,
+  termsOfServicePage,
 };
+
+// ============= Privacy Policy =============
+function privacyPolicyPage() {
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Privacy Policy</h1>
+  <a class="btn btn-text" href="/" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page">
+  <div class="legal-doc">
+    <div class="legal-updated">Last updated: September 2026</div>
+
+    <h2>What This Covers</h2>
+    <p>This policy explains what the ISRP Staff Bot dashboard collects when you sign in with Discord and use it, and what happens to that information. This is an internal tool for ISRP server staff, not a public product, so this policy is written plainly rather than as a general-purpose legal document.</p>
+
+    <h2>Information We Collect</h2>
+    <p>When you log in with Discord, we receive your Discord user ID, username, and the list of servers you belong to, only to determine which server dashboards you can access. We do not store your Discord username or server list permanently. Your access token is used once to fetch this information at login and is discarded immediately afterward. It is never saved to a database.</p>
+    <p>As part of using the dashboard or the bot's commands, the following is stored against your Discord user ID for as long as it remains relevant to server staff records:</p>
+    <ul>
+      <li>Shift assignments you join or leave, and check-in and check-out timestamps</li>
+      <li>Leave of absence requests, including the reason you provide and the dates involved</li>
+      <li>Infractions and promotions recorded against you by server staff, including the reason given and who issued them</li>
+      <li>Support tickets you open, including the channel they were created in</li>
+    </ul>
+    <p>None of this is shared outside the server it was created in. It exists to give server staff a working record of their own team, similar to a shift log or an HR file, not to track you for any other purpose.</p>
+
+    <h2>Session Data</h2>
+    <p>When you log in, we create a session stored in our database and set a browser cookie that only contains a session identifier, never your Discord token or password. The cookie is marked <strong>httpOnly</strong> and <strong>secure</strong>, meaning JavaScript cannot read it and it is only ever sent over an encrypted connection. Sessions expire automatically after 24 hours.</p>
+
+    <h2>Third-Party Services</h2>
+    <p>Logging in is handled entirely through Discord's own OAuth2 system. We never see or store your Discord password. This site also loads the Google Sans Flex font from Google Fonts' content delivery network, which means Google receives your IP address when a page loads, the same as any site using a font CDN. No analytics, advertising, or tracking scripts of any kind run on this site.</p>
+
+    <h2>Data Retention</h2>
+    <p>Staff records (infractions, promotions, LOA history, shift history) are kept for as long as the server's staff team finds them useful for accountability and continuity, the same way a paper shift log or HR file would be kept. Session data is deleted automatically once a session expires.</p>
+
+    <h2>Who Can Access Your Data</h2>
+    <p>Your own shift history, LOA status, and personal record are visible to you and to staff members holding the server's configured Staff Manage role or the Manage Roles permission. Regular members without that role cannot view another member's infraction or promotion history through this dashboard.</p>
+
+    <h2>Removing Your Data</h2>
+    <p>If you want your records removed, contact the server's staff team directly. Since this is an internal server tool rather than a public service with its own support line, requests are handled by the server's own administrators.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>If this policy changes in a way that matters, we will update the date at the top of this page. Continuing to use the dashboard after a change means you accept the updated version.</p>
+  </div>
+</div>`;
+  return layout({ title: 'Privacy Policy', body });
+}
+
+// ============= Terms of Service =============
+function termsOfServicePage() {
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Terms of Service</h1>
+  <a class="btn btn-text" href="/" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page">
+  <div class="legal-doc">
+    <div class="legal-updated">Last updated: September 2026</div>
+
+    <h2>Acceptance</h2>
+    <p>By logging into this dashboard with Discord, you agree to these terms. This is an internal staff tool for the ISRP Discord community, not a public product, so these terms are scoped to that use.</p>
+
+    <h2>What This Bot Does</h2>
+    <p>The ISRP Staff Bot and its web dashboard help server staff manage promotions, demotions, infractions, leave of absence tracking, support tickets, session votes, and shift scheduling for the ISRP community. It is provided by and for that community.</p>
+
+    <h2>Acceptable Use</h2>
+    <p>You agree to use this dashboard only for legitimate staff purposes connected to the ISRP server. You will not attempt to access another user's account, bypass the permission checks that gate admin features, submit false information in shift, LOA, infraction, or promotion records, or use the dashboard to harass or retaliate against another member.</p>
+
+    <h2>Staff Records Are Real Records</h2>
+    <p>Infractions, promotions, and leave of absence entries created through this dashboard or the bot's commands are treated as the server's actual staff record, the same as if a moderator wrote them down by hand. Submitting an entry means you are asserting it is accurate and made in good faith.</p>
+
+    <h2>No Warranty</h2>
+    <p>This dashboard is provided as is, built and maintained on a volunteer basis for the ISRP community. We do not guarantee it will be available at all times, free of bugs, or fit for any purpose beyond its intended staff management use. Features may change, break, or be removed as the bot continues to be developed.</p>
+
+    <h2>Limitation of Liability</h2>
+    <p>To the extent permitted by law, the bot's developers and the ISRP server ownership are not liable for any loss or damage arising from your use of this dashboard, including lost data, missed shifts, or disputes arising from infraction or promotion records.</p>
+
+    <h2>Changes to the Service</h2>
+    <p>Features, permissions, and the underlying rules enforced by this dashboard may change over time as the ISRP server's needs change. Material changes to these terms will be reflected by updating the date at the top of this page.</p>
+
+    <h2>Termination of Access</h2>
+    <p>Access to this dashboard is tied to your standing in the ISRP Discord server. If you leave the server, are removed from it, or lose the staff role required for a given page, your access to that page ends accordingly.</p>
+
+    <h2>Governing Community Rules</h2>
+    <p>Use of this dashboard is also subject to the ISRP server's own rules and staff policies, which take precedence over these terms in the event of a conflict specific to server conduct.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about these terms should go to the ISRP server's staff team directly, the same as any other server policy question.</p>
+  </div>
+</div>`;
+  return layout({ title: 'Terms of Service', body });
+}
