@@ -1,6 +1,6 @@
 # CLAUDE.md - Project Continuity Notes
 
-**Last updated**: 2026-09-06. The bot was completely down since the morning of 2026-09-06 due to a crash-at-startup bug; it is now confirmed genuinely live and working end to end. Read this whole file before touching anything, the last "feature complete" claims in this file's history were wrong and not verified against a live deploy.
+**Last updated**: 2026-09-07. Data deletion requests, real Render/Databricks subprocessor disclosure, and a UI aesthetic-consistency pass are live, confirmed the same way as everything else in this file: `Render:get_deploy` returning `status: live`, fresh logs showing a clean boot, and the new table confirmed present via `Neon:get_database_tables`, not assumed from having written the code.
 
 ## Hard-learned lesson from this session
 
@@ -54,6 +54,29 @@ Verified clean afterward via a full ESLint `no-undef` plus correctness rule swee
 - Content is written to match what the code actually does, not generic boilerplate: no stored OAuth access tokens (used once at login, discarded), 24-hour httpOnly/secure session cookies stored server-side in Postgres, Google Fonts CDN disclosure (the only third-party request the site makes), staff record retention rationale, who can access what (self plus Staff Manage/Manage Roles for others)
 - Site-wide footer linking both, added to the shared `layout()` function in `views.js`, appears on every page
 - Login page expanded with a three-item feature summary and a "by continuing you agree to Terms/Privacy" line, partly addressing the "site looks empty" feedback alongside the CSS routing fix above (which is probably the bigger factor)
+
+## Data deletion requests (added 2026-09-07)
+
+Table `data_deletion_requests` (guild_id, user_id, reason, status, requested_at, handled_by, handled_at). Functions in `database.js`: `createDeletionRequest`, `getLatestDeletionRequest`, `getPendingDeletionRequests`, `getDeletionRequest`, `completeDeletionRequest` (transactional, deletes `shift_members` and `loas` rows for the user and marks the request completed atomically, so one can never happen without the other), `denyDeletionRequest`.
+
+Deliberately does not touch `infractions` or `promotions`. Those remain the server's accountability record per the ToS ("Staff Records Are Real Records"), not self-erasable personal data.
+
+Routes: `GET/POST /dashboard/:guildId/data-deletion` (staff, `requireMember`), `GET /dashboard/:guildId/deletion-requests` plus `.../complete` and `.../deny` (admin, `requireAdmin`). Linked from the staff dashboard under Your Profile, and from the admin section.
+
+## Legal pages: verified subprocessor links (added 2026-09-07)
+
+Privacy Policy and ToS both link to Render's actual current pages (`render.com/privacy`, `render.com/terms`, fetched and confirmed directly, not guessed) and to Databricks' current pages for Neon, since Neon was acquired by Databricks in 2025 and no longer has an independent privacy policy. `databricks.com/legal/privacynotice` is used in the Privacy Policy's subprocessor section, `databricks.com/legal/terms-of-use` in the ToS's infrastructure section. These are two different Databricks URLs for two different purposes, do not conflate them if editing.
+
+## CSS aesthetic-consistency fixes (added 2026-09-07)
+
+Found and fixed the same class of bug that caused the earlier outage, just in the stylesheet instead of server code: several selectors and tokens were referenced but silently wrong or duplicated, with no error thrown since CSS fails silently, unlike JS's `ReferenceError`. Worth knowing before touching `style.css` again:
+
+- `--md-sys-typescale-font` was set to Roboto Flex while `body` separately hardcoded Google Sans Flex to override it. Fixed so the token itself is correct (Google Sans Flex, falling back to Roboto Flex, then system fonts) and nothing needs a separate override anymore.
+- `.guild-item`, `.guild-icon`, `.guild-icon-placeholder`, `.list-row` were each defined twice (same duplicate-append pattern as the `module.exports` bug in `views.js` from the previous session). Consolidated to one definition each. If a class ever renders differently than its comment says it should, check for a second definition further down the file before assuming the logic itself is wrong.
+- `--md-sys-motion-duration-short2` was referenced in five transitions but never defined, silently resolving to `0s` per the CSS spec's handling of an invalid `var()` reference with no fallback. All five "hover" transitions were snapping instantly with no animation. Now defined at 100ms, matching the real MD3 spec value.
+- Added real elevation shadows to `.card`/`.card-high` and hover feedback to `.shift-card`, both previously flat/static despite being used for prominent or clickable content.
+
+**When adding new CSS classes, grep for the selector first** (`grep -n "^\.your-class" src/web/style.css`) before appending a new block. This whole category of bug came from adding CSS via `cat >> file` without checking what already existed.
 
 ## Known, non-urgent design note (not a bug)
 
