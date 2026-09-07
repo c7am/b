@@ -219,10 +219,16 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin }) {
       ${icon('users')}
       <h2 class="staff-section-title">Your Profile</h2>
     </div>
-    <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="gap:8px;align-self:flex-start">
-      ${icon('users')}
-      <span>View My History</span>
-    </a>
+    <div class="row" style="gap:var(--space-2)">
+      <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="gap:8px">
+        ${icon('users')}
+        <span>View My History</span>
+      </a>
+      <a href="/dashboard/${escapeHtml(guild.id)}/data-deletion" class="btn btn-outlined" style="gap:8px">
+        ${icon('trash2')}
+        <span>Delete My Data</span>
+      </a>
+    </div>
   </div>
 
   ${isAdmin ? `
@@ -239,6 +245,10 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin }) {
       <a href="/dashboard/${escapeHtml(guild.id)}" class="btn btn-tonal" style="gap:8px">
         ${icon('check')}
         <span>Server Settings</span>
+      </a>
+      <a href="/dashboard/${escapeHtml(guild.id)}/deletion-requests" class="btn btn-tonal" style="gap:8px">
+        ${icon('trash2')}
+        <span>Deletion Requests</span>
       </a>
     </div>
   </div>` : ''}
@@ -848,6 +858,153 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
   return layout({ title: 'Settings', body });
 }
 
+// ============= Data Deletion Request (Staff) =============
+function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
+  const status = latestRequest?.status;
+
+  if (status === 'pending') {
+    const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page">
+  <div class="legal-doc">
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-title">Request Pending</div>
+        ${icon('clock')}
+      </div>
+      <div class="info-card-body">
+        <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin:0">
+          Your data deletion request was submitted on ${formatDate(latestRequest.requested_at)} and is waiting for a staff member with the Staff Manage role to process it. You will see an update here once it has been handled.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>`;
+    return layout({ title: 'Data Deletion', body });
+  }
+
+  if (status === 'completed') {
+    const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page">
+  <div class="legal-doc">
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-title">Completed</div>
+        ${icon('checkCircle')}
+      </div>
+      <div class="info-card-body">
+        <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin:0">
+          Your shift history and leave of absence records were deleted on ${formatDate(latestRequest.handled_at)}. Infractions and promotions are kept as part of the server's staff record and are not affected by this.
+        </p>
+      </div>
+    </div>
+    <a href="/dashboard/${escapeHtml(guildId)}/data-deletion?new=1" class="btn btn-text" style="margin-top:var(--space-3)">Submit another request</a>
+  </div>
+</div>`;
+    return layout({ title: 'Data Deletion', body });
+  }
+
+  const deniedNotice = status === 'denied' ? `
+    <div class="info-card" style="border-left:4px solid var(--md-sys-color-error);margin-bottom:var(--space-3)">
+      <div class="info-card-title">Previous Request Denied</div>
+      <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">
+        Your last request, submitted ${formatDate(latestRequest.requested_at)}, was reviewed and denied. You can submit a new one below.
+      </p>
+    </div>` : '';
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page">
+  <div class="legal-doc">
+    ${deniedNotice}
+    <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
+      This will delete your shift assignment history, check-in and check-out records, and leave of absence history from this server. It will not delete infractions or promotions, which are kept as the server's staff accountability record. See the <a href="/privacy">Privacy Policy</a> for details.
+    </p>
+
+    <div class="card-high stack" style="margin-top:var(--space-3)">
+      <form method="POST" action="/dashboard/${escapeHtml(guildId)}/request-deletion" class="stack">
+        <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+        <div class="field-group">
+          <label for="deletion-reason">Reason (optional)</label>
+          <input type="text" id="deletion-reason" name="reason" placeholder="e.g. Leaving the server">
+        </div>
+        <button class="btn btn-danger" type="submit" style="align-self:flex-start;gap:8px">
+          ${icon('trash2')}
+          <span>Request Deletion</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>`;
+  return layout({ title: 'Data Deletion', body });
+}
+
+// ============= Data Deletion Requests Queue (Admin) =============
+function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
+  const rows = requests.map(r => `
+    <div class="info-card">
+      <div class="info-card-header">
+        <div class="info-card-title">User ${escapeHtml(r.user_id)}</div>
+        <span class="badge badge-warning">Pending</span>
+      </div>
+      <div class="info-card-body">
+        <div class="info-card-row">
+          <span class="info-card-label">Requested</span>
+          <span class="info-card-value">${formatDate(r.requested_at)}</span>
+        </div>
+        ${r.reason ? `
+        <div class="info-card-row" style="flex-direction:column;align-items:flex-start">
+          <span class="info-card-label">Reason</span>
+          <span class="info-card-value">${escapeHtml(r.reason)}</span>
+        </div>` : ''}
+      </div>
+      <div class="row" style="gap:var(--space-2);margin-top:var(--space-2)">
+        <form method="POST" action="/dashboard/${escapeHtml(guildId)}/deletion-requests/${escapeHtml(r.id)}/complete" style="margin:0">
+          <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+          <button class="btn btn-filled" type="submit" style="gap:8px">
+            ${icon('trash2')}
+            <span>Delete Data</span>
+          </button>
+        </form>
+        <form method="POST" action="/dashboard/${escapeHtml(guildId)}/deletion-requests/${escapeHtml(r.id)}/deny" style="margin:0">
+          <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+          <button class="btn btn-outlined" type="submit">Deny</button>
+        </form>
+      </div>
+    </div>`).join('\n');
+
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Data Deletion Requests</h1>
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+    ${icon('chevronLeft')} Back
+  </a>
+</header>
+<div class="page stack">
+  <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
+    Completing a request permanently deletes that user's shift history and leave of absence records. Infractions and promotions are never affected.
+  </p>
+  ${requests.length > 0 ? rows : '<div class="empty-state"><div class="empty-state-text">No pending requests</div></div>'}
+</div>`;
+  return layout({ title: 'Data Deletion Requests', body });
+}
+
 module.exports = {
   loginPage,
   guildListPage,
@@ -861,6 +1018,8 @@ module.exports = {
   settingsPage,
   privacyPolicyPage,
   termsOfServicePage,
+  dataDeletionPage,
+  deletionRequestsListPage,
 };
 
 // ============= Privacy Policy =============
@@ -893,17 +1052,24 @@ function privacyPolicyPage() {
     <h2>Session Data</h2>
     <p>When you log in, we create a session stored in our database and set a browser cookie that only contains a session identifier, never your Discord token or password. The cookie is marked <strong>httpOnly</strong> and <strong>secure</strong>, meaning JavaScript cannot read it and it is only ever sent over an encrypted connection. Sessions expire automatically after 24 hours.</p>
 
-    <h2>Third-Party Services</h2>
-    <p>Logging in is handled entirely through Discord's own OAuth2 system. We never see or store your Discord password. This site also loads the Google Sans Flex font from Google Fonts' content delivery network, which means Google receives your IP address when a page loads, the same as any site using a font CDN. No analytics, advertising, or tracking scripts of any kind run on this site.</p>
+    <h2>Infrastructure Providers</h2>
+    <p>Logging in is handled entirely through Discord's own OAuth2 system. We never see or store your Discord password.</p>
+    <p>This dashboard and bot run on <strong>Render</strong>, and the database that stores staff records runs on <strong>Neon</strong>, part of Databricks since 2025. Both providers process data on our behalf as infrastructure, the same way any web application depends on the servers it runs on, and both have their own privacy practices governing that layer:</p>
+    <ul>
+      <li>Render: <a href="https://render.com/privacy" target="_blank" rel="noopener noreferrer">render.com/privacy</a></li>
+      <li>Neon / Databricks: <a href="https://www.databricks.com/legal/privacynotice" target="_blank" rel="noopener noreferrer">databricks.com/legal/privacynotice</a></li>
+    </ul>
+    <p>This site also loads the Google Sans Flex font from Google Fonts' content delivery network, which means Google receives your IP address when a page loads, the same as any site using a font CDN. No analytics, advertising, or tracking scripts of any kind run on this site.</p>
 
     <h2>Data Retention</h2>
-    <p>Staff records (infractions, promotions, LOA history, shift history) are kept for as long as the server's staff team finds them useful for accountability and continuity, the same way a paper shift log or HR file would be kept. Session data is deleted automatically once a session expires.</p>
+    <p>Infractions and promotions are kept for as long as the server's staff team finds them useful for accountability and continuity, the same way a paper shift log or HR file would be kept. Shift history and leave of absence records are kept the same way, but unlike infractions and promotions, you can request they be deleted, see below. Session data is deleted automatically once a session expires.</p>
 
     <h2>Who Can Access Your Data</h2>
     <p>Your own shift history, LOA status, and personal record are visible to you and to staff members holding the server's configured Staff Manage role or the Manage Roles permission. Regular members without that role cannot view another member's infraction or promotion history through this dashboard.</p>
 
-    <h2>Removing Your Data</h2>
-    <p>If you want your records removed, contact the server's staff team directly. Since this is an internal server tool rather than a public service with its own support line, requests are handled by the server's own administrators.</p>
+    <h2>Requesting Data Deletion</h2>
+    <p>You can request deletion of your shift assignment history, check-in and check-out records, and leave of absence history directly from the dashboard, under <strong>Your Profile &gt; Delete My Data</strong> once logged in. A staff member with the Staff Manage role reviews and completes the request, at which point that data is permanently deleted.</p>
+    <p>Infractions and promotions are not deleted through this process. They are the server's accountability record rather than personal data you generated for your own convenience, the same way an employee cannot unilaterally erase entries from a completed HR file. If you believe an infraction or promotion record is inaccurate, that is a matter to raise with the server's staff team directly rather than a deletion request.</p>
 
     <h2>Changes to This Policy</h2>
     <p>If this policy changes in a way that matters, we will update the date at the top of this page. Continuing to use the dashboard after a change means you accept the updated version.</p>
@@ -936,6 +1102,13 @@ function termsOfServicePage() {
 
     <h2>Staff Records Are Real Records</h2>
     <p>Infractions, promotions, and leave of absence entries created through this dashboard or the bot's commands are treated as the server's actual staff record, the same as if a moderator wrote them down by hand. Submitting an entry means you are asserting it is accurate and made in good faith.</p>
+
+    <h2>Underlying Infrastructure</h2>
+    <p>This dashboard runs on hosting and database infrastructure operated by Render and Neon respectively. Their own terms of service govern that underlying infrastructure independently of these terms:</p>
+    <ul>
+      <li>Render: <a href="https://render.com/terms" target="_blank" rel="noopener noreferrer">render.com/terms</a></li>
+      <li>Neon / Databricks: <a href="https://www.databricks.com/legal/terms-of-use" target="_blank" rel="noopener noreferrer">databricks.com/legal/terms-of-use</a></li>
+    </ul>
 
     <h2>No Warranty</h2>
     <p>This dashboard is provided as is, built and maintained on a volunteer basis for the ISRP community. We do not guarantee it will be available at all times, free of bugs, or fit for any purpose beyond its intended staff management use. Features may change, break, or be removed as the bot continues to be developed.</p>

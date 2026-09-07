@@ -148,6 +148,19 @@ async function initDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_shift_members_shift ON shift_members(shift_id);
     CREATE INDEX IF NOT EXISTS idx_shift_members_user ON shift_members(user_id);
+
+    CREATE TABLE IF NOT EXISTS data_deletion_requests (
+      id SERIAL PRIMARY KEY,
+      guild_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      reason TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      requested_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      handled_by TEXT,
+      handled_at TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_deletion_requests_guild_status ON data_deletion_requests(guild_id, status);
   `);
   console.log('[db] schema ready');
 }
@@ -440,6 +453,74 @@ async function getUser(guildId, userId) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Data deletion requests. Deliberately does not touch infractions or
+// promotions when completed: those are treated as the server's actual
+// staff accountability record (see the Terms of Service, "Staff Records
+// Are Real Records"), the same way a completed HR file is not something
+// an employee can unilaterally erase. What this does delete is genuinely
+// personal and not an accountability record: shift memberships and
+// check-in data, and LOA history.
+// ---------------------------------------------------------------------------
+async function createDeletionRequest({ guildId, userId, reason }) {
+  const res = await pool.query(
+    `INSERT INTO data_deletion_requests (guild_id, user_id, reason) VALUES ($1,$2,$3) RETURNING id`,
+    [guildId, userId, reason || null]
+  );
+  return res.rows[0].id;
+}
+
+async function getLatestDeletionRequest(guildId, userId) {
+  const res = await pool.query(
+    `SELECT * FROM data_deletion_requests WHERE guild_id = $1 AND user_id = $2 ORDER BY requested_at DESC LIMIT 1`,
+    [guildId, userId]
+  );
+  return res.rows[0] || null;
+}
+
+async function getPendingDeletionRequests(guildId) {
+  const res = await pool.query(
+    `SELECT * FROM data_deletion_requests WHERE guild_id = $1 AND status = 'pending' ORDER BY requested_at ASC`,
+    [guildId]
+  );
+  return res.rows;
+}
+
+async function getDeletionRequest(requestId) {
+  const res = await pool.query(`SELECT * FROM data_deletion_requests WHERE id = $1`, [requestId]);
+  return res.rows[0] || null;
+}
+
+// Performs the actual deletion (shift memberships and LOA history only,
+// see the module comment above) and marks the request completed in the
+// same transaction, so a request can never be marked done without the
+// deletion actually having happened, or vice versa.
+async function completeDeletionRequest({ requestId, guildId, userId, handledBy }) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`DELETE FROM shift_members WHERE user_id = $1 AND shift_id IN (SELECT id FROM shifts WHERE guild_id = $2)`, [userId, guildId]);
+    await client.query(`DELETE FROM loas WHERE guild_id = $1 AND user_id = $2`, [guildId, userId]);
+    await client.query(
+      `UPDATE data_deletion_requests SET status = 'completed', handled_by = $1, handled_at = now() WHERE id = $2`,
+      [handledBy, requestId]
+    );
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+async function denyDeletionRequest({ requestId, handledBy }) {
+  await pool.query(
+    `UPDATE data_deletion_requests SET status = 'denied', handled_by = $1, handled_at = now() WHERE id = $2`,
+    [handledBy, requestId]
+  );
+}
+
 module.exports = {
   pool,
   initDatabase,
@@ -475,4 +556,10 @@ module.exports = {
   checkInShift,
   checkOutShift,
   getUser,
+  createDeletionRequest,
+  getLatestDeletionRequest,
+  getPendingDeletionRequests,
+  getDeletionRequest,
+  completeDeletionRequest,
+  denyDeletionRequest,
 };

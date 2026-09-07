@@ -10,6 +10,8 @@ const {
   checkInPage,
   userProfilePage,
   settingsPage,
+  dataDeletionPage,
+  deletionRequestsListPage,
 } = require('./views');
 const {
   SCALAR_KEYS,
@@ -37,6 +39,12 @@ const {
   startLoa,
   endLoa,
   getUser,
+  createDeletionRequest,
+  getLatestDeletionRequest,
+  getPendingDeletionRequests,
+  getDeletionRequest,
+  completeDeletionRequest,
+  denyDeletionRequest,
 } = require('../db/database');
 const { canManageStaff } = require('../utils/permissions');
 
@@ -363,6 +371,75 @@ function buildDashboardRouter(client) {
   router.post('/:guildId/end-loa', requireMember, requireCsrf, asyncRoute(async (req, res) => {
     await endLoa(req.guild.id, req.session.user.id);
     res.redirect(`/dashboard/${req.guild.id}/staff`);
+  }));
+
+  // Staff: Data deletion request status or form
+  router.get('/:guildId/data-deletion', requireMember, asyncRoute(async (req, res) => {
+    const latestRequest = await getLatestDeletionRequest(req.guild.id, req.session.user.id);
+    res.send(dataDeletionPage({
+      guild: req.guild,
+      guildId: req.guild.id,
+      // ?new=1 lets someone submit again after a completed or denied
+      // request instead of being stuck looking at the old one forever.
+      latestRequest: req.query.new === '1' ? null : latestRequest,
+      csrfToken: req.session.csrfToken,
+    }));
+  }));
+
+  // Staff: Submit a data deletion request
+  router.post('/:guildId/request-deletion', requireMember, requireCsrf, asyncRoute(async (req, res) => {
+    const existing = await getLatestDeletionRequest(req.guild.id, req.session.user.id);
+    if (existing && existing.status === 'pending') {
+      return res.status(400).send('You already have a pending deletion request.');
+    }
+    await createDeletionRequest({
+      guildId: req.guild.id,
+      userId: req.session.user.id,
+      reason: req.body.reason || null,
+    });
+    res.redirect(`/dashboard/${req.guild.id}/data-deletion`);
+  }));
+
+  // Admin: Review queue for pending deletion requests
+  router.get('/:guildId/deletion-requests', requireAdmin, asyncRoute(async (req, res) => {
+    const requests = await getPendingDeletionRequests(req.guild.id);
+    res.send(deletionRequestsListPage({
+      guild: req.guild,
+      guildId: req.guild.id,
+      requests,
+      csrfToken: req.session.csrfToken,
+    }));
+  }));
+
+  // Admin: Complete a deletion request (actually deletes shift/LOA data)
+  router.post('/:guildId/deletion-requests/:requestId/complete', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const request = await getDeletionRequest(parseInt(req.params.requestId, 10));
+    if (!request || request.guild_id !== req.guild.id) {
+      return res.status(404).send('Request not found.');
+    }
+    if (request.status !== 'pending') {
+      return res.status(400).send('That request has already been handled.');
+    }
+    await completeDeletionRequest({
+      requestId: request.id,
+      guildId: req.guild.id,
+      userId: request.user_id,
+      handledBy: req.session.user.id,
+    });
+    res.redirect(`/dashboard/${req.guild.id}/deletion-requests`);
+  }));
+
+  // Admin: Deny a deletion request
+  router.post('/:guildId/deletion-requests/:requestId/deny', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const request = await getDeletionRequest(parseInt(req.params.requestId, 10));
+    if (!request || request.guild_id !== req.guild.id) {
+      return res.status(404).send('Request not found.');
+    }
+    if (request.status !== 'pending') {
+      return res.status(400).send('That request has already been handled.');
+    }
+    await denyDeletionRequest({ requestId: request.id, handledBy: req.session.user.id });
+    res.redirect(`/dashboard/${req.guild.id}/deletion-requests`);
   }));
 
   // User profile view. Anyone can view their own profile (that is
