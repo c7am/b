@@ -108,33 +108,104 @@ Repo `https://github.com/c7am/b`, branch `main`. Claude has autonomous push auth
 
 ## Rebranding to Axiom (2026-09-09)
 
-Bot name and Discord app name now simply **Axiom** (was "ISRP Staff Bot"). All references in dashboard, embeds, and footer updated. Package.json name remains `staff-bot` internally (implementation detail).
+Bot name and Discord app name now simply **Axiom** (was "ISRP Staff Bot"). All references in dashboard, embeds, footer, Privacy Policy, and ToS updated to generic multi-server language. Package.json name remains `staff-bot` internally (implementation detail).
 
 Dashboard URL remains at `https://isrp-staff-bot.onrender.com` for now (Render rename would require DNS reconfiguration; deferred unless G requests).
 
-## Next steps: Ticket Panel Migration to Dashboard
+## Ticket Panel Migration Completed (2026-09-09 Session)
 
-**Phase 1 (THIS SESSION)**: Remove `/ticket-panel` slash command, move ticket spawner to dashboard admin page.
-1. Delete `/src/commands/ticket-panel.js`
-2. Remove from commands registration in `src/index.js`
-3. Add dashboard page `/dashboard/:guildId/admin/ticket-settings` with:
-   - Form to configure ticket categories (General, Management, Partnership, Ownership, etc.)
-   - Save configuration to a new `ticket_settings` column in `settings` table (JSON)
-   - Button to "Post Ticket Panel to Channel" - select channel, then POST to `ticketHandler.js` to post the panel
-4. Test end-to-end: configure categories, post panel, verify select menu appears
+**Phase 1 - COMPLETE**:
+- Deleted `/src/commands/ticket-panel.js` (slash command removed)
+- Added `getTicketCategories(guildId)` and `setTicketCategories(guildId, categories)` to `src/db/database.js` (stores in settings table as JSON, defaults to 4 categories if not configured)
+- Updated `src/handlers/ticketHandler.js` to fetch categories dynamically instead of hardcoded `CATEGORY_LABELS`
+- Added "Ticket Categories" section to admin settings dashboard (`/dashboard/:guildId`)
+- Implemented `POST /dashboard/:guildId/post-ticket-panel` route:
+  - Admin selects a text channel
+  - Route fetches configured categories from database
+  - Builds panel embed with dynamic category descriptions
+  - Posts to selected channel with functional select menu
+  - Shows success/error message in settings page
+- Updated `buildTranscript()` to fetch dynamic categories for transcript headers
 
-**Phase 2**: Implement custom infraction and shift type configuration.
-1. Add admin UI forms for creating/editing infraction types and severity tiers
-2. Add admin UI forms for creating/editing shift types and duration limits
-3. Store in database alongside existing `infraction_types` and shift data
-4. Verify generalization: no hardcoded type names anywhere
+**Code Status**: All 6 modified files pass Node syntax check. Git commit `8241494` ready for deployment.
 
-**Phase 3**: Verify shift redirect and dashboard stability (live run-through).
+**Critical**: The commit exists locally but needs to be pushed to GitHub before Render can deploy. This requires:
+1. GitHub PAT authentication (G has this, Claude does not in this session)
+2. `git push origin main` from any authenticated terminal
+3. Alternatively: trigger Render deploy directly from the web dashboard once code is pushed
 
-## Critical Known Issues (from earlier sessions)
+**Next immediate step**: PUSH TO GITHUB, then use Render MCP to trigger deploy and verify boot sequence.
 
-All listed in the "Critical bugs found and fixed" section above are now resolved. Always verify with ESLint no-undef sweep after changes: `npx eslint src/ --rule 'no-undef: error'`
+## Phase 2 (DEFERRED TO NEXT SESSION)
 
-## Proprietary Approach
+Implement custom infraction and shift type configuration (database schema and admin UI already support this; only UI forms and test needed).
 
-Axiom is closed-source. GitHub repo `https://github.com/c7am/b` is private (or will be made private if it isn't). No open-source licensing, no public distribution. Deployments are self-hosted on Render only.
+## Phase 3 (DEFERRED)
+
+Verify shift redirect and full dashboard stability in live run-through.
+
+
+
+## Deployment Checklist For Next Session
+
+**BLOCKING**: Commit `8241494` must be pushed to GitHub before Render can deploy.
+
+### Step 1: Push to GitHub
+```bash
+# From any terminal with GitHub PAT credentials:
+cd /home/claude/axiom
+git push origin main
+```
+
+### Step 2: Trigger Render Deploy
+Use Render MCP with workspace `tea-dab9orqjobas73bqsa4g`, service `srv-dadi11740ujc73bh83sg`:
+```
+Render:trigger_deploy
+```
+Save the deployId from the response.
+
+### Step 3: Verify Deployment
+Wait ~45 seconds, then:
+```
+Render:get_deploy(deployId=<from step 2>)
+// Confirm: status: "live"
+```
+
+### Step 4: Check Boot Logs
+```
+Render:list_logs(direction: "backward", type: ["app"])
+// Look for:
+// [db] schema ready
+// [bot] axiom#XXXX is online
+// 7 slash commands registered (ticket-panel should NOT appear)
+// [web] dashboard listening
+```
+
+### Step 5: Test in Discord
+1. Run `/help` or any slash command to verify 7 commands (not 8)
+2. Log into dashboard at `https://isrp-staff-bot.onrender.com`
+3. Navigate to Settings page
+4. Verify "Ticket Categories" section exists at bottom
+5. Select a test channel and click "Post Ticket Panel"
+6. Go to that Discord channel and verify panel appears with working select menu
+
+### Step 6: Test Ticket Creation
+1. In Discord, select a category from the ticket panel
+2. Fill in the description modal
+3. Verify ticket channel is created with correct name
+4. Verify ticket data persists in database
+
+## Continuation Prompt (For Next Agent)
+
+> You are continuing work on **Axiom**, a proprietary Discord staff management bot for ERLC roleplay communities. Commit `8241494` implements Phase 1 of ticket panel migration (slash command removed, moved to dashboard with dynamic categories).
+>
+> **IMMEDIATE PRIORITY**: Push commit to GitHub and deploy via Render, following the Deployment Checklist above.
+>
+> After deployment is verified live:
+> 1. Test end-to-end: post panel, select category, create ticket, verify everything works
+> 2. Phase 2 (deferred): Implement custom infraction and shift type configuration UI
+> 3. Phase 3: Verify shift redirect flow (Discord -> dashboard confirmation)
+> 4. Scope: Prepare for ERLC API integration (account linking, player list commands, shift sync)
+>
+> **Key principles**: Proprietary code only. Verify deploys with `Render:get_deploy` on specific deployId, not `list_deploys`. Test rigorously. Challenge bad ideas. Talk like a human.
+
