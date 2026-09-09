@@ -521,6 +521,27 @@ async function denyDeletionRequest({ requestId, handledBy }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Ticket configuration: store ticket categories per guild as JSON in settings
+// ---------------------------------------------------------------------------
+async function getTicketCategories(guildId) {
+  const categories = await getSetting(guildId, 'ticket_categories');
+  if (!categories) {
+    // Default categories if none configured
+    return [
+      { id: 'general', label: 'General', description: 'Giveaway claims, minor issues, and questions' },
+      { id: 'management', label: 'Management', description: 'Ban appeals, reports, and serious issues' },
+      { id: 'partnership', label: 'Partnership', description: 'Partnership requests and inquiries' },
+      { id: 'ownership', label: 'Ownership', description: 'High-ranking reports and escalations' },
+    ];
+  }
+  return categories;
+}
+
+async function setTicketCategories(guildId, categories) {
+  await setSetting(guildId, 'ticket_categories', categories);
+}
+
 module.exports = {
   pool,
   initDatabase,
@@ -562,4 +583,6 @@ module.exports = {
   getDeletionRequest,
   completeDeletionRequest,
   denyDeletionRequest,
+  getTicketCategories,
+  setTicketCategories,
 };

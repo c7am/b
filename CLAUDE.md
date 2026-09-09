@@ -1,18 +1,14 @@
-# CLAUDE.md - Project Continuity Notes
+# Axiom - Staff Management Bot for ERLC Communities
 
-**Last updated**: 2026-09-07. Data deletion requests, real Render/Databricks subprocessor disclosure, and a UI aesthetic-consistency pass are live, confirmed the same way as everything else in this file: `Render:get_deploy` returning `status: live`, fresh logs showing a clean boot, and the new table confirmed present via `Neon:get_database_tables`, not assumed from having written the code.
+**Last updated**: 2026-09-09. Transitioning from single-server ISRP deployment to multi-server proprietary platform for ERLC (Emergency Response: Liberty County) roleplay automation.
 
-## Hard-learned lesson from this session
+## What This Project Is
 
-Earlier summaries in this project claimed features were "production ready" based on seeing `build_in_progress` on a triggered deploy and never circling back to confirm the deploy actually finished successfully. It did not. Every deploy from commit `f9af26a` onward failed, and the live site sat on a stale pre-shifts commit for the entire session while multiple "complete" writeups were produced. **Never declare something live without pulling the actual final deploy status and, ideally, real logs or a real HTTP request against the live URL.** `Render:get_deploy` on the specific deploy ID, checked after waiting for it to finish, not `Render:trigger_deploy`'s immediate response, is the source of truth.
+**Axiom** is a proprietary, self-hosted Discord bot for staff management and server automation in ERLC roleplay communities. Eight slash commands (`/config`, `/promote`, `/demote`, `/infract`, `/history`, `/ticket-panel`, `/session-vote`, `/loa`), a web dashboard for staff self-service and admin management, Postgres (Neon) backend, free Render hosting with self-ping to avoid idle spin-down.
 
-Similarly: manual code review missed several real, severe bugs this session (undefined functions referenced in `module.exports`, a CSS route mismatch that meant the entire site rendered unstyled, `req.csrfToken()` called as a function that never existed). What actually caught these: running ESLint's `no-undef` rule across the whole `src/` tree, and actually executing every view function with fixture data plus booting the real Express app and issuing real HTTP requests. Prefer executing code over reading it whenever feasible.
+**Status**: Rebranding from ISRP to Axiom (multi-server support). Ticket panel command removal and dashboard migration in progress. ERLC API integration planned.
 
-## What this project is
-
-Production Discord staff management bot for ISRP (Indiana State Roleplay) Roblox community. Eight slash commands (`/config`, `/promote`, `/demote`, `/infract`, `/history`, `/ticket-panel`, `/session-vote`, `/loa`), a web dashboard for staff self-service and admin management, Postgres (Neon) backend, free Render hosting with self-ping to avoid idle spin-down.
-
-All async. No em dashes anywhere in code, comments, or user-facing text. No Unicode emojis, custom Lucide-derived Discord application emojis only. Material Design 3 Expressive throughout, Google Sans Flex typography. Catppuccin Mocha palette (Mauve seed, `#cba6f7`).
+All async. No em dashes anywhere in code, comments, or user-facing text. No Unicode emojis, custom Lucide-derived Discord application emojis only. Material Design 3 Expressive (Catppuccin Mocha, Mauve seed `#cba6f7`), Google Sans Flex typography.
 
 G communicates in short directives, expects scope inference, wants direct pushback on bad ideas, has granted full autonomous authority over code, database, git, and Render deploys.
 
@@ -110,6 +106,35 @@ OAuth callback registered in Discord Developer Portal: `https://isrp-staff-bot.o
 
 Repo `https://github.com/c7am/b`, branch `main`. Claude has autonomous push authority via PAT. Standard flow: edit locally in `/home/claude/bot`, verify with `node -c` plus the ESLint sweep plus actually executing changed code where feasible, commit, push, trigger deploy, confirm `status: live`, check logs.
 
-## Next steps
+## Rebranding to Axiom (2026-09-09)
 
-No specific feature was in flight when this note was written. Await direction from G. If resuming without direction: consider (a) confirming the `/config` Administrator-vs-canManageStaff question above with G rather than guessing, (b) further "less empty" work like dashboard stats or richer empty states if that's still wanted, (c) a live end-to-end click-through of the actual dashboard in a real browser against a real Discord account, which has not been done, only simulated locally with fixture data.
+Bot name and Discord app name now simply **Axiom** (was "ISRP Staff Bot"). All references in dashboard, embeds, and footer updated. Package.json name remains `staff-bot` internally (implementation detail).
+
+Dashboard URL remains at `https://isrp-staff-bot.onrender.com` for now (Render rename would require DNS reconfiguration; deferred unless G requests).
+
+## Next steps: Ticket Panel Migration to Dashboard
+
+**Phase 1 (THIS SESSION)**: Remove `/ticket-panel` slash command, move ticket spawner to dashboard admin page.
+1. Delete `/src/commands/ticket-panel.js`
+2. Remove from commands registration in `src/index.js`
+3. Add dashboard page `/dashboard/:guildId/admin/ticket-settings` with:
+   - Form to configure ticket categories (General, Management, Partnership, Ownership, etc.)
+   - Save configuration to a new `ticket_settings` column in `settings` table (JSON)
+   - Button to "Post Ticket Panel to Channel" - select channel, then POST to `ticketHandler.js` to post the panel
+4. Test end-to-end: configure categories, post panel, verify select menu appears
+
+**Phase 2**: Implement custom infraction and shift type configuration.
+1. Add admin UI forms for creating/editing infraction types and severity tiers
+2. Add admin UI forms for creating/editing shift types and duration limits
+3. Store in database alongside existing `infraction_types` and shift data
+4. Verify generalization: no hardcoded type names anywhere
+
+**Phase 3**: Verify shift redirect and dashboard stability (live run-through).
+
+## Critical Known Issues (from earlier sessions)
+
+All listed in the "Critical bugs found and fixed" section above are now resolved. Always verify with ESLint no-undef sweep after changes: `npx eslint src/ --rule 'no-undef: error'`
+
+## Proprietary Approach
+
+Axiom is closed-source. GitHub repo `https://github.com/c7am/b` is private (or will be made private if it isn't). No open-source licensing, no public distribution. Deployments are self-hosted on Render only.

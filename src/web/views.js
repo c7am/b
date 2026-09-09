@@ -49,7 +49,7 @@ function layout({ title, body, showNav = true }) {
         <span class="site-footer-dot">&middot;</span>
         <a href="/terms">Terms of Service</a>
       </div>
-      <div class="site-footer-copy">ISRP Staff Bot</div>
+      <div class="site-footer-copy">Axiom Staff Bot</div>
     </footer>
   </div>
 </body>
@@ -74,7 +74,7 @@ function loginPage() {
 <div class="center-page">
   <div class="card stack shape-large" style="width:100%;max-width:420px;padding:var(--space-5)">
     <div style="text-align:center">
-      <h1 class="headline-large">ISRP Staff Bot</h1>
+      <h1 class="headline-large">Axiom Staff Bot</h1>
       <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
         Sign in with Discord to get started.
       </p>
@@ -701,7 +701,7 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 }
 
 // ============= Settings Page (Admin) =============
-function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, csrfToken, guildId, flash }) {
+function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, ticketCategories, csrfToken, guildId, flash }) {
   const roleOptionsFor = (selectedId) => roles
     .map(r => `<option value="${escapeHtml(r.id)}" ${selectedId === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`)
     .join('\n');
@@ -852,6 +852,25 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
           <span>Add</span>
         </button>
       </div>
+    </form>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Ticket Categories</h2>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:-var(--space-1)">These categories appear in the ticket creation dropdown when members open a support ticket.</p>
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/post-ticket-panel" class="stack" style="margin-top:var(--space-2)">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <div class="field-group">
+        <label for="ticket-channel">Post Panel To</label>
+        <select id="ticket-channel" name="channelId" required>
+          <option value="">Select a channel...</option>
+          ${textChannels.map(c => `<option value="${escapeHtml(c.id)}">#${escapeHtml(c.name)}</option>`).join('\n')}
+        </select>
+      </div>
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+        ${icon('check')}
+        <span>Post Ticket Panel</span>
+      </button>
     </form>
   </div>
 </div>`;
@@ -1036,7 +1055,7 @@ function privacyPolicyPage() {
     <div class="legal-updated">Last updated: September 2026</div>
 
     <h2>What This Covers</h2>
-    <p>This policy explains what the ISRP Staff Bot dashboard collects when you sign in with Discord and use it, and what happens to that information. This is an internal tool for ISRP server staff, not a public product, so this policy is written plainly rather than as a general-purpose legal document.</p>
+    <p>This policy explains what the Axiom Staff Bot dashboard collects when you sign in with Discord and use it, and what happens to that information. Axiom is a staff management tool for Discord roleplay communities.</p>
 
     <h2>Information We Collect</h2>
     <p>When you log in with Discord, we receive your Discord user ID, username, and the list of servers you belong to, only to determine which server dashboards you can access. We do not store your Discord username or server list permanently. Your access token is used once to fetch this information at login and is discarded immediately afterward. It is never saved to a database.</p>
@@ -1095,7 +1114,7 @@ function termsOfServicePage() {
     <p>By logging into this dashboard with Discord, you agree to these terms. This is an internal staff tool for the ISRP Discord community, not a public product, so these terms are scoped to that use.</p>
 
     <h2>What This Bot Does</h2>
-    <p>The ISRP Staff Bot and its web dashboard help server staff manage promotions, demotions, infractions, leave of absence tracking, support tickets, session votes, and shift scheduling for the ISRP community. It is provided by and for that community.</p>
+    <p>Axiom is a staff management dashboard for Discord roleplay communities. It helps server staff manage promotions, demotions, infractions, leave of absence tracking, support tickets, session votes, and shift scheduling.</p>
 
     <h2>Acceptable Use</h2>
     <p>You agree to use this dashboard only for legitimate staff purposes connected to the ISRP server. You will not attempt to access another user's account, bypass the permission checks that gate admin features, submit false information in shift, LOA, infraction, or promotion records, or use the dashboard to harass or retaliate against another member.</p>

@@ -14,22 +14,18 @@ const { COLORS, icon, iconEmoji } = require('../config');
 const { buildCard, V2 } = require('../utils/components');
 const { getScalar } = require('../utils/guildConfig');
 const { isTicketStaff } = require('../utils/permissions');
-const { createTicket, setTicketChannel, getTicketByChannel, closeTicket } = require('../db/database');
-
-const CATEGORY_LABELS = {
-  general: 'General',
-  management: 'Management',
-  partnership: 'Partnership',
-  ownership: 'Ownership',
-};
+const { createTicket, setTicketChannel, getTicketByChannel, closeTicket, getTicketCategories } = require('../db/database');
 
 // Selecting a category opens the detail modal directly - no separate button.
 async function handleTicketSelectChange(interaction) {
-  const category = interaction.values[0];
-  const label = CATEGORY_LABELS[category] || 'Support';
+  const guildId = interaction.guildId;
+  const categoryId = interaction.values[0];
+  const categories = await getTicketCategories(guildId);
+  const categoryObj = categories.find(c => c.id === categoryId);
+  const label = categoryObj?.label || 'Support';
 
   const modal = new ModalBuilder()
-    .setCustomId(`ticket_create_modal_${category}`)
+    .setCustomId(`ticket_create_modal_${categoryId}`)
     .setTitle(`${label} Ticket`);
 
   const descInput = new TextInputBuilder()
@@ -51,8 +47,10 @@ function sanitize(str) {
 async function handleTicketModalSubmit(interaction) {
   const guildId = interaction.guildId;
   const categoryMatch = interaction.customId.match(/ticket_create_modal_(\w+)/);
-  const category = categoryMatch ? categoryMatch[1] : 'general';
-  const categoryLabel = CATEGORY_LABELS[category] || 'Support';
+  const categoryId = categoryMatch ? categoryMatch[1] : 'general';
+  const categories = await getTicketCategories(guildId);
+  const categoryObj = categories.find(c => c.id === categoryId);
+  const categoryLabel = categoryObj?.label || 'Support';
 
   const ticketStaffRoleId = await getScalar(guildId, 'ticketStaffRoleId');
   const ticketCategoryId = await getScalar(guildId, 'ticketCategoryId');
@@ -61,7 +59,7 @@ async function handleTicketModalSubmit(interaction) {
   const ticketId = await createTicket({
     guildId,
     userId: interaction.user.id,
-    category,
+    category: categoryId,
     description,
   });
 
@@ -153,8 +151,12 @@ async function buildTranscript(channel, ticket, closedByUsername) {
 
   allMessages.reverse(); // oldest first
 
+  const categories = await getTicketCategories(channel.guildId);
+  const categoryObj = categories.find(c => c.id === ticket.category);
+  const categoryLabel = categoryObj?.label || ticket.category;
+
   const header = [
-    `Ticket #${ticket.id} - ${CATEGORY_LABELS[ticket.category] || ticket.category}`,
+    `Ticket #${ticket.id} - ${categoryLabel}`,
     `Opened by ${ticket.user_id} at ${new Date(ticket.opened_at).toISOString()}`,
     `Reason: ${ticket.description}`,
     '-'.repeat(60),
@@ -225,11 +227,14 @@ async function handleTicketClose(interaction) {
           const attachment = new AttachmentBuilder(Buffer.from(transcript, 'utf-8'), {
             name: `ticket-${ticket.id}-transcript.txt`,
           });
+          const categories = await getTicketCategories(interaction.guildId);
+          const categoryObj = categories.find(c => c.id === ticket.category);
+          const categoryLabel = categoryObj?.label || ticket.category;
           const transcriptCard = buildCard({
             accentColor: COLORS.lavender,
             heading: `${icon('transcript')} Ticket #${ticket.id} Transcript`,
             lines: [
-              `**Category:** ${CATEGORY_LABELS[ticket.category] || ticket.category}`,
+              `**Category:** ${categoryLabel}`,
               `**Opened by:** <@${ticket.user_id}>`,
               `**Closed by:** ${interaction.user}`,
               `\nFull message log for this ticket is attached below.`,

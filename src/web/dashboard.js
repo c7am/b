@@ -45,6 +45,8 @@ const {
   getDeletionRequest,
   completeDeletionRequest,
   denyDeletionRequest,
+  getTicketCategories,
+  setTicketCategories,
 } = require('../db/database');
 const { canManageStaff } = require('../utils/permissions');
 
@@ -508,10 +510,11 @@ function buildDashboardRouter(client) {
       .map((c) => ({ id: c.id, name: c.name }));
 
     const scalarKeys = Object.keys(SCALAR_KEYS);
-    const [scalarValues, ranks, infractionTypes] = await Promise.all([
+    const [scalarValues, ranks, infractionTypes, ticketCategories] = await Promise.all([
       Promise.all(scalarKeys.map((key) => getScalar(guild.id, key))),
       getRanks(guild.id),
       getInfractionTypes(guild.id),
+      getTicketCategories(guild.id),
     ]);
     const scalars = {};
     scalarKeys.forEach((key, i) => { scalars[key] = scalarValues[i]; });
@@ -527,6 +530,7 @@ function buildDashboardRouter(client) {
       scalars,
       ranks,
       infractionTypes,
+      ticketCategories,
       csrfToken: req.session.csrfToken,
       guildId: guild.id,
       flash,
@@ -601,6 +605,64 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, removed
       ? { type: 'success', message: 'Infraction type removed.' }
       : { type: 'error', message: 'That infraction type was already removed.' }));
+  }));
+
+  router.post('/:guildId/post-ticket-panel', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const { channelId } = req.body;
+    if (!channelId) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'Please select a channel.' }));
+    }
+
+    const channel = await req.guild.channels.fetch(channelId).catch(() => null);
+    if (!channel || !channel.isTextBased()) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'Invalid channel selected.' }));
+    }
+
+    try {
+      const categories = await getTicketCategories(req.guild.id);
+      const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
+      const { COLORS, icon, iconEmoji } = require('../config');
+      const { buildCard: buildCardUtil, V2 } = require('../utils/components');
+
+      const lines = [
+        'Need help with something? Pick the category below that best matches your issue, and you will be asked to describe it in a bit more detail before your ticket is created. A member of staff will be with you as soon as they are able.',
+        '',
+        ...categories.map(c => `**${c.label}**: ${c.description}`),
+        '',
+        '-# Please only open one ticket at a time for a given issue, duplicates just split up the conversation and slow things down for everyone.',
+      ];
+
+      const card = buildCardUtil({
+        accentColor: COLORS.mauve,
+        heading: `${icon('ticket')} Support Tickets`,
+        lines,
+      });
+
+      const select = new StringSelectMenuBuilder()
+        .setCustomId('ticket_category_select')
+        .setPlaceholder('Select a category to begin');
+
+      for (const cat of categories) {
+        const builder = new StringSelectMenuOptionBuilder()
+          .setLabel(cat.label)
+          .setValue(cat.id)
+          .setDescription(cat.description);
+        const emoji = iconEmoji(cat.id);
+        if (emoji) builder.setEmoji(emoji);
+        select.addOptions(builder);
+      }
+
+      const selectRow = new ActionRowBuilder().addComponents(select);
+      await channel.send({
+        components: [card, selectRow],
+        ...V2,
+      });
+
+      res.send(await renderSettings(req, { type: 'success', message: `Ticket panel posted to ${channel}` }));
+    } catch (err) {
+      console.error(`[dashboard] Failed to post ticket panel: ${err.message}`);
+      res.send(await renderSettings(req, { type: 'error', message: `Failed to post panel: ${err.message}` }));
+    }
   }));
 
   return router;
