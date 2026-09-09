@@ -4,6 +4,7 @@ const { handleTicketSelectChange, handleTicketModalSubmit, handleTicketClose } =
 const { handleConfigButton, handleConfigModal } = require('../handlers/configHandler');
 const { activeVotes, getVoteCard, notifyInitiatorThresholdReached, handleSsuStart, handleSsuWait, handleSsuJoinCodeModal } = require('../commands/session-vote');
 const { V2 } = require('../utils/components');
+const { handleErlcLinkModal } = require('../handlers/erlcHandler');
 
 // Every non-slash-command handler below is routed through this so a thrown
 // error still gets the user *something* useful instead of Discord's generic,
@@ -105,6 +106,9 @@ module.exports = {
       }
       if (interaction.customId.startsWith('ssu_joincode_')) {
         return safeHandle(interaction, handleSsuJoinCodeModal, 'SSU join code error');
+      }
+      if (interaction.customId.startsWith('erlc_link_modal_')) {
+        return safeHandle(interaction, handleErlcLinkModal, 'ERLC link error');
       }
       return;
     }

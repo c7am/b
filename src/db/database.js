@@ -542,6 +542,27 @@ async function setTicketCategories(guildId, categories) {
   await setSetting(guildId, 'ticket_categories', categories);
 }
 
+// ---------------------------------------------------------------------------
+// Shift types: configurable per guild with duration limits
+// ---------------------------------------------------------------------------
+async function getShiftTypes(guildId) {
+  const types = await getSetting(guildId, 'shift_types');
+  if (!types) {
+    // Default shift types if none configured
+    return [
+      { id: 'patrol', label: 'Patrol', minDuration: 600, maxDuration: 3600 }, // 10 min to 1 hour
+      { id: 'support', label: 'Support', minDuration: 600, maxDuration: 7200 }, // 10 min to 2 hours
+      { id: 'event', label: 'Event', minDuration: 1800, maxDuration: 14400 }, // 30 min to 4 hours
+      { id: 'trainee', label: 'Trainee', minDuration: 900, maxDuration: 3600 }, // 15 min to 1 hour
+    ];
+  }
+  return types;
+}
+
+async function setShiftTypes(guildId, types) {
+  await setSetting(guildId, 'shift_types', types);
+}
+
 module.exports = {
   pool,
   initDatabase,
@@ -585,4 +606,6 @@ module.exports = {
   denyDeletionRequest,
   getTicketCategories,
   setTicketCategories,
+  getShiftTypes,
+  setShiftTypes,
 };

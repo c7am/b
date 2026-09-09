@@ -47,6 +47,8 @@ const {
   denyDeletionRequest,
   getTicketCategories,
   setTicketCategories,
+  getShiftTypes,
+  setShiftTypes,
 } = require('../db/database');
 const { canManageStaff } = require('../utils/permissions');
 
@@ -510,11 +512,12 @@ function buildDashboardRouter(client) {
       .map((c) => ({ id: c.id, name: c.name }));
 
     const scalarKeys = Object.keys(SCALAR_KEYS);
-    const [scalarValues, ranks, infractionTypes, ticketCategories] = await Promise.all([
+    const [scalarValues, ranks, infractionTypes, ticketCategories, shiftTypes] = await Promise.all([
       Promise.all(scalarKeys.map((key) => getScalar(guild.id, key))),
       getRanks(guild.id),
       getInfractionTypes(guild.id),
       getTicketCategories(guild.id),
+      getShiftTypes(guild.id),
     ]);
     const scalars = {};
     scalarKeys.forEach((key, i) => { scalars[key] = scalarValues[i]; });
@@ -531,6 +534,7 @@ function buildDashboardRouter(client) {
       ranks,
       infractionTypes,
       ticketCategories,
+      shiftTypes,
       csrfToken: req.session.csrfToken,
       guildId: guild.id,
       flash,

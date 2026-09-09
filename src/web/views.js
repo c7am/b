@@ -37,7 +37,7 @@ function layout({ title, body, showNav = true }) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(title)} - Staff Bot Dashboard</title>
+  <title>${escapeHtml(title)} - Axiom</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -49,7 +49,7 @@ function layout({ title, body, showNav = true }) {
         <span class="site-footer-dot">&middot;</span>
         <a href="/terms">Terms of Service</a>
       </div>
-      <div class="site-footer-copy">Axiom Staff Bot</div>
+      <div class="site-footer-copy">Axiom</div>
     </footer>
   </div>
 </body>
@@ -74,7 +74,8 @@ function loginPage() {
 <div class="center-page">
   <div class="card stack shape-large" style="width:100%;max-width:420px;padding:var(--space-5)">
     <div style="text-align:center">
-      <h1 class="headline-large">Axiom Staff Bot</h1>
+      <h1 class="headline-large">Axiom</h1>
+      <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Staff and ERLC management tool</p>
       <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
         Sign in with Discord to get started.
       </p>
@@ -117,7 +118,7 @@ function guildListPage({ guilds, username }) {
 
   const body = `
 <header class="topbar">
-  <h1 class="title-large" style="margin:0">Staff Bot Dashboard</h1>
+  <h1 class="title-large" style="margin:0">Axiom</h1>
   <div class="row">
     <span class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">${escapeHtml(username)}</span>
     <a class="btn btn-text" href="/auth/logout" style="gap:4px" title="Log out">
@@ -701,7 +702,7 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 }
 
 // ============= Settings Page (Admin) =============
-function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, ticketCategories, csrfToken, guildId, flash }) {
+function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, ticketCategories, shiftTypes, csrfToken, guildId, flash }) {
   const roleOptionsFor = (selectedId) => roles
     .map(r => `<option value="${escapeHtml(r.id)}" ${selectedId === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`)
     .join('\n');
@@ -872,6 +873,30 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
         <span>Post Ticket Panel</span>
       </button>
     </form>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">Shift Types</h2>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:-var(--space-1)">Configure shift types and their duration limits (in minutes).</p>
+    <div style="display:grid;gap:var(--space-2);margin-top:var(--space-2)">
+      ${shiftTypes.map((type, idx) => `
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:var(--space-2);align-items:flex-end;padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+          <div class="field-group" style="margin-bottom:0">
+            <label>Type</label>
+            <input type="text" value="${escapeHtml(type.label)}" disabled style="opacity:0.7">
+          </div>
+          <div class="field-group" style="margin-bottom:0">
+            <label>Min (min)</label>
+            <input type="text" value="${Math.round(type.minDuration / 60)}" disabled style="opacity:0.7">
+          </div>
+          <div class="field-group" style="margin-bottom:0">
+            <label>Max (min)</label>
+            <input type="text" value="${Math.round(type.maxDuration / 60)}" disabled style="opacity:0.7">
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-2)">Shift types are currently read-only. Custom configuration UI coming soon.</p>
   </div>
 </div>`;
   return layout({ title: 'Settings', body });
@@ -1055,7 +1080,7 @@ function privacyPolicyPage() {
     <div class="legal-updated">Last updated: September 2026</div>
 
     <h2>What This Covers</h2>
-    <p>This policy explains what the Axiom Staff Bot dashboard collects when you sign in with Discord and use it, and what happens to that information. Axiom is a staff management tool for Discord roleplay communities.</p>
+    <p>Axiom is a staff and ERLC management tool for Discord roleplay communities. It helps server staff manage promotions, demotions, infractions, leave of absence tracking, support tickets, session votes, and shift scheduling.</p>
 
     <h2>Information We Collect</h2>
     <p>When you log in with Discord, we receive your Discord user ID, username, and the list of servers you belong to, only to determine which server dashboards you can access. We do not store your Discord username or server list permanently. Your access token is used once to fetch this information at login and is discarded immediately afterward. It is never saved to a database.</p>
