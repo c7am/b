@@ -242,3 +242,79 @@ Render:list_logs(direction: "backward", type: ["app"])
 
 All documentation files are saved locally and ready for reference by next agent.
 
+
+## Phase 2 & ERLC Integration - Complete (2026-09-09 Session 2)
+
+**Deploy**: `dep-dagri0tg1s2s73cctdsg` - Status: ✓ LIVE
+
+### Phase 2: Custom Shift Types
+- Added `getShiftTypes()` and `setShiftTypes()` database functions
+- Shift types stored in settings as JSON (defaults: Patrol, Support, Event, Trainee)
+- Each type has configurable min/max duration limits (in seconds, displayed in minutes on dashboard)
+- Settings page displays shift types in read-only cards (UI for editing deferred to Phase 3)
+- Framework in place for custom shift duration enforcement
+
+### ERLC Integration - Scaffold Complete
+**Client** (`src/erlc/erlcClient.js`):
+- Wraps ERLC Private Server API (https://api.esx-rp.com/v1)
+- Methods: getPlayers(), getServerStatus(), getPlayerDetails(), getTeams(), setPlayerTeam(), kickPlayer(), getLogs()
+- Error handling and timeout protection
+
+**Handler** (`src/handlers/erlcHandler.js`):
+- `getErlcClient()`: Initialize client from guild's stored API key
+- `verifyApiKey()`: Test if API key works
+- `setErlcApiKey()`: Store API key securely in database
+- `linkRobloxAccount()`: Map Discord user to Roblox username
+- `getRobloxUsername()`: Retrieve linked username
+- `syncShiftToErlc()`: When user starts shift in Discord, automatically assign them to team in ERLC (core integration feature)
+- `getCurrentPlayers()`: Fetch current server player list
+- `getServerInfo()`: Get server status and team list
+- `handleErlcLinkModal()`: Process account linking modal submission
+
+**Commands** (2 new):
+- `/erlc-link`: Modal to link Discord user to Roblox username (verified via API)
+- `/erlc-players`: View current ERLC server players with their assigned teams
+
+**Integration** (`src/events/interactionCreate.js`):
+- Added modal handler routing for `erlc_link_modal_*` submissions
+- Modal triggers on command, processes username verification, stores mapping
+
+### Branding (Final)
+- Bot name is now simply **"Axiom"** (no "Staff Bot" suffix)
+- Tagline: "Staff and ERLC management tool"
+- Applied across dashboard title, footer, login page
+
+### Boot Verification
+```
+✓ [cmd] config, demote, erlc-link, erlc-players, history, infract, loa, promote, session-vote
+✓ [sync] 9 slash commands registered (original 7 + 2 ERLC)
+✓ [db] schema ready
+✓ [bot] hi#9174 is online
+✓ [web] dashboard listening
+✓ Zero errors in boot sequence
+```
+
+### What Works Now (Live)
+1. **Ticket system** - slash command removed, dashboard-only posting with dynamic categories
+2. **Shift types** - configurable per-guild with duration limits (read-only UI for now)
+3. **ERLC API client** - full integration points ready
+4. **Roblox linking** - `/erlc-link` command lets users connect Discord to Roblox username
+5. **Server status** - `/erlc-players` command pulls and displays current ERLC players
+6. **Shift sync framework** - code ready to assign users to ERLC teams when shifts start (needs Shift command update)
+
+### What's Ready for Phase 3 (Next Session)
+- Update `/start-shift` command to call `syncShiftToErlc()` after creating shift
+- Admin UI to configure shift-type-to-ERLC-team mappings
+- Admin dashboard for ERLC API key configuration and testing
+- Custom shift type editor (allow admins to add/remove/edit types and duration limits)
+- ERLC event logging (subscribe to join/leave/kill events)
+- Account linking verification via server list check
+
+### Domain Rename (Pending)
+Still at `https://isrp-staff-bot.onrender.com`. To change to `axiom-staff-bot.onrender.com` or custom domain:
+1. Render dashboard: Rename service
+2. Discord dev portal: Update OAuth callback URL
+3. Update references in CLAUDE.md and views
+
+G to decide: proceed with domain rename now or defer?
+
