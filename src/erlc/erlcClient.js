@@ -151,6 +151,101 @@ class ErlcClient {
       throw err;
     }
   }
+
+  /**
+   * Fetch Roblox user profile by username
+   * Returns: { id, username, displayName, bio, created, avatar, ... }
+   */
+  async getRobloxProfile(username) {
+    try {
+      // Roblox public API - no auth needed
+      const url = new URL(`https://users.roblox.com/v1/usernames/users`);
+      const response = await new Promise((resolve, reject) => {
+        const req = https.request(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: this.timeout,
+        }, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch (err) {
+              reject(new Error(`Failed to parse profile response`));
+            }
+          });
+        });
+        
+        req.on('error', reject);
+        req.on('timeout', () => {
+          req.abort();
+          reject(new Error('Roblox API timeout'));
+        });
+        
+        req.write(JSON.stringify({ usernames: [username], excludeBannedUsers: true }));
+        req.end();
+      });
+
+      if (!response.data || response.data.length === 0) {
+        throw new Error(`User not found: ${username}`);
+      }
+
+      const user = response.data[0];
+      return {
+        id: user.id,
+        username: user.name,
+        displayName: user.displayName,
+      };
+    } catch (err) {
+      console.error(`[erlc] Failed to fetch Roblox profile: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Get Roblox user avatar URL
+   */
+  async getRobloxAvatar(userId) {
+    try {
+      const url = new URL(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=420x420&format=Png&isCircular=false`);
+      const response = await new Promise((resolve, reject) => {
+        const req = https.request(url, {
+          method: 'GET',
+          timeout: this.timeout,
+        }, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch (err) {
+              reject(new Error(`Failed to parse avatar response`));
+            }
+          });
+        });
+        
+        req.on('error', reject);
+        req.on('timeout', () => {
+          req.abort();
+          reject(new Error('Roblox API timeout'));
+        });
+        
+        req.end();
+      });
+
+      if (response.data && response.data.length > 0) {
+        return response.data[0].imageUrl;
+      }
+      
+      return null;
+    } catch (err) {
+      console.error(`[erlc] Failed to fetch avatar: ${err.message}`);
+      return null;
+    }
+  }
 }
 
 module.exports = { ErlcClient };

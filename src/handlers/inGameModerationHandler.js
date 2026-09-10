@@ -54,7 +54,7 @@ async function verifyModStatus(guildId, discordUserId, guild) {
 /**
  * Log in-game moderation action
  * Called when staff uses ?moderate command in ERLC
- * Returns success/error with notification data
+ * Returns success/error with notification data + fetched avatars
  */
 async function logInGameModeration(client, guildId, robloxModName, discordModId, {
   playerName,
@@ -98,6 +98,23 @@ async function logInGameModeration(client, guildId, robloxModName, discordModId,
       return { success: false, error: `Violation not found after match` };
     }
 
+    // Fetch Roblox avatar for the moderated player
+    const { getErlcClient } = require('./erlcHandler');
+    let playerAvatar = null;
+    let playerId = null;
+    
+    try {
+      const erlcClient = await getErlcClient(guildId);
+      if (erlcClient) {
+        const profile = await erlcClient.getRobloxProfile(playerName);
+        playerId = profile.id;
+        playerAvatar = await erlcClient.getRobloxAvatar(profile.id);
+      }
+    } catch (avatarErr) {
+      // Avatar fetch failed, continue without it
+      console.warn(`[mod] Failed to fetch avatar for ${playerName}: ${avatarErr.message}`);
+    }
+
     console.log(`[mod] ${moderator.user.username} (${robloxModName}): ${playerName} - ${preset.label} - ${reason}`);
 
     return { 
@@ -107,6 +124,8 @@ async function logInGameModeration(client, guildId, robloxModName, discordModId,
         roblox: robloxModName,
       },
       player: playerName,
+      playerId,
+      playerAvatar,
       violation: preset.label,
       reason,
       timestamp: new Date().toISOString(),

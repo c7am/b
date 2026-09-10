@@ -4,7 +4,7 @@ const { handleTicketSelectChange, handleTicketModalSubmit, handleTicketClose } =
 const { handleConfigButton, handleConfigModal } = require('../handlers/configHandler');
 const { activeVotes, getVoteCard, notifyInitiatorThresholdReached, handleSsuStart, handleSsuWait, handleSsuJoinCodeModal } = require('../commands/session-vote');
 const { V2 } = require('../utils/components');
-const { handleErlcLinkModal } = require('../handlers/erlcHandler');
+const { handleErlcLinkModal, handleErlcVerifyButton, handleErlcRegenerateButton, handleErlcVerifyUsernameModal } = require('../handlers/erlcHandler');
 
 // Every non-slash-command handler below is routed through this so a thrown
 // error still gets the user *something* useful instead of Discord's generic,
@@ -110,6 +110,9 @@ module.exports = {
       if (interaction.customId.startsWith('erlc_link_modal_')) {
         return safeHandle(interaction, handleErlcLinkModal, 'ERLC link error');
       }
+      if (interaction.customId.startsWith('erlc_verify_username_')) {
+        return safeHandle(interaction, handleErlcVerifyUsernameModal, 'ERLC verify username error');
+      }
       return;
     }
 
@@ -136,6 +139,14 @@ module.exports = {
 
     if (customId.startsWith('ssu_wait_')) {
       return safeHandle(interaction, handleSsuWait, 'SSU wait error');
+    }
+
+    if (customId.startsWith('erlc_verify_')) {
+      return safeHandle(interaction, handleErlcVerifyButton, 'ERLC verify error');
+    }
+
+    if (customId.startsWith('erlc_regenerate_')) {
+      return safeHandle(interaction, handleErlcRegenerateButton, 'ERLC regenerate error');
     }
   },
 };
