@@ -170,8 +170,26 @@ async function handleErlcLinkModal(interaction) {
     // Link the account
     await linkRobloxAccount(interaction.guildId, interaction.user.id, robloxUsername);
 
+    // Check if user is staff - if so, enable in-game mod status
+    const { setInGameModStatus } = require('../db/database');
+    const member = await interaction.guild.members.fetch(interaction.user.id);
+    const isStaff = member.roles.cache.some(r => {
+      const name = r.name.toLowerCase();
+      return name.includes('admin') || name.includes('manager') || 
+             name.includes('staff') || name.includes('moderator') ||
+             name.includes('lead');
+    });
+
+    if (isStaff) {
+      await setInGameModStatus(interaction.guildId, interaction.user.id, true);
+      return interaction.reply({
+        content: `✓ Your Roblox account **${robloxUsername}** has been linked. You can now use \`?moderate\` commands in-game.`,
+        ephemeral: true,
+      });
+    }
+
     return interaction.reply({
-      content: `✓ Your Roblox account **${robloxUsername}** has been linked. Shifts will now sync to ERLC automatically.`,
+      content: `✓ Your Roblox account **${robloxUsername}** has been linked.`,
       ephemeral: true,
     });
   } catch (err) {

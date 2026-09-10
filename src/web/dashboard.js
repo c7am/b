@@ -12,6 +12,7 @@ const {
   settingsPage,
   dataDeletionPage,
   deletionRequestsListPage,
+  inGameModerationPage,
 } = require('./views');
 const {
   SCALAR_KEYS,
@@ -49,6 +50,8 @@ const {
   setTicketCategories,
   getShiftTypes,
   setShiftTypes,
+  getModerationPresets,
+  getInGameModerations,
 } = require('../db/database');
 const { canManageStaff } = require('../utils/permissions');
 

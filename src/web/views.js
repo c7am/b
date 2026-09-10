@@ -1000,6 +1000,53 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
 }
 
 // ============= Data Deletion Requests Queue (Admin) =============
+function inGameModerationPage({ guild, guildId, moderations, presets, searchPlayerId = null }) {
+  const filtered = searchPlayerId 
+    ? moderations.filter(m => m.player_id === searchPlayerId || m.player_name.toLowerCase().includes(searchPlayerId.toLowerCase()))
+    : moderations;
+
+  const body = `
+<div class="staff-content">
+  <div class="stack" style="gap:var(--space-4)">
+    <h1 class="title-large">${icon('shield')} In-Game Moderations</h1>
+    
+    <div class="card-high">
+      <div class="field-group">
+        <label>Search Player</label>
+        <input type="text" placeholder="Player ID or name..." onkeyup="location.href = '/dashboard/${escapeHtml(guildId)}/moderations?search=' + this.value" style="width:100%">
+      </div>
+    </div>
+
+    ${filtered.length === 0 
+      ? '<p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">No moderation records found.</p>'
+      : `<div class="stack" style="gap:var(--space-2)">
+        ${filtered.slice(0, 50).map(mod => {
+          const preset = presets.find(p => p.id === mod.preset_id);
+          return `
+        <div style="padding:var(--space-3);background:var(--md-sys-color-surface-dim);border-radius:8px;border-left:4px solid ${
+          mod.severity === 'severe' ? 'var(--md-sys-color-error)' :
+          mod.severity === 'medium' ? 'var(--md-sys-color-tertiary)' :
+          'var(--md-sys-color-outline)'
+        }">
+          <div class="row" style="gap:var(--space-2);align-items:flex-start;justify-content:space-between">
+            <div style="flex:1">
+              <p class="label-large"><strong>${escapeHtml(mod.player_name)}</strong> (${escapeHtml(mod.player_id)})</p>
+              <p class="body-medium" style="margin-top:var(--space-1)"><strong>${preset?.label || mod.preset_id}</strong> • ${mod.severity}</p>
+              ${mod.notes ? `<p class="body-small" style="margin-top:var(--space-1);color:var(--md-sys-color-on-surface-variant)">${escapeHtml(mod.notes)}</p>` : ''}
+              <p class="body-small" style="margin-top:var(--space-1);color:var(--md-sys-color-on-surface-variant)">${new Date(mod.logged_at).toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+          `;
+        }).join('')}
+      </div>`
+    }
+  </div>
+</div>`;
+  return layout({ title: 'In-Game Moderations', body });
+}
+
+// ============= Data Deletion Requests Queue (Admin) =============
 function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
   const rows = requests.map(r => `
     <div class="info-card">
@@ -1064,6 +1111,7 @@ module.exports = {
   termsOfServicePage,
   dataDeletionPage,
   deletionRequestsListPage,
+  inGameModerationPage,
 };
 
 // ============= Privacy Policy =============

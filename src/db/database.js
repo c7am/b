@@ -106,6 +106,21 @@ async function initDatabase() {
       transcript TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS discord_roblox_links (
+      id SERIAL PRIMARY KEY,
+      guild_id TEXT NOT NULL,
+      discord_user_id TEXT NOT NULL,
+      roblox_username TEXT NOT NULL,
+      roblox_user_id TEXT,
+      verified BOOLEAN DEFAULT false,
+      is_in_game_mod BOOLEAN DEFAULT false,
+      linked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      last_staff_check TIMESTAMPTZ
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_discord_roblox_links_unique ON discord_roblox_links(guild_id, discord_user_id);
+    CREATE INDEX IF NOT EXISTS idx_discord_roblox_links_roblox ON discord_roblox_links(guild_id, roblox_username);
+
     CREATE INDEX IF NOT EXISTS idx_tickets_channel ON tickets(channel_id);
     CREATE INDEX IF NOT EXISTS idx_tickets_guild ON tickets(guild_id);
 
@@ -563,6 +578,68 @@ async function setShiftTypes(guildId, types) {
   await setSetting(guildId, 'shift_types', types);
 }
 
+// ---------------------------------------------------------------------------
+// In-game moderation presets (VDM, RDM, etc.)
+// ---------------------------------------------------------------------------
+async function getModerationPresets(guildId) {
+  const presets = await getSetting(guildId, 'moderation_presets');
+  if (!presets) {
+    // Default moderation presets
+    return [
+      { id: 'rdm', label: 'RDM', description: 'Random Deathmatch - killing without RP reason' },
+      { id: 'vdm', label: 'VDM', description: 'Vehicle Deathmatch - killing with vehicle without reason' },
+      { id: 'fail_rp', label: 'Fail RP', description: 'Failing to roleplay properly' },
+      { id: 'powergaming', label: 'Powergaming', description: 'Using unrealistic RP actions' },
+      { id: 'metagaming', label: 'Metagaming', description: 'Using OOC information in RP' },
+      { id: 'spam', label: 'Spam', description: 'Spamming chat or commands' },
+      { id: 'disrespect', label: 'Disrespect', description: 'Disrespecting staff or players' },
+      { id: 'exploit', label: 'Exploit', description: 'Using game exploits' },
+      { id: 'glitch_abuse', label: 'Glitch Abuse', description: 'Abusing game glitches' },
+      { id: 'no_value_life', label: 'No Value of Life', description: 'Not valuing your character life' },
+    ];
+  }
+  return presets;
+}
+
+async function setModerationPresets(guildId, presets) {
+  await setSetting(guildId, 'moderation_presets', presets);
+}
+
+// ---------------------------------------------------------------------------
+// Discord-Roblox Account Linking (for in-game mod tracking)
+// ---------------------------------------------------------------------------
+async function linkRobloxAccount(guildId, discordUserId, robloxUsername) {
+  const res = await pool.query(
+    `INSERT INTO discord_roblox_links (guild_id, discord_user_id, roblox_username, verified)
+     VALUES ($1, $2, $3, true)
+     ON CONFLICT (guild_id, discord_user_id) DO UPDATE
+     SET roblox_username = $3, verified = true
+     RETURNING id`,
+    [guildId, discordUserId, robloxUsername]
+  );
+  return res.rows[0].id;
+}
+
+async function getRobloxLink(guildId, discordUserId) {
+  const res = await pool.query(
+    `SELECT * FROM discord_roblox_links WHERE guild_id = $1 AND discord_user_id = $2`,
+    [guildId, discordUserId]
+  );
+  return res.rows[0] || null;
+}
+
+async function getRobloxUsername(guildId, discordUserId) {
+  const link = await getRobloxLink(guildId, discordUserId);
+  return link?.roblox_username || null;
+}
+
+async function setInGameModStatus(guildId, discordUserId, isInGameMod) {
+  await pool.query(
+    `UPDATE discord_roblox_links SET is_in_game_mod = $1, last_staff_check = now() WHERE guild_id = $2 AND discord_user_id = $3`,
+    [isInGameMod, guildId, discordUserId]
+  );
+}
+
 module.exports = {
   pool,
   initDatabase,
@@ -608,4 +685,10 @@ module.exports = {
   setTicketCategories,
   getShiftTypes,
   setShiftTypes,
+  getModerationPresets,
+  setModerationPresets,
+  linkRobloxAccount,
+  getRobloxLink,
+  getRobloxUsername,
+  setInGameModStatus,
 };
