@@ -579,23 +579,26 @@ async function setShiftTypes(guildId, types) {
 }
 
 // ---------------------------------------------------------------------------
-// In-game moderation presets (VDM, RDM, etc.)
+// In-game moderation presets (VDM, RDM, etc.) with short codes
 // ---------------------------------------------------------------------------
 async function getModerationPresets(guildId) {
   const presets = await getSetting(guildId, 'moderation_presets');
   if (!presets) {
-    // Default moderation presets
+    // Default moderation presets with actual ERLC terminology
     return [
-      { id: 'rdm', label: 'RDM', description: 'Random Deathmatch - killing without RP reason' },
-      { id: 'vdm', label: 'VDM', description: 'Vehicle Deathmatch - killing with vehicle without reason' },
-      { id: 'fail_rp', label: 'Fail RP', description: 'Failing to roleplay properly' },
-      { id: 'powergaming', label: 'Powergaming', description: 'Using unrealistic RP actions' },
-      { id: 'metagaming', label: 'Metagaming', description: 'Using OOC information in RP' },
-      { id: 'spam', label: 'Spam', description: 'Spamming chat or commands' },
-      { id: 'disrespect', label: 'Disrespect', description: 'Disrespecting staff or players' },
-      { id: 'exploit', label: 'Exploit', description: 'Using game exploits' },
-      { id: 'glitch_abuse', label: 'Glitch Abuse', description: 'Abusing game glitches' },
-      { id: 'no_value_life', label: 'No Value of Life', description: 'Not valuing your character life' },
+      { id: 'rdm', label: 'RDM', shortCodes: ['rdm', 'random deathmatch'], description: 'Random Deathmatch - killing without RP reason' },
+      { id: 'vdm', label: 'VDM', shortCodes: ['vdm', 'vehicle deathmatch'], description: 'Vehicle Deathmatch - killing with vehicle without reason' },
+      { id: 'frp', label: 'FRP', shortCodes: ['frp', 'fail rp', 'fail-rp'], description: 'Failing to roleplay properly' },
+      { id: 'powergaming', label: 'Powergaming', shortCodes: ['pg', 'powergaming', 'power gaming'], description: 'Using unrealistic RP actions' },
+      { id: 'metagaming', label: 'Metagaming', shortCodes: ['mg', 'metagaming', 'meta gaming'], description: 'Using OOC information in RP' },
+      { id: 'spam', label: 'Spam', shortCodes: ['spam'], description: 'Spamming chat or commands' },
+      { id: 'disrespect', label: 'Disrespect', shortCodes: ['disrespect', 'disrespectful'], description: 'Disrespecting staff or players' },
+      { id: 'exploit', label: 'Exploit', shortCodes: ['exploit', 'exploiting'], description: 'Using game exploits' },
+      { id: 'glitch_abuse', label: 'Glitch Abuse', shortCodes: ['glitch', 'glitch abuse', 'glitch-abuse'], description: 'Abusing game glitches' },
+      { id: 'nvl', label: 'NVL', shortCodes: ['nvl', 'no value of life', 'no-value-life'], description: 'Not valuing your character life' },
+      { id: 'cop', label: 'COP', shortCodes: ['cop', 'cop-out', 'copout'], description: 'Cop Out - leaving during roleplay' },
+      { id: 'mixing', label: 'Mixing', shortCodes: ['mixing', 'ic/ooc mixing'], description: 'Mixing IC and OOC chat/behavior' },
+      { id: 'nrp', label: 'NRP', shortCodes: ['nrp', 'no roleplay'], description: 'Not roleplaying at all' },
     ];
   }
   return presets;
@@ -603,6 +606,67 @@ async function getModerationPresets(guildId) {
 
 async function setModerationPresets(guildId, presets) {
   await setSetting(guildId, 'moderation_presets', presets);
+}
+
+// ---------------------------------------------------------------------------
+// Custom violation types (staff can add their own)
+// ---------------------------------------------------------------------------
+async function getCustomViolations(guildId) {
+  const customs = await getSetting(guildId, 'custom_violations') || [];
+  return customs;
+}
+
+async function addCustomViolation(guildId, { label, shortCodes, description }) {
+  const customs = await getCustomViolations(guildId);
+  const id = `custom_${Date.now()}`;
+  customs.push({
+    id,
+    label,
+    shortCodes: Array.isArray(shortCodes) ? shortCodes : [shortCodes],
+    description,
+    createdAt: new Date().toISOString(),
+  });
+  await setSetting(guildId, 'custom_violations', customs);
+  return id;
+}
+
+// ---------------------------------------------------------------------------
+// Smart violation matching (normalize user input to violation ID)
+// E.g., "vDM" → "vdm", "random deathmatch" → "rdm"
+// ---------------------------------------------------------------------------
+async function matchViolation(guildId, userInput) {
+  const normalized = userInput.toLowerCase().trim();
+  
+  // Get all presets + customs
+  const presets = await getModerationPresets(guildId);
+  const customs = await getCustomViolations(guildId);
+  const allViolations = [...presets, ...customs];
+  
+  // Try exact ID match first
+  if (allViolations.find(v => v.id === normalized)) {
+    return normalized;
+  }
+  
+  // Try short code match (case-insensitive)
+  for (const violation of allViolations) {
+    if (violation.shortCodes && violation.shortCodes.some(code => code === normalized)) {
+      return violation.id;
+    }
+  }
+  
+  // Try partial fuzzy match (for typos like "vdm" vs "VDM")
+  const fuzzyMatch = allViolations.find(v => {
+    const vLabel = v.label.toLowerCase().replace(/[\s\-]/g, '');
+    const codes = (v.shortCodes || []).map(c => c.replace(/[\s\-]/g, ''));
+    return vLabel === normalized || codes.includes(normalized);
+  });
+  
+  if (fuzzyMatch) {
+    return fuzzyMatch.id;
+  }
+  
+  // Not found
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -687,6 +751,9 @@ module.exports = {
   setShiftTypes,
   getModerationPresets,
   setModerationPresets,
+  getCustomViolations,
+  addCustomViolation,
+  matchViolation,
   linkRobloxAccount,
   getRobloxLink,
   getRobloxUsername,

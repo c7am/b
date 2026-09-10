@@ -5,7 +5,7 @@
  * All moderations logged to staff member's Discord record + player notified
  */
 
-const { getRobloxLink, setInGameModStatus, getModerationPresets } = require('../db/database');
+const { getRobloxLink, setInGameModStatus, getModerationPresets, matchViolation } = require('../db/database');
 
 /**
  * Parse in-game moderation command
@@ -79,16 +79,23 @@ async function logInGameModeration(client, guildId, robloxModName, discordModId,
       };
     }
 
-    // Get presets to validate violation
-    const presets = await getModerationPresets(guildId);
-    const preset = presets.find(p => p.id === violationId);
-    
-    if (!preset) {
-      const validViolations = presets.map(p => p.id).join(', ');
+    // Smart match the violation (handles typos, short codes, custom types)
+    const matchedViolationId = await matchViolation(guildId, violationId);
+    if (!matchedViolationId) {
+      const presets = await getModerationPresets(guildId);
+      const validViolations = presets.map(p => `${p.label} (${p.shortCodes.join('/')})`).join(', ');
       return { 
         success: false, 
-        error: `Unknown violation. Valid: ${validViolations}`,
+        error: `Unknown violation "${violationId}". Valid: ${validViolations}`,
       };
+    }
+
+    // Fetch the matched violation for display
+    const presets = await getModerationPresets(guildId);
+    const preset = presets.find(p => p.id === matchedViolationId);
+    
+    if (!preset) {
+      return { success: false, error: `Violation not found after match` };
     }
 
     console.log(`[mod] ${moderator.user.username} (${robloxModName}): ${playerName} - ${preset.label} - ${reason}`);

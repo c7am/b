@@ -51,7 +51,9 @@ const {
   getShiftTypes,
   setShiftTypes,
   getModerationPresets,
-  getInGameModerations,
+  getCustomViolations,
+  addCustomViolation,
+  matchViolation,
 } = require('../db/database');
 const { canManageStaff } = require('../utils/permissions');
 
@@ -515,12 +517,14 @@ function buildDashboardRouter(client) {
       .map((c) => ({ id: c.id, name: c.name }));
 
     const scalarKeys = Object.keys(SCALAR_KEYS);
-    const [scalarValues, ranks, infractionTypes, ticketCategories, shiftTypes] = await Promise.all([
+    const [scalarValues, ranks, infractionTypes, ticketCategories, shiftTypes, moderationPresets, customViolations] = await Promise.all([
       Promise.all(scalarKeys.map((key) => getScalar(guild.id, key))),
       getRanks(guild.id),
       getInfractionTypes(guild.id),
       getTicketCategories(guild.id),
       getShiftTypes(guild.id),
+      getModerationPresets(guild.id),
+      getCustomViolations(guild.id),
     ]);
     const scalars = {};
     scalarKeys.forEach((key, i) => { scalars[key] = scalarValues[i]; });
@@ -538,6 +542,8 @@ function buildDashboardRouter(client) {
       infractionTypes,
       ticketCategories,
       shiftTypes,
+      moderationPresets,
+      customViolations,
       csrfToken: req.session.csrfToken,
       guildId: guild.id,
       flash,
@@ -612,6 +618,23 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, removed
       ? { type: 'success', message: 'Infraction type removed.' }
       : { type: 'error', message: 'That infraction type was already removed.' }));
+  }));
+
+  router.post('/:guildId/add-custom-violation', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const { label, codes, description } = req.body;
+    if (!label?.trim() || !codes?.trim()) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'Violation needs a label and at least one code.' }));
+    }
+    const shortCodes = codes.split(',').map(c => c.trim().toLowerCase()).filter(c => c);
+    if (shortCodes.length === 0) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'At least one short code is required.' }));
+    }
+    await addCustomViolation(req.guild.id, {
+      label: label.trim(),
+      shortCodes,
+      description: description?.trim() || '',
+    });
+    res.send(await renderSettings(req, { type: 'success', message: `Custom violation "${label.trim()}" added.` }));
   }));
 
   router.post('/:guildId/post-ticket-panel', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {

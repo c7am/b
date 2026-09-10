@@ -702,7 +702,7 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 }
 
 // ============= Settings Page (Admin) =============
-function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, ticketCategories, shiftTypes, csrfToken, guildId, flash }) {
+function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, ranks, infractionTypes, ticketCategories, shiftTypes, moderationPresets, customViolations, csrfToken, guildId, flash }) {
   const roleOptionsFor = (selectedId) => roles
     .map(r => `<option value="${escapeHtml(r.id)}" ${selectedId === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`)
     .join('\n');
@@ -897,6 +897,59 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       `).join('')}
     </div>
     <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-2)">Shift types are currently read-only. Custom configuration UI coming soon.</p>
+  </div>
+
+  <div class="card-high stack">
+    <h2 class="headline-medium">${icon('shield')} Moderation Violations</h2>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:-var(--space-1)">Preset violations staff can use in-game. Add custom types for your server.</p>
+    
+    <div style="margin-top:var(--space-2)">
+      <h3 class="title-small">Default Presets</h3>
+      <div style="display:grid;gap:var(--space-1);margin-top:var(--space-2)">
+        ${moderationPresets.map(preset => `
+        <div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+          <p class="label-large"><strong>${escapeHtml(preset.label)}</strong></p>
+          <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Codes: ${escapeHtml(preset.shortCodes.join(', '))}</p>
+          <p class="body-small" style="color:var(--md-sys-color-on-surface-variant)">${escapeHtml(preset.description)}</p>
+        </div>
+        `).join('')}
+      </div>
+    </div>
+
+    ${customViolations.length > 0 ? `
+    <div style="margin-top:var(--space-3)">
+      <h3 class="title-small">Custom Violations</h3>
+      <div style="display:grid;gap:var(--space-1);margin-top:var(--space-2)">
+        ${customViolations.map(custom => `
+        <div style="padding:var(--space-2);background:var(--md-sys-color-secondary-container);border-radius:8px">
+          <p class="label-large"><strong>${escapeHtml(custom.label)}</strong></p>
+          <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Codes: ${escapeHtml((custom.shortCodes || []).join(', '))}</p>
+        </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/add-custom-violation" class="stack" style="margin-top:var(--space-3)">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <h3 class="title-small">Add Custom Violation</h3>
+      <div class="field-group">
+        <label for="violation-label">Label</label>
+        <input id="violation-label" type="text" name="label" placeholder="e.g., Excessive Honking" required>
+      </div>
+      <div class="field-group">
+        <label for="violation-codes">Short Codes (comma-separated)</label>
+        <input id="violation-codes" type="text" name="codes" placeholder="e.g., honk, honking, excessive-honk" required>
+      </div>
+      <div class="field-group">
+        <label for="violation-desc">Description</label>
+        <input id="violation-desc" type="text" name="description" placeholder="What this violation is for" required>
+      </div>
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+        ${icon('plus')}
+        <span>Add Violation Type</span>
+      </button>
+    </form>
   </div>
 </div>`;
   return layout({ title: 'Settings', body });
