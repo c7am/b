@@ -5,9 +5,9 @@
  */
 
 const { EmbedBuilder } = require('discord.js');
-const { getErlcClient } = require('./erlcClient');
+const { getErlcClient } = require('../handlers/erlcHandler');
 const { logInGameModeration, parseModCommand } = require('../handlers/inGameModerationHandler');
-const { getRobloxUsername, getRobloxLink } = require('../handlers/erlcHandler');
+const { getRobloxLink } = require('../handlers/erlcHandler');
 const { getModerationPresets } = require('../db/database');
 
 let pollIntervals = new Map(); // Track intervals per guild
