@@ -900,6 +900,36 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
   </div>
 
   <div class="card-high stack">
+    <h2 class="headline-medium">${icon('zap')} ERLC Server Configuration</h2>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:-var(--space-1)">Configure your ERLC Private Server API key for shift syncing and player data.</p>
+    
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/set-erlc-api-key" class="stack" style="margin-top:var(--space-2)">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <div class="field-group">
+        <label for="erlc-api-key">API Key</label>
+        <input id="erlc-api-key" type="password" name="apiKey" placeholder="Paste your ERLC API key here" required>
+        <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Get your API key from the ERLC dashboard. Keep it secret.</p>
+      </div>
+      <div class="row" style="gap:var(--space-2);align-items:center">
+        <button class="btn btn-filled" type="submit" style="gap:8px;align-self:flex-start">
+          ${icon('check')}
+          <span>Save API Key</span>
+        </button>
+      </div>
+    </form>
+
+    <div style="margin-top:var(--space-3);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px;border-left:4px solid var(--md-sys-color-outline)">
+      <p class="body-small"><strong>What this enables:</strong></p>
+      <ul style="margin:var(--space-1) 0;padding-left:var(--space-3);list-style:disc;color:var(--md-sys-color-on-surface-variant)">
+        <li class="body-small">Live player list with /erlc-players command</li>
+        <li class="body-small">Shift syncing to in-game teams</li>
+        <li class="body-small">Real-time moderation monitoring</li>
+        <li class="body-small">Server status and team management</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card-high stack">
     <h2 class="headline-medium">${icon('shield')} Moderation Violations</h2>
     <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:-var(--space-1)">Preset violations staff can use in-game. Add custom types for your server.</p>
     

@@ -1,6 +1,7 @@
 const { Events, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { startWebServer } = require('../web/server');
+const { startErlcEventListener } = require('../erlc/erlcEventListener');
 
 module.exports = {
   name: Events.ClientReady,
@@ -30,5 +31,14 @@ module.exports = {
     // gateway READY dispatch before this event fires. Starting it any
     // earlier would risk an empty cache on the first request after boot.
     startWebServer(client);
+
+    // Start ERLC event listeners for all guilds
+    for (const [guildId] of client.guilds.cache) {
+      try {
+        await startErlcEventListener(client, guildId);
+      } catch (err) {
+        console.warn(`[erlc-listen] Failed to start listener for guild ${guildId}: ${err.message}`);
+      }
+    }
   },
 };

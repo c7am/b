@@ -1,5 +1,6 @@
 const express = require('express');
 const { ChannelType } = require('discord.js');
+const { syncShiftToErlc } = require('../handlers/erlcHandler');
 const {
   guildListPage,
   staffDashboard,
@@ -207,6 +208,18 @@ function buildDashboardRouter(client) {
     }
 
     await joinShift(shiftId, userId);
+
+    // Sync to ERLC if configured
+    try {
+      const { syncShiftToErlc } = require('../handlers/erlcHandler');
+      const member = await guild.members.fetch(userId).catch(() => null);
+      if (member) {
+        await syncShiftToErlc(guild.id, member, shift);
+      }
+    } catch (err) {
+      console.warn(`[shift] Failed to sync to ERLC: ${err.message}`);
+    }
+
     res.redirect(`/dashboard/${guild.id}/shift/${shiftId}`);
   }));
 
@@ -618,6 +631,29 @@ function buildDashboardRouter(client) {
     res.send(await renderSettings(req, removed
       ? { type: 'success', message: 'Infraction type removed.' }
       : { type: 'error', message: 'That infraction type was already removed.' }));
+  }));
+
+  router.post('/:guildId/set-erlc-api-key', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const { apiKey } = req.body;
+    if (!apiKey || apiKey.trim().length === 0) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'API key cannot be empty.' }));
+    }
+
+    try {
+      // Test the API key before saving
+      const { verifyApiKey, setErlcApiKey } = require('../handlers/erlcHandler');
+      const verification = await verifyApiKey(req.guild.id, apiKey.trim());
+      
+      if (!verification.valid) {
+        return res.send(await renderSettings(req, { type: 'error', message: `API key verification failed: ${verification.error}` }));
+      }
+
+      // Save the API key
+      await setErlcApiKey(req.guild.id, apiKey.trim());
+      res.send(await renderSettings(req, { type: 'success', message: 'ERLC API key saved and verified.' }));
+    } catch (err) {
+      res.send(await renderSettings(req, { type: 'error', message: `Failed to save API key: ${err.message}` }));
+    }
   }));
 
   router.post('/:guildId/add-custom-violation', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
