@@ -194,10 +194,46 @@ class ErlcClient {
       }
 
       const user = response.data[0];
+      
+      // Fetch detailed profile to get bio/description
+      let bio = '';
+      try {
+        const profileUrl = new URL(`https://users.roblox.com/v1/users/${user.id}`);
+        const profileResponse = await new Promise((resolve, reject) => {
+          const req = https.request(profileUrl, {
+            method: 'GET',
+            timeout: this.timeout,
+          }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+              try {
+                resolve(JSON.parse(data));
+              } catch (err) {
+                reject(new Error('Failed to parse bio'));
+              }
+            });
+          });
+          
+          req.on('error', reject);
+          req.on('timeout', () => {
+            req.abort();
+            reject(new Error('Bio fetch timeout'));
+          });
+          
+          req.end();
+        });
+        
+        bio = profileResponse.description || '';
+      } catch (bioErr) {
+        console.warn(`[erlc] Could not fetch bio: ${bioErr.message}`);
+      }
+
       return {
         id: user.id,
         username: user.name,
         displayName: user.displayName,
+        bio,
       };
     } catch (err) {
       console.error(`[erlc] Failed to fetch Roblox profile: ${err.message}`);

@@ -219,6 +219,22 @@ async function getUserHistory(guildId, userId) {
   );
 }
 
+async function getInfractionsByGuild(guildId) {
+  const res = await pool.query(
+    `SELECT * FROM infractions WHERE guild_id = $1 ORDER BY created_at DESC`,
+    [guildId]
+  );
+  return res.rows;
+}
+
+async function getPromotionsByGuild(guildId) {
+  const res = await pool.query(
+    `SELECT * FROM promotions WHERE guild_id = $1 ORDER BY created_at DESC`,
+    [guildId]
+  );
+  return res.rows;
+}
+
 // ---------------------------------------------------------------------------
 // Scalar settings (role/channel ids). Ranks and infraction types have their
 // own tables below.
@@ -578,6 +594,42 @@ async function setShiftTypes(guildId, types) {
   await setSetting(guildId, 'shift_types', types);
 }
 
+async function addShiftType(guildId, { label, minDuration, maxDuration }) {
+  const types = await getShiftTypes(guildId);
+  const id = label.toLowerCase().replace(/\s+/g, '-');
+  
+  // Check if type already exists
+  if (types.some(t => t.id === id)) {
+    throw new Error(`Shift type "${label}" already exists.`);
+  }
+  
+  types.push({
+    id,
+    label,
+    minDuration: Math.max(1, parseInt(minDuration, 10) * 60), // Convert minutes to seconds
+    maxDuration: Math.max(1, parseInt(maxDuration, 10) * 60),
+  });
+  
+  await setShiftTypes(guildId, types);
+  return id;
+}
+
+async function removeShiftType(guildId, typeId) {
+  const types = await getShiftTypes(guildId);
+  const filtered = types.filter(t => t.id !== typeId);
+  
+  if (filtered.length === types.length) {
+    throw new Error(`Shift type not found: ${typeId}`);
+  }
+  
+  // Must have at least one type
+  if (filtered.length === 0) {
+    throw new Error('Must keep at least one shift type.');
+  }
+  
+  await setShiftTypes(guildId, filtered);
+}
+
 // ---------------------------------------------------------------------------
 // In-game moderation presets (VDM, RDM, etc.) with short codes
 // ---------------------------------------------------------------------------
@@ -749,6 +801,8 @@ module.exports = {
   setTicketCategories,
   getShiftTypes,
   setShiftTypes,
+  addShiftType,
+  removeShiftType,
   getModerationPresets,
   setModerationPresets,
   getCustomViolations,
@@ -758,4 +812,6 @@ module.exports = {
   getRobloxLink,
   getRobloxUsername,
   setInGameModStatus,
+  getInfractionsByGuild,
+  getPromotionsByGuild,
 };

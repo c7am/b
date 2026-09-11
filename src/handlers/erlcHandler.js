@@ -262,7 +262,7 @@ async function handleErlcVerifyUsernameModal(interaction) {
       });
     }
 
-    // Fetch Roblox profile to verify account exists
+    // Fetch Roblox profile with bio
     const profile = await client.getRobloxProfile(robloxUsername.trim());
     const phrase = getVerificationCode(interaction.user.id, interaction.guildId);
 
@@ -272,19 +272,16 @@ async function handleErlcVerifyUsernameModal(interaction) {
       });
     }
 
-    // Fetch profile to check bio
-    const profileUrl = `https://www.roblox.com/users/${profile.id}/profile`;
+    // Check if bio contains the verification phrase
+    const bioValid = verifyBioPhrase(profile.bio, phrase);
     
-    // Note: We can't actually fetch the bio from the public API without more auth,
-    // so we'll provide instructions for manual verification for now
-    // In a real app, you'd use Roblox API with proper auth
-    
-    await interaction.editReply({
-      content: `✓ Roblox account **${profile.displayName}** found!\n\nPlease make sure the verification phrase is in your Roblox bio, then run this verification again.\n\nBio check: https://www.roblox.com/my/settings/account`,
-    });
+    if (!bioValid) {
+      return interaction.editReply({
+        content: `Verification failed. Your Roblox bio does not contain the phrase:\n\n\`\`\`\n${phrase}\n\`\`\`\n\nPlease add it to your bio at https://www.roblox.com/my/settings/account and try again.`,
+      });
+    }
 
-    // For now, we'll assume verification is successful and store the link
-    // In production, you'd want to actually verify the bio contains the phrase
+    // Bio verification successful - link account
     await linkRobloxAccount(interaction.guildId, interaction.user.id, profile.displayName || profile.username);
 
     // Check if user is staff
@@ -298,14 +295,12 @@ async function handleErlcVerifyUsernameModal(interaction) {
 
     if (isStaff) {
       await setInGameModStatus(interaction.guildId, interaction.user.id, true);
-      await interaction.followUp({
-        content: `✓ Your Roblox account **${profile.displayName}** has been verified and linked. You can now use \`?moderate\` commands in-game.`,
-        ephemeral: true,
+      await interaction.editReply({
+        content: `✓ Account **${profile.displayName}** verified and linked. You can now use \`?moderate\` commands in-game.`,
       });
     } else {
-      await interaction.followUp({
-        content: `✓ Your Roblox account **${profile.displayName}** has been linked.`,
-        ephemeral: true,
+      await interaction.editReply({
+        content: `✓ Account **${profile.displayName}** verified and linked.`,
       });
     }
 
@@ -313,7 +308,7 @@ async function handleErlcVerifyUsernameModal(interaction) {
   } catch (err) {
     console.error(`[erlc] Verification error: ${err.message}`);
     await interaction.editReply({
-      content: `Failed to verify Roblox account: ${err.message}. Make sure the username is correct.`,
+      content: `Verification failed: ${err.message}. Make sure the username is correct and try again.`,
     });
   }
 }

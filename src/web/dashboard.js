@@ -11,6 +11,7 @@ const {
   checkInPage,
   userProfilePage,
   settingsPage,
+  auditLogPage,
   dataDeletionPage,
   deletionRequestsListPage,
   inGameModerationPage,
@@ -51,6 +52,8 @@ const {
   setTicketCategories,
   getShiftTypes,
   setShiftTypes,
+  addShiftType,
+  removeShiftType,
   getModerationPresets,
   getCustomViolations,
   addCustomViolation,
@@ -464,6 +467,35 @@ function buildDashboardRouter(client) {
     res.redirect(`/dashboard/${req.guild.id}/deletion-requests`);
   }));
 
+  // Staff: Audit log with filters and export
+  router.get('/:guildId/audit', requireMember, asyncRoute(async (req, res) => {
+    const { type, userId, dateFrom, dateTo } = req.query;
+    
+    // Fetch all audit data
+    const { addInfraction, addPromotion, getInfractionsByGuild, getPromotionsByGuild, getShifts } = require('../db/database');
+    
+    const infractions = await getInfractionsByGuild(req.guild.id);
+    const promotions = await getPromotionsByGuild(req.guild.id);
+    const shifts = await getShifts(req.guild.id, { active: false, upcoming: false });
+    
+    // Fetch shift members for each shift
+    const shiftsWithMembers = await Promise.all(shifts.map(async (shift) => {
+      const { getShiftMembers } = require('../db/database');
+      const members = await getShiftMembers(shift.id);
+      return { ...shift, members };
+    }));
+
+    res.send(auditLogPage({
+      guild: req.guild,
+      guildId: req.guild.id,
+      infractions: infractions || [],
+      promotions: promotions || [],
+      shifts: shiftsWithMembers || [],
+      csrfToken: req.session.csrfToken,
+      filter: { type, userId, dateFrom, dateTo },
+    }));
+  }));
+
   // User profile view. Anyone can view their own profile (that is
   // baseline staff self-service, same as checking your own shifts or
   // LOA); viewing someone else's requires the same canManageStaff gate
@@ -671,6 +703,41 @@ function buildDashboardRouter(client) {
       description: description?.trim() || '',
     });
     res.send(await renderSettings(req, { type: 'success', message: `Custom violation "${label.trim()}" added.` }));
+  }));
+
+  router.post('/:guildId/add-shift-type', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const { label, minDuration, maxDuration } = req.body;
+    if (!label?.trim() || !minDuration || !maxDuration) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'All fields are required.' }));
+    }
+    const minVal = parseInt(minDuration, 10);
+    const maxVal = parseInt(maxDuration, 10);
+    if (isNaN(minVal) || isNaN(maxVal) || minVal < 1 || maxVal < 1 || minVal > maxVal) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'Invalid duration values. Min must be less than max.' }));
+    }
+    
+    try {
+      const { addShiftType } = require('../db/database');
+      await addShiftType(req.guild.id, { label: label.trim(), minDuration: minVal, maxDuration: maxVal });
+      res.send(await renderSettings(req, { type: 'success', message: `Shift type "${label.trim()}" added.` }));
+    } catch (err) {
+      res.send(await renderSettings(req, { type: 'error', message: `Failed to add shift type: ${err.message}` }));
+    }
+  }));
+
+  router.post('/:guildId/remove-shift-type', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {
+    const { shiftTypeId } = req.body;
+    if (!shiftTypeId) {
+      return res.send(await renderSettings(req, { type: 'error', message: 'Shift type ID required.' }));
+    }
+    
+    try {
+      const { removeShiftType } = require('../db/database');
+      await removeShiftType(req.guild.id, shiftTypeId);
+      res.send(await renderSettings(req, { type: 'success', message: 'Shift type removed.' }));
+    } catch (err) {
+      res.send(await renderSettings(req, { type: 'error', message: `Failed to remove shift type: ${err.message}` }));
+    }
   }));
 
   router.post('/:guildId/post-ticket-panel', requireAdmin, requireCsrf, asyncRoute(async (req, res) => {

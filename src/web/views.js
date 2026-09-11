@@ -878,9 +878,10 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
   <div class="card-high stack">
     <h2 class="headline-medium">Shift Types</h2>
     <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:-var(--space-1)">Configure shift types and their duration limits (in minutes).</p>
+    
     <div style="display:grid;gap:var(--space-2);margin-top:var(--space-2)">
       ${shiftTypes.map((type, idx) => `
-        <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:var(--space-2);align-items:flex-end;padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+        <div style="display:grid;grid-template-columns:1fr 80px 80px auto;gap:var(--space-2);align-items:flex-end;padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
           <div class="field-group" style="margin-bottom:0">
             <label>Type</label>
             <input type="text" value="${escapeHtml(type.label)}" disabled style="opacity:0.7">
@@ -893,10 +894,39 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
             <label>Max (min)</label>
             <input type="text" value="${Math.round(type.maxDuration / 60)}" disabled style="opacity:0.7">
           </div>
+          <form method="POST" action="/dashboard/${escapeHtml(guildId)}/remove-shift-type" style="margin:0">
+            <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+            <input type="hidden" name="shiftTypeId" value="${escapeHtml(type.id)}">
+            <button class="btn btn-icon btn-danger" type="submit" title="Delete shift type">
+              ${icon('trash2')}
+            </button>
+          </form>
         </div>
       `).join('')}
     </div>
-    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-2)">Shift types are currently read-only. Custom configuration UI coming soon.</p>
+
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/add-shift-type" class="stack" style="margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--md-sys-color-outline)">
+      <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
+      <h3 class="title-small">Add New Shift Type</h3>
+      <div class="row" style="gap:var(--space-2);align-items:flex-end">
+        <div class="field-group" style="flex:1;min-width:150px">
+          <label for="new-shift-name">Name</label>
+          <input id="new-shift-name" type="text" name="label" placeholder="e.g. Support" required>
+        </div>
+        <div class="field-group" style="min-width:100px">
+          <label for="new-shift-min">Min (minutes)</label>
+          <input id="new-shift-min" type="number" name="minDuration" placeholder="15" min="1" required>
+        </div>
+        <div class="field-group" style="min-width:100px">
+          <label for="new-shift-max">Max (minutes)</label>
+          <input id="new-shift-max" type="number" name="maxDuration" placeholder="120" min="1" required>
+        </div>
+        <button class="btn btn-filled" type="submit" style="gap:8px;align-self:flex-start">
+          ${icon('plus')}
+          <span>Add Type</span>
+        </button>
+      </div>
+    </form>
   </div>
 
   <div class="card-high stack">
@@ -1129,6 +1159,169 @@ function inGameModerationPage({ guild, guildId, moderations, presets, searchPlay
   return layout({ title: 'In-Game Moderations', body });
 }
 
+// ============= Audit Log Dashboard (Staff) =============
+function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfToken, filter = {} }) {
+  const filterUser = filter.userId || '';
+  const filterType = filter.type || 'all';
+  const filterDateFrom = filter.dateFrom || '';
+  const filterDateTo = filter.dateTo || '';
+
+  const formatDate = (date) => new Date(date).toLocaleString();
+  const formatType = (action) => {
+    const types = {
+      infraction: 'Infraction',
+      promotion: 'Promotion',
+      demotion: 'Demotion',
+      shift_join: 'Shift Join',
+      shift_leave: 'Shift Leave',
+    };
+    return types[action] || action;
+  };
+
+  // Combine all events
+  const events = [];
+  
+  infractions.forEach(inf => {
+    events.push({
+      type: 'infraction',
+      timestamp: new Date(inf.created_at),
+      user: inf.user_id,
+      staff: inf.issued_by,
+      details: `${inf.violation} - ${inf.reason || 'No reason'}`,
+      action: inf.violation,
+    });
+  });
+
+  promotions.forEach(promo => {
+    events.push({
+      type: promo.demoted_at ? 'demotion' : 'promotion',
+      timestamp: new Date(promo.demoted_at || promo.promoted_at),
+      user: promo.user_id,
+      staff: promo.promoted_by,
+      details: `${promo.rank_name || 'Unknown rank'}`,
+      action: promo.demoted_at ? 'Demotion' : 'Promotion',
+    });
+  });
+
+  shifts.forEach(shift => {
+    shift.members?.forEach(member => {
+      events.push({
+        type: 'shift_join',
+        timestamp: new Date(member.joined_at),
+        user: member.user_id,
+        staff: null,
+        details: `${shift.name || 'Unknown shift'}`,
+        action: 'Shift Join',
+      });
+    });
+  });
+
+  // Sort by date descending
+  events.sort((a, b) => b.timestamp - a.timestamp);
+
+  // Filter events
+  let filtered = events;
+  if (filterType !== 'all') {
+    filtered = filtered.filter(e => e.type === filterType);
+  }
+  if (filterUser) {
+    filtered = filtered.filter(e => e.user === filterUser);
+  }
+  if (filterDateFrom) {
+    const from = new Date(filterDateFrom);
+    filtered = filtered.filter(e => e.timestamp >= from);
+  }
+  if (filterDateTo) {
+    const to = new Date(filterDateTo);
+    to.setHours(23, 59, 59, 999);
+    filtered = filtered.filter(e => e.timestamp <= to);
+  }
+
+  const csvData = filtered.map(e => {
+    const parts = [
+      formatDate(e.timestamp),
+      e.type,
+      e.user,
+      e.staff || 'N/A',
+      e.action
+    ];
+    return '"' + parts.join('","') + '"';
+  }).join('\n');
+
+  const eventRows = filtered.length === 0 
+    ? '<p class="body-medium">No events found.</p>'
+    : filtered.map(e => {
+      const staffLine = e.staff ? '<p class="body-small" style="color:var(--md-sys-color-on-surface-variant)">By: ' + escapeHtml(e.staff) + '</p>' : '';
+      return '<div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px;border-left:4px solid var(--md-sys-color-primary)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-1)">' +
+          '<div>' +
+            '<span class="badge badge-info">' + escapeHtml(formatType(e.type)) + '</span>' +
+            '<span style="margin-left:var(--space-1);color:var(--md-sys-color-on-surface-variant);font-size:12px">' + formatDate(e.timestamp) + '</span>' +
+          '</div>' +
+          '<span class="body-small" style="color:var(--md-sys-color-on-surface-variant)">User: ' + escapeHtml(e.user) + '</span>' +
+        '</div>' +
+        '<p class="body-medium" style="margin:var(--space-1) 0">' +
+          '<strong>' + escapeHtml(e.action) + '</strong>: ' + escapeHtml(e.details) +
+        '</p>' +
+        staffLine +
+        '</div>';
+    }).join('');
+
+  const content = '<div style="display:flex;gap:var(--space-3);align-items:flex-start;margin-bottom:var(--space-3)">' +
+    '<h1 class="display-small">Audit Log</h1>' +
+    '<div style="flex:1"></div>' +
+    '<form method="GET" style="display:flex;gap:var(--space-1);align-items:flex-end">' +
+      '<div class="field-group" style="margin-bottom:0;min-width:120px">' +
+        '<label for="filter-type">Type</label>' +
+        '<select id="filter-type" name="type" onchange="this.form.submit()">' +
+          '<option value="all"' + (filterType === 'all' ? ' selected' : '') + '>All</option>' +
+          '<option value="infraction"' + (filterType === 'infraction' ? ' selected' : '') + '>Infractions</option>' +
+          '<option value="promotion"' + (filterType === 'promotion' ? ' selected' : '') + '>Promotions</option>' +
+          '<option value="demotion"' + (filterType === 'demotion' ? ' selected' : '') + '>Demotions</option>' +
+          '<option value="shift_join"' + (filterType === 'shift_join' ? ' selected' : '') + '>Shifts</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="field-group" style="margin-bottom:0;min-width:100px">' +
+        '<label for="filter-user">User ID</label>' +
+        '<input id="filter-user" type="text" name="userId" value="' + escapeHtml(filterUser) + '" placeholder="User ID">' +
+      '</div>' +
+      '<button class="btn btn-filled" type="submit" style="gap:8px;align-self:flex-start">' +
+        icon('search') + '<span>Filter</span>' +
+      '</button>' +
+      '<button class="btn btn-outlined" type="button" onclick="downloadCSV()" style="gap:8px;align-self:flex-start">' +
+        icon('download') + '<span>Export</span>' +
+      '</button>' +
+    '</form>' +
+    '</div>' +
+    '<div class="card-high stack">' +
+      '<p class="body-small" style="color:var(--md-sys-color-on-surface-variant)">' +
+        'Showing ' + filtered.length + ' of ' + events.length + ' events' +
+      '</p>' +
+      '<div style="display:grid;gap:var(--space-1);margin-top:var(--space-2)">' +
+        eventRows +
+      '</div>' +
+    '</div>' +
+    '<textarea id="csv-data" style="display:none">' + escapeHtml(csvData) + '</textarea>' +
+    '<script>' +
+      'function downloadCSV() {' +
+        'const data = document.getElementById("csv-data").value;' +
+        'const blob = new Blob([data], { type: "text/csv" });' +
+        'const url = URL.createObjectURL(blob);' +
+        'const link = document.createElement("a");' +
+        'link.href = url;' +
+        'link.download = "audit-log-" + new Date().toISOString().split("T")[0] + ".csv";' +
+        'link.click();' +
+        'URL.revokeObjectURL(url);' +
+      '}' +
+    '</script>';
+
+  return page(guild, {
+    title: 'Audit Log',
+    activeSection: 'audit',
+    content: content,
+  });
+}
+
 // ============= Data Deletion Requests Queue (Admin) =============
 function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
   const rows = requests.map(r => `
@@ -1190,6 +1383,7 @@ module.exports = {
   checkInPage,
   userProfilePage,
   settingsPage,
+  auditLogPage,
   privacyPolicyPage,
   termsOfServicePage,
   dataDeletionPage,
