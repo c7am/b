@@ -549,48 +549,94 @@ function guildListPage({ guilds, username }) {
 
 // ============= Staff Dashboard (Main Page) =============
 function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, viewingAsStaff, guildId }) {
-  const shiftCards = shifts.map(s => {
-    const start = new Date(s.starts_at);
-    const end = new Date(s.ends_at);
-    const now = new Date();
-    const isActive = start <= now && end > now;
-    
-    let status = 'Upcoming';
-    let statusClass = 'badge-info';
-    if (isActive) {
-      status = 'Active';
-      statusClass = 'badge-active';
-    } else if (end < now) {
-      status = 'Completed';
-      statusClass = 'badge-inactive';
-    }
+  const now = new Date();
+  const activeShifts = shifts.filter(s => new Date(s.starts_at) <= now && new Date(s.ends_at) > now);
+  const upcomingShifts = shifts.filter(s => new Date(s.starts_at) > now);
+  const completedShifts = shifts.filter(s => new Date(s.ends_at) < now);
 
-    return `
-    <div class="shift-card">
-      <div class="shift-info">
-        <div class="shift-name">${escapeHtml(s.name)}</div>
-        <div class="shift-time">${icon('clock')} ${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-        <div class="badge ${statusClass}">${status}</div>
-      </div>
-      <div class="shift-actions">
-        <a href="/dashboard/${escapeHtml(guild.id)}/shift/${escapeHtml(s.id)}" class="btn btn-text">View</a>
-      </div>
-    </div>`;
-  }).join('\n');
-
-  const loaAlert = activeLoa ? `
-    <div class="info-card" style="border-left:4px solid var(--md-sys-color-error)">
-      <div style="display:flex;gap:var(--space-2);align-items:flex-start">
-        ${icon('alertCircle')}
-        <div>
-          <div class="info-card-title">On Leave of Absence</div>
-          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">
-            Ends: ${formatDate(activeLoa.ends_at)}
-            <div style="margin-top:4px">${escapeHtml(activeLoa.reason)}</div>
-          </div>
+  // Quick stats
+  const statsHtml = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success)">${icon('checkCircle')}</div>
+        <div class="stat-content">
+          <div class="stat-label">Active Shifts</div>
+          <div class="stat-value">${activeShifts.length}</div>
         </div>
       </div>
-    </div>` : '';
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--md-sys-color-warning-container);color:var(--md-sys-color-warning)">${icon('clock')}</div>
+        <div class="stat-content">
+          <div class="stat-label">Upcoming</div>
+          <div class="stat-value">${upcomingShifts.length}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:var(--md-sys-color-info-container);color:var(--md-sys-color-info)">${icon('check')}</div>
+        <div class="stat-content">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value">${completedShifts.length}</div>
+        </div>
+      </div>
+      ${activeLoa ? `
+      <div class="stat-card" style="background:var(--md-sys-color-error-container);border-left:4px solid var(--md-sys-color-error)">
+        <div class="stat-icon" style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-error)">${icon('alertCircle')}</div>
+        <div class="stat-content">
+          <div class="stat-label">On Leave</div>
+          <div class="stat-value" style="color:var(--md-sys-color-error)">Until ${formatDate(activeLoa.ends_at).split(' ')[0]}</div>
+        </div>
+      </div>` : ''}
+    </div>
+  `;
+
+  // Shift cards organized by status
+  const shiftCard = (s) => {
+    const start = new Date(s.starts_at);
+    const end = new Date(s.ends_at);
+    const isActive = start <= now && end > now;
+    const isUpcoming = start > now;
+    
+    let status = 'Completed';
+    let statusClass = 'badge-inactive';
+    if (isActive) {
+      status = 'Active Now';
+      statusClass = 'badge-active';
+    } else if (isUpcoming) {
+      status = 'Upcoming';
+      statusClass = 'badge-info';
+    }
+
+    const duration = end - start;
+    const durationHours = Math.floor(duration / (1000 * 60 * 60));
+    const durationMins = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `
+      <div class="shift-card-enhanced">
+        <div class="shift-card-header">
+          <div>
+            <div class="shift-card-title">${escapeHtml(s.name)}</div>
+            <div class="shift-card-time">${icon('clock')} ${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          </div>
+          <div class="badge ${statusClass}">${status}</div>
+        </div>
+        <div class="shift-card-details">
+          <div class="shift-detail">
+            <span class="detail-label">Duration:</span>
+            <span class="detail-value">${durationHours}h ${durationMins}m</span>
+          </div>
+          <div class="shift-detail">
+            <span class="detail-label">Ends:</span>
+            <span class="detail-value">${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </div>
+        <div class="shift-card-actions">
+          <a href="/dashboard/${escapeHtml(guild.id)}/shift/${escapeHtml(s.id)}" class="btn btn-text" style="gap:4px">
+            ${icon('chevronRight')}
+            View Shift
+          </a>
+        </div>
+      </div>`;
+  };
 
   const toggleButton = trueAdmin ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/toggle-view-mode" style="display:inline">
@@ -600,9 +646,247 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
       </button>
     </form>` : '';
 
+  const shiftsHtml = shifts.length > 0 ? `
+    ${activeShifts.length > 0 ? `
+    <div class="shifts-section">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-badge" style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success)">${activeShifts.length}</span>
+          <h3 class="headline-small">Active Shifts</h3>
+        </div>
+      </div>
+      <div class="shifts-list">
+        ${activeShifts.map(shiftCard).join('')}
+      </div>
+    </div>` : ''}
+
+    ${upcomingShifts.length > 0 ? `
+    <div class="shifts-section">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-badge" style="background:var(--md-sys-color-warning-container);color:var(--md-sys-color-warning)">${upcomingShifts.length}</span>
+          <h3 class="headline-small">Upcoming Shifts</h3>
+        </div>
+      </div>
+      <div class="shifts-list">
+        ${upcomingShifts.map(shiftCard).join('')}
+      </div>
+    </div>` : ''}
+
+    ${completedShifts.length > 0 ? `
+    <div class="shifts-section">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-badge" style="background:var(--md-sys-color-info-container);color:var(--md-sys-color-info)">${completedShifts.length}</span>
+          <h3 class="headline-small">Completed Shifts</h3>
+        </div>
+      </div>
+      <div class="shifts-list">
+        ${completedShifts.slice(0, 3).map(shiftCard).join('')}
+        ${completedShifts.length > 3 ? `<div class="shifts-show-more"><a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-text">View all ${completedShifts.length} completed shifts</a></div>` : ''}
+      </div>
+    </div>` : ''}
+  ` : `
+    <div class="empty-state-enhanced">
+      <div class="empty-state-icon">${icon('clock')}</div>
+      <div class="empty-state-title">No Shifts Assigned</div>
+      <div class="empty-state-desc">You don't have any shifts yet. Contact your administrator to get assigned to a shift.</div>
+      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-tonal" style="gap:8px;margin-top:var(--space-2)">${icon('plus')} Create Shift</a>` : ''}
+    </div>
+  `;
+
   const body = `
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.stat-card {
+  background: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 12px;
+  padding: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.stat-card:hover {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
+}
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.shifts-section {
+  margin-bottom: var(--space-4);
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.section-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.shifts-list {
+  display: grid;
+  gap: var(--space-2);
+}
+.shift-card-enhanced {
+  background: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 12px;
+  padding: var(--space-3);
+  transition: all 0.2s ease;
+}
+.shift-card-enhanced:hover {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+.shift-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.shift-card-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--md-sys-color-on-surface);
+}
+.shift-card-time {
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+.shift-card-time svg {
+  width: 16px;
+  height: 16px;
+}
+.shift-card-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.shift-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.detail-label {
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 500;
+}
+.detail-value {
+  color: var(--md-sys-color-on-surface);
+  font-weight: 600;
+}
+.shift-card-actions {
+  text-align: right;
+}
+
+.empty-state-enhanced {
+  text-align: center;
+  padding: var(--space-5);
+  border: 2px dashed var(--md-sys-color-outline);
+  border-radius: 12px;
+  background: var(--md-sys-color-surface-variant);
+  opacity: 0.7;
+}
+.empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-primary);
+  margin-bottom: var(--space-2);
+}
+.empty-state-icon svg {
+  width: 32px;
+  height: 32px;
+}
+.empty-state-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 8px;
+}
+.empty-state-desc {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.shifts-show-more {
+  padding: var(--space-2);
+  text-align: center;
+}
+</style>
+
 <header class="topbar">
-  <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
+  <div>
+    <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:8px 0 0 0">Welcome, ${escapeHtml(user.name)}</p>
+  </div>
   <div class="row">
     ${toggleButton}
     <a class="btn btn-text" href="/dashboard" style="gap:4px">
@@ -614,67 +898,60 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
     </a>
   </div>
 </header>
+
 <div class="page stack">
-  ${loaAlert}
-
-  <div class="staff-section">
-    <div class="staff-section-header">
-      ${icon('clock')}
-      <h2 class="staff-section-title">Your Shifts</h2>
-    </div>
-    ${shifts.length > 0 ? `<div style="display:flex;flex-direction:column;gap:var(--space-2)">${shiftCards}</div>` : '<div class="empty-state"><div class="empty-state-text">No shifts assigned</div></div>'}
-  </div>
-
-  <div class="staff-section">
-    <div class="staff-section-header">
+  ${activeLoa ? `
+  <div class="info-card" style="border-left:4px solid var(--md-sys-color-error);background:var(--md-sys-color-error-container);opacity:0.95">
+    <div style="display:flex;gap:var(--space-2);align-items:flex-start">
       ${icon('alertCircle')}
-      <h2 class="staff-section-title">Leave of Absence</h2>
+      <div>
+        <div class="info-card-title">You're On Leave of Absence</div>
+        <div class="body-small" style="color:var(--md-sys-color-on-error-container);margin-top:4px">
+          Ends ${formatDate(activeLoa.ends_at)} - ${escapeHtml(activeLoa.reason)}
+          <div style="margin-top:8px"><a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn btn-text" style="gap:4px;font-weight:600">Manage Leave</a></div>
+        </div>
+      </div>
     </div>
-    <a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn btn-tonal" style="gap:8px;align-self:flex-start">
-      ${icon('check')}
-      <span>${activeLoa ? 'Manage Leave' : 'Request Leave'}</span>
-    </a>
+  </div>` : ''}
+
+  ${statsHtml}
+
+  <div class="section-divider"></div>
+
+  <div class="shifts-container">
+    ${shiftsHtml}
   </div>
 
-  <div class="staff-section">
-    <div class="staff-section-header">
-      ${icon('users')}
-      <h2 class="staff-section-title">Your Profile</h2>
+  <div class="section-divider"></div>
+
+  <!-- Quick Actions -->
+  <div class="section">
+    <div class="section-header">
+      <h3 class="headline-small">Quick Actions</h3>
     </div>
-    <div class="row" style="gap:var(--space-2)">
-      <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="gap:8px">
-        ${icon('users')}
-        <span>View My History</span>
-      </a>
-      <a href="/dashboard/${escapeHtml(guild.id)}/data-deletion" class="btn btn-outlined" style="gap:8px">
-        ${icon('trash2')}
-        <span>Delete My Data</span>
-      </a>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
+      ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn btn-tonal" style="gap:8px"><span>Request Leave</span></a>` : ''}
+      <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="gap:8px"><span>My History</span></a>
+      <a href="/dashboard/${escapeHtml(guild.id)}/audit" class="btn btn-tonal" style="gap:8px"><span>Activity Log</span></a>
+      <a href="/dashboard/${escapeHtml(guild.id)}/docs" class="btn btn-tonal" style="gap:8px"><span>Documentation</span></a>
+      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}" class="btn btn-tonal" style="gap:8px"><span>Settings</span></a>` : ''}
     </div>
   </div>
 
   ${isAdmin ? `
-  <div class="staff-section">
-    <div class="staff-section-header">
-      ${icon('check')}
-      <h2 class="staff-section-title">Admin</h2>
+  <div class="section-divider"></div>
+  <div class="admin-section" style="background:var(--md-sys-color-primary-container);border-radius:12px;padding:var(--space-3);border-left:4px solid var(--md-sys-color-primary)">
+    <div class="section-header">
+      <h3 class="headline-small" style="color:var(--md-sys-color-on-primary-container)">Admin Tools</h3>
     </div>
-    <div class="row" style="gap:var(--space-2)">
-      <a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-tonal" style="gap:8px">
-        ${icon('clock')}
-        <span>Manage Shifts</span>
-      </a>
-      <a href="/dashboard/${escapeHtml(guild.id)}" class="btn btn-tonal" style="gap:8px">
-        ${icon('check')}
-        <span>Server Settings</span>
-      </a>
-      <a href="/dashboard/${escapeHtml(guild.id)}/deletion-requests" class="btn btn-tonal" style="gap:8px">
-        ${icon('trash2')}
-        <span>Deletion Requests</span>
-      </a>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
+      <a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-filled" style="gap:8px"><span>Shift Manager</span></a>
+      <a href="/dashboard/${escapeHtml(guild.id)}/deletion-requests" class="btn btn-filled" style="gap:8px"><span>Deletion Queue</span></a>
     </div>
   </div>` : ''}
-</div>`;
+</div>
+`;
+
   return layout({ title: 'Dashboard', body });
 }
 

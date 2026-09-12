@@ -1127,3 +1127,18 @@ select {
     opacity: 0.6;
   }
 }
+
+/* Section Dividers and Organization */
+.section-divider {
+  height: 1px;
+  background: var(--md-sys-color-outline-variant);
+  margin: var(--space-4) 0;
+}
+
+.section {
+  margin-bottom: var(--space-4);
+}
+
+.shifts-container {
+  margin-bottom: var(--space-3);
+}
