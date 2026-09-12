@@ -2,6 +2,7 @@ const express = require('express');
 const { ChannelType } = require('discord.js');
 const { syncShiftToErlc } = require('../handlers/erlcHandler');
 const {
+  docsPage,
   guildListPage,
   staffDashboard,
   shiftDetailsPage,
@@ -155,6 +156,16 @@ function buildDashboardRouter(client) {
       .map((g) => ({ id: g.id, name: g.name, icon: g.icon }));
     res.send(guildListPage({ guilds: manageable, username: req.session.user.username }));
   });
+
+  // Documentation
+  router.get('/docs', asyncRoute(async (req, res) => {
+    res.send(docsPage());
+  }));
+
+  router.get('/:guildId/docs', requireMember, asyncRoute(async (req, res) => {
+    const guild = req.guild;
+    res.send(docsPage({ guild, guildId: guild.id }));
+  }));
 
   // Staff dashboard - shows user's shifts and LOA status
   router.get('/:guildId/staff', requireMember, asyncRoute(async (req, res) => {

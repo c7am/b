@@ -45,6 +45,8 @@ function layout({ title, body, showNav = true }) {
     ${body}
     <footer class="site-footer">
       <div class="site-footer-links">
+        <a href="/docs">Documentation</a>
+        <span class="site-footer-dot">&middot;</span>
         <a href="/privacy">Privacy Policy</a>
         <span class="site-footer-dot">&middot;</span>
         <a href="/terms">Terms of Service</a>
@@ -96,6 +98,297 @@ function loginPage() {
   </div>
 </div>`;
   return layout({ title: 'Login', body });
+}
+
+// ============= Documentation Page =============
+function docsPage({ guild = null, guildId = null } = {}) {
+  const backLink = guildId ? `<a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:4px">${icon('chevronLeft')} Back</a>` : '';
+  
+  const body = `
+<header class="topbar">
+  <h1 class="title-large" style="margin:0">Documentation</h1>
+  ${backLink}
+</header>
+
+<div class="page stack">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:var(--space-2)">
+    <!-- Getting Started -->
+    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('getting-started')">
+      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
+        ${icon('book')}
+        Getting Started
+      </div>
+      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Learn the basics of Axiom</p>
+    </div>
+
+    <!-- Shifts Guide -->
+    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('shifts')">
+      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
+        ${icon('clock')}
+        Shift Management
+      </div>
+      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Join, start, and manage shifts</p>
+    </div>
+
+    <!-- SSU Integration -->
+    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('ssu')">
+      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
+        ${icon('server')}
+        Server Requirements
+      </div>
+      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">SSU integration and player requirements</p>
+    </div>
+
+    <!-- Account Verification -->
+    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('verification')">
+      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
+        ${icon('checkCircle')}
+        Account Verification
+      </div>
+      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Link your Roblox account</p>
+    </div>
+
+    <!-- Moderation -->
+    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('moderation')">
+      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
+        ${icon('shield')}
+        Moderation
+      </div>
+      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">In-game and Discord moderation</p>
+    </div>
+
+    <!-- Admin Settings -->
+    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('admin')">
+      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
+        ${icon('settings')}
+        Admin Settings
+      </div>
+      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Configure Axiom for your server</p>
+    </div>
+  </div>
+
+  <!-- Content Sections -->
+  <div id="content" style="margin-top:var(--space-3)"></div>
+</div>
+
+<script>
+const sections = {
+  'getting-started': \`
+    <div class="card-high" style="padding:var(--space-3)">
+      <h2 class="headline-medium" style="margin-top:0">Getting Started</h2>
+      <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
+        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">What is Axiom?</h3>
+        <p>Axiom is a Discord bot designed to manage staff shifts and in-game moderation for ERLC (Emergency Response: Liberty County) roleplay communities. It provides tools for scheduling, tracking attendance, and moderating player behavior.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Key Features</h3>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li>Shift management with SSU integration</li>
+          <li>Roblox account verification</li>
+          <li>In-game moderation logging</li>
+          <li>Attendance tracking</li>
+          <li>Staff audit logs</li>
+          <li>Discord integration</li>
+        </ul>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Quick Navigation</h3>
+        <p><strong>Dashboard Home:</strong> Click your server name to access the staff dashboard</p>
+        <p><strong>Shifts:</strong> View and manage shifts from the Shifts tab</p>
+        <p><strong>Account Setup:</strong> Use /erlc-link command in Discord to verify your Roblox account</p>
+      </div>
+    </div>
+  \`,
+
+  'shifts': \`
+    <div class="card-high" style="padding:var(--space-3)">
+      <h2 class="headline-medium" style="margin-top:0">Shift Management</h2>
+      <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
+        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">Joining a Shift</h3>
+        <p>1. Go to the Shifts page from your dashboard</p>
+        <p>2. Find the shift you want to join</p>
+        <p>3. Click <strong>Join Shift</strong> (button will be disabled if server doesn't have 25+ players)</p>
+        <p>4. You'll see the shift details page with controls</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Controlling Your Shift</h3>
+        <p>Once you've joined a shift, you'll see four control buttons:</p>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li><strong>Start:</strong> Begin your shift (updates shift status to 'Started')</li>
+          <li><strong>Pause:</strong> Temporarily pause your shift (status becomes 'Paused')</li>
+          <li><strong>Resume:</strong> Resume from paused state (back to 'Started')</li>
+          <li><strong>End:</strong> Complete your shift (status becomes 'Ended')</li>
+        </ul>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Check-In / Check-Out</h3>
+        <p>Click <strong>Check In / Out</strong> to toggle your attendance status during active shifts. This helps track who was actually present during each shift.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Viewing Shift Members</h3>
+        <p>The Members section shows all staff who joined the shift and their check-in status. Check-in status can be either:</p>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li><strong>Checked in:</strong> Present during the shift</li>
+          <li><strong>Not checked in:</strong> Joined but didn't check in</li>
+        </ul>
+      </div>
+    </div>
+  \`,
+
+  'ssu': \`
+    <div class="card-high" style="padding:var(--space-3)">
+      <h2 class="headline-medium" style="margin-top:0">Server Requirements (SSU Integration)</h2>
+      <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
+        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">What is SSU?</h3>
+        <p>SSU (Server Startup Unit) is a requirement that ensures shifts can only be joined when the ERLC server has officially started and has at least 25 players in-game. This prevents ghost shifts and ensures proper staffing coordination.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Why 25 Players?</h3>
+        <p>25 players is the minimum threshold to ensure the server is properly running with meaningful activity. This prevents premature shift joins when the server is still warming up.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Joining When SSU Isn't Ready</h3>
+        <p>If you try to join a shift but see <strong>'Server Not Ready'</strong> message, it means:</p>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li>The ERLC server hasn't started yet, OR</li>
+          <li>There aren't enough players in-game (fewer than 25)</li>
+        </ul>
+        <p>Simply wait until the server reaches 25 players, then refresh the page to try again.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Server Status Display</h3>
+        <p>Each shift detail page shows live server status including:</p>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li>Current player count</li>
+          <li>Server status (Started/Not Started)</li>
+          <li>Reason why shifts can't be joined (if applicable)</li>
+        </ul>
+      </div>
+    </div>
+  \`,
+
+  'verification': \`
+    <div class="card-high" style="padding:var(--space-3)">
+      <h2 class="headline-medium" style="margin-top:0">Roblox Account Verification</h2>
+      <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
+        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">Why Verify?</h3>
+        <p>Verifying your Roblox account links your Discord identity with your in-game account. This enables in-game moderation logging and staff tracking.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Verification Steps</h3>
+        <p><strong>Step 1:</strong> Run <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:4px">/erlc-link</code> in Discord</p>
+        <p><strong>Step 2:</strong> Bot sends you a 12-word verification phrase</p>
+        <p><strong>Step 3:</strong> Add the phrase to your Roblox bio/description</p>
+        <p><strong>Step 4:</strong> Click <strong>Verify My Account</strong> button</p>
+        <p><strong>Step 5:</strong> Enter your Roblox username when prompted</p>
+        <p><strong>Step 6:</strong> Bot verifies the phrase is in your bio and confirms verification</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Regenerate Phrase</h3>
+        <p>If the phrase contains censored words or you want a new one, click <strong>Regenerate Words</strong> to get a different 12-word phrase.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">After Verification</h3>
+        <p>Once verified, your account is linked permanently. You can now:</p>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li>Use in-game moderation commands</li>
+          <li>Be tracked in moderation logs</li>
+          <li>Receive mod permissions if you have Discord staff role</li>
+        </ul>
+      </div>
+    </div>
+  \`,
+
+  'moderation': \`
+    <div class="card-high" style="padding:var(--space-3)">
+      <h2 class="headline-medium" style="margin-top:0">Moderation</h2>
+      <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
+        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">In-Game Moderation</h3>
+        <p>If you have verified your Roblox account and have Discord staff role, you can issue moderation commands in-game:</p>
+        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:6px;font-family:monospace;margin:8px 0">
+          ?moderate PlayerName violation reason
+        </p>
+        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:4px">?moderate JohnDoe VDM Rammed officer</code></p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Discord Moderation</h3>
+        <p>Alternatively, issue moderation commands directly in Discord using the same format:</p>
+        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:6px;font-family:monospace;margin:8px 0">
+          ?moderate PlayerName violation reason
+        </p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Violation Types</h3>
+        <p>Common violations (case-insensitive, shorthand accepted):</p>
+        <ul style="margin:8px 0;padding-left:20px;columns:2">
+          <li>RDM - Random Death Match</li>
+          <li>VDM - Vehicle Death Match</li>
+          <li>FRP - Fail Roleplay</li>
+          <li>PG - Powergaming</li>
+          <li>MG - Metagaming</li>
+          <li>Spam - Spam</li>
+          <li>Disrespect - Disrespectful behavior</li>
+          <li>Exploit - Exploit usage</li>
+          <li>Glitch Abuse - Glitch abuse</li>
+          <li>NVL - No Value of Life</li>
+        </ul>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Moderation Logging</h3>
+        <p>All moderation actions are logged to your server's moderation channel with:</p>
+        <ul style="margin:8px 0;padding-left:20px">
+          <li>Player avatar</li>
+          <li>Staff member who issued the action</li>
+          <li>Violation type</li>
+          <li>Reason given</li>
+          <li>Timestamp</li>
+        </ul>
+      </div>
+    </div>
+  \`,
+
+  'admin': \`
+    <div class="card-high" style="padding:var(--space-3)">
+      <h2 class="headline-medium" style="margin-top:0">Admin Settings</h2>
+      <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
+        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">Accessing Settings</h3>
+        <p>Only administrators can access the Settings page. Click the gear icon in the dashboard to configure Axiom.</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">ERLC Configuration</h3>
+        <p>To enable Axiom features, you need to configure your ERLC Private Server API key:</p>
+        <p><strong>1.</strong> Go to Settings</p>
+        <p><strong>2.</strong> Find 'ERLC Server Configuration' section</p>
+        <p><strong>3.</strong> Enter your ERLC API key</p>
+        <p><strong>4.</strong> Click 'Save API Key' (bot validates connection)</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Shift Type Management</h3>
+        <p>Create custom shift types with duration limits:</p>
+        <p><strong>1.</strong> Go to Settings</p>
+        <p><strong>2.</strong> Find 'Shift Types' section</p>
+        <p><strong>3.</strong> Enter shift type name (e.g., 'Patrol')</p>
+        <p><strong>4.</strong> Set minimum and maximum duration in minutes</p>
+        <p><strong>5.</strong> Click 'Add Shift Type'</p>
+        <p>Admins can delete shift types with the delete button (must keep at least one)</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Custom Violations</h3>
+        <p>Add custom violation types beyond the default 10 presets:</p>
+        <p><strong>1.</strong> Go to Settings</p>
+        <p><strong>2.</strong> Find 'Custom Violations' section</p>
+        <p><strong>3.</strong> Enter violation name</p>
+        <p><strong>4.</strong> Click 'Add Violation'</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Creating Shifts</h3>
+        <p>Click 'Create Shift' button to schedule new shifts:</p>
+        <p><strong>1.</strong> Enter shift name (e.g., 'Morning Patrol')</p>
+        <p><strong>2.</strong> Select shift type</p>
+        <p><strong>3.</strong> Set start and end times</p>
+        <p><strong>4.</strong> Add optional description</p>
+        <p><strong>5.</strong> Click 'Create Shift'</p>
+
+        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Audit Log</h3>
+        <p>View all staff actions including infractions, promotions, and shift joins. Filter by type, user, or date range. Export to CSV for reporting.</p>
+      </div>
+    </div>
+  \`
+};
+
+function showSection(sectionId) {
+  const content = document.getElementById('content');
+  content.innerHTML = sections[sectionId] || '<p>Section not found</p>';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Show getting started by default
+showSection('getting-started');
+</script>`;
+
+  return layout({ title: 'Documentation', body });
 }
 
 // ============= Guild List Page =============
@@ -1463,6 +1756,7 @@ function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
 
 module.exports = {
   loginPage,
+  docsPage,
   guildListPage,
   staffDashboard,
   shiftDetailsPage,
