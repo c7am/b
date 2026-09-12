@@ -115,6 +115,15 @@ function buildDashboardRouter(client) {
       req.guild = guild;
       req.member = member;
       req.isAdmin = await canManageStaff(member, guildId);
+      req.trueAdmin = req.isAdmin; // Save actual admin status
+      
+      // Determine viewing mode - if admin and explicitly viewing as staff, act as staff
+      req.session.viewMode = req.session.viewMode || {};
+      req.session.viewMode[guildId] = req.session.viewMode[guildId] || 'admin';
+      if (req.trueAdmin && req.session.viewMode[guildId] === 'staff') {
+        req.viewingAsStaff = true;
+        req.isAdmin = false; // Temporarily disable admin for this request
+      }
       next();
     } catch (err) {
       console.error('[dashboard] requireMember error:', err);
@@ -158,13 +167,20 @@ function buildDashboardRouter(client) {
   });
 
   // Documentation
-  router.get('/docs', asyncRoute(async (req, res) => {
-    res.send(docsPage());
-  }));
-
   router.get('/:guildId/docs', requireMember, asyncRoute(async (req, res) => {
     const guild = req.guild;
     res.send(docsPage({ guild, guildId: guild.id }));
+  }));
+
+  // Toggle between admin and staff view modes (only for admins)
+  router.post('/:guildId/toggle-view-mode', requireMember, asyncRoute(async (req, res) => {
+    const { guildId } = req.params;
+    if (!req.trueAdmin) {
+      return res.status(403).send('Only admins can toggle view mode.');
+    }
+    req.session.viewMode = req.session.viewMode || {};
+    req.session.viewMode[guildId] = req.session.viewMode[guildId] === 'admin' ? 'staff' : 'admin';
+    res.redirect(`/dashboard/${guildId}/staff`);
   }));
 
   // Staff dashboard - shows user's shifts and LOA status
@@ -183,6 +199,9 @@ function buildDashboardRouter(client) {
       shifts,
       activeLoa,
       isAdmin: req.isAdmin,
+      trueAdmin: req.trueAdmin,
+      viewingAsStaff: req.viewingAsStaff,
+      guildId: guild.id,
     }));
   }));
 

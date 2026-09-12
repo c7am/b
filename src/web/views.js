@@ -109,70 +109,185 @@ function docsPage({ guild = null, guildId = null } = {}) {
   const backLink = guildId ? `<a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:4px">${icon('chevronLeft')} Back</a>` : '';
   
   const body = `
+<style>
+.docs-hero {
+  background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-secondary-container));
+  padding: var(--space-5);
+  border-radius: 12px;
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+.docs-hero h1 {
+  margin: 0 0 8px 0;
+  color: var(--md-sys-color-on-primary-container);
+}
+.docs-hero p {
+  margin: 0;
+  color: var(--md-sys-color-on-primary-container);
+  opacity: 0.9;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.docs-card {
+  padding: var(--space-3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.docs-card:hover {
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.docs-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.docs-card:hover::before {
+  transform: scaleX(1);
+}
+.docs-card-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--md-sys-color-primary-container);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: var(--md-sys-color-primary);
+}
+.docs-card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+.docs-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--md-sys-color-on-surface);
+}
+.docs-card-desc {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0;
+  line-height: 1.4;
+}
+.docs-content {
+  display: none;
+}
+.docs-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.docs-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+.docs-nav-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface-variant);
+  color: var(--md-sys-color-on-surface-variant);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.docs-nav-btn:hover, .docs-nav-btn.active {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+</style>
+
 <header class="topbar">
-  <h1 class="title-large" style="margin:0">Documentation</h1>
+  <div>
+    <h1 class="title-large" style="margin:0">Documentation</h1>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:8px 0 0 0">Everything you need to know about Axiom</p>
+  </div>
   ${backLink}
 </header>
 
 <div class="page stack">
-  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:var(--space-2)">
-    <!-- Getting Started -->
-    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('getting-started')">
-      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        ${icon('book')}
-        Getting Started
-      </div>
-      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Learn the basics of Axiom</p>
+  <!-- Hero Section -->
+  <div class="docs-hero">
+    <h1 style="font-size:28px">Welcome to Axiom</h1>
+    <p>Your complete guide to staff management, shifts, and ERLC integration</p>
+  </div>
+
+  <!-- Section Cards -->
+  <div class="docs-grid">
+    <div class="card-high docs-card" onclick="showSection('getting-started')">
+      <div class="docs-card-icon">${icon('book')}</div>
+      <div class="docs-card-title">Getting Started</div>
+      <p class="docs-card-desc">Learn the basics and key features of Axiom</p>
     </div>
 
-    <!-- Shifts Guide -->
-    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('shifts')">
-      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        ${icon('clock')}
-        Shift Management
-      </div>
-      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Join, start, and manage shifts</p>
+    <div class="card-high docs-card" onclick="showSection('shifts')">
+      <div class="docs-card-icon">${icon('clock')}</div>
+      <div class="docs-card-title">Shift Management</div>
+      <p class="docs-card-desc">Join, control, and track shift attendance</p>
     </div>
 
-    <!-- SSU Integration -->
-    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('ssu')">
-      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        ${icon('server')}
-        Server Requirements
-      </div>
-      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">SSU integration and player requirements</p>
+    <div class="card-high docs-card" onclick="showSection('ssu')">
+      <div class="docs-card-icon">${icon('server')}</div>
+      <div class="docs-card-title">Server Requirements</div>
+      <p class="docs-card-desc">Understanding SSU and player thresholds</p>
     </div>
 
-    <!-- Account Verification -->
-    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('verification')">
-      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        ${icon('checkCircle')}
-        Account Verification
-      </div>
-      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Link your Roblox account</p>
+    <div class="card-high docs-card" onclick="showSection('verification')">
+      <div class="docs-card-icon">${icon('checkCircle')}</div>
+      <div class="docs-card-title">Account Verification</div>
+      <p class="docs-card-desc">Link your Roblox account safely</p>
     </div>
 
-    <!-- Moderation -->
-    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('moderation')">
-      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        ${icon('shield')}
-        Moderation
-      </div>
-      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">In-game and Discord moderation</p>
+    <div class="card-high docs-card" onclick="showSection('moderation')">
+      <div class="docs-card-icon">${icon('shield')}</div>
+      <div class="docs-card-title">Moderation</div>
+      <p class="docs-card-desc">In-game and Discord moderation commands</p>
     </div>
 
-    <!-- Admin Settings -->
-    <div class="card-high" style="padding:var(--space-3);cursor:pointer" onclick="showSection('admin')">
-      <div class="body-large" style="font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        ${icon('settings')}
-        Admin Settings
-      </div>
-      <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:0">Configure Axiom for your server</p>
+    <div class="card-high docs-card" onclick="showSection('admin')">
+      <div class="docs-card-icon">${icon('settings')}</div>
+      <div class="docs-card-title">Admin Settings</div>
+      <p class="docs-card-desc">Configure Axiom for your server</p>
     </div>
   </div>
 
-  <!-- Content Sections -->
-  <div id="content" style="margin-top:var(--space-3)"></div>
+  <!-- Quick Navigation -->
+  <div class="docs-nav" id="docs-nav-buttons" style="display:none">
+    <button class="docs-nav-btn active" onclick="showSection('getting-started')">Getting Started</button>
+    <button class="docs-nav-btn" onclick="showSection('shifts')">Shifts</button>
+    <button class="docs-nav-btn" onclick="showSection('ssu')">SSU</button>
+    <button class="docs-nav-btn" onclick="showSection('verification')">Verification</button>
+    <button class="docs-nav-btn" onclick="showSection('moderation')">Moderation</button>
+    <button class="docs-nav-btn" onclick="showSection('admin')">Admin</button>
+  </div>
+
+  <!-- Content Area -->
+  <div id="content" style="display:none"></div>
 </div>
 
 <script>
@@ -433,7 +548,7 @@ function guildListPage({ guilds, username }) {
 }
 
 // ============= Staff Dashboard (Main Page) =============
-function staffDashboard({ guild, user, shifts, activeLoa, isAdmin }) {
+function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, viewingAsStaff, guildId }) {
   const shiftCards = shifts.map(s => {
     const start = new Date(s.starts_at);
     const end = new Date(s.ends_at);
@@ -477,10 +592,19 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin }) {
       </div>
     </div>` : '';
 
+  const toggleButton = trueAdmin ? `
+    <form method="POST" action="/dashboard/${escapeHtml(guildId)}/toggle-view-mode" style="display:inline">
+      <button type="submit" class="btn btn-filled" title="Switch between admin and staff views">
+        ${viewingAsStaff ? icon('shield') : icon('users')}
+        ${viewingAsStaff ? 'View as Admin' : 'View as Staff'}
+      </button>
+    </form>` : '';
+
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
   <div class="row">
+    ${toggleButton}
     <a class="btn btn-text" href="/dashboard" style="gap:4px">
       ${icon('chevronLeft')}
       <span>Back</span>
