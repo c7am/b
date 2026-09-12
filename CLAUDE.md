@@ -1,100 +1,126 @@
-# CLAUDE.md - Axiom Final State
+# CLAUDE.md - Axiom Shift System Update
 
-**Last Updated:** September 11, 2026 | **Deploy:** dep-dai5jimq1p3s73beis4g | **Status:** ✓ LIVE
+**Last Updated:** September 12, 2026 | **Deploy:** dep-daihc2oae00c73eh99h0 | **Status:** ✓ LIVE
 
 ---
 
 ## Project Summary
 
-**Axiom** is a proprietary Discord staff and ERLC management tool for ERLC (Emergency Response: Liberty County) Roblox roleplay communities. Full-stack production system with Discord bot, web dashboard, real-time ERLC integration, and comprehensive audit logging.
+**Axiom** is a proprietary Discord staff and ERLC management tool for ERLC (Emergency Response: Liberty County) Roblox roleplay communities. Full-stack production system with Discord bot, web dashboard, real-time ERLC integration, and comprehensive shift management.
 
 **Stack:** Node.js 18+, Discord.js v14, PostgreSQL (Neon), Render hosting, Express dashboard, Material Design 3 (Catppuccin Mocha)
 
 ---
 
-## Complete Feature Set (All Live)
+## Major Update: SSU-Gated Shift System + Complete UI Redesign
 
-### 1. Roblox Account Verification (Production-Grade)
-- Staff run `/erlc-link` to initiate verification
-- Bot generates random 12-word censorship-safe phrase
-- Staff places phrase in Roblox bio
-- Bot verifies phrase is actually present in bio (API-fetched)
-- Auto-grant in-game mod perms if Discord staff role exists
-- "Regenerate Words" button for censored phrases
-- Rejects if bio doesn't contain phrase with clear error message
+### New Shift System Features
 
-### 2. In-Game Moderation System (Production-Grade)
-- Staff use `?moderate PlayerName violation reason` in-game
-- Smart violation matching (13 presets + custom per-guild types)
-- Fetches moderated player's Roblox avatar for embeds
-- Logs all moderation to Discord mod channel
-- Auto-revokes mod perms if staff loses Discord role
-- Real-time processing via Discord messageCreate event
+**1. SSU Integration (Server Must Have 25+ Players)**
+- New `checkSsuStatus()` function fetches ERLC server status and player count
+- Shifts only joinable when server is started AND has 25+ players in-game
+- Shows live player count and helpful error messages if not ready
+- Join button automatically disabled with reason if SSU conditions not met
+- Graceful fallback if ERLC API unreachable (shows "cannot check status" message)
 
-### 3. ERLC Event Listener (Real-Time)
-- Polls ERLC server logs every 30 seconds
-- Detects `?moderate` commands from in-game chat
-- Auto-processes and logs to Discord
-- Finds moderator by Roblox username link
-- Posts embeds with player avatars to mod channel
-- Graceful error handling, continues on failures
+**2. Shift State Management**
+- Shifts now have states: `pending`, `started`, `paused`, `ended`
+- Only users joined to shift can control state
+- Four state control buttons: Start / Pause / Resume / End
+- Async state changes via Fetch API with automatic page reload
+- State persisted to database
 
-### 4. Real-Time Moderation via Discord (New)
-- Staff can issue `?moderate` commands via Discord messages
-- Bot validates command format and user staff status
-- Reacts with checkmark on success
-- Logs to Discord mod channel
-- Complements ERLC event listener
+**3. Complete UI Redesign**
 
-### 5. Smart Violation Matching (Production-Grade)
-- 13 preset violations: RDM, VDM, FRP, Powergaming, Metagaming, Spam, Disrespect, Exploit, Glitch Abuse, NVL, COP, Mixing, NRP
-- Handles typos, shorthand codes, case-insensitive input
-- Custom violations per-guild via admin form
-- Example: "vdm" → VDM, "fail rp" → FRP, "pg" → Powergaming
+**Before:** Old cramped info-card layout
+**After:** Modern grid-based card system with:
+- **Header:** Shift name + status badges (Started/Paused/Ended/Pending)
+- **Key Info Grid:** 4 card layout showing Start, End, Duration, Member Count
+- **SSU Status Card:** Live player count or error reason
+- **Join/Leave Actions:** Prominent buttons with disabled state if SSU not ready
+- **Shift Controls Menu:** 2x2 grid with Start/Pause/Resume/End buttons
+- **Member List:** Redesigned with better spacing, check-in status per member
+- **Notes Section:** Dedicated card for shift description
+- **Better Typography:** Using M3 body-small, body-medium, body-large tokens
+- **Color Coding:** Status badges with semantic colors (success/warning/info)
 
-### 6. Admin Shift Type Editor (Production-Grade)
-- Add new shift types with name and min/max duration (minutes)
-- Delete shift types (must keep at least one)
-- Settings page displays all types with add form
-- Duration limits enforced on shift creation
-- Routes: POST `/add-shift-type`, `/remove-shift-type`
+**4. Enhanced Information Display**
+- Shift duration calculated and displayed (e.g., "4h 30m")
+- Member count updated in real-time
+- Check-in status per member (Checked in / Not checked in)
+- Joined time for each member
+- Status indicator dots with animations
 
-### 7. Shift Sync to ERLC Teams (Production-Grade)
-- When staff joins shift: auto-syncs to mapped ERLC team
-- Reads shift type, maps to team ID, assigns player
-- Graceful fallback if ERLC API unreachable
-- Doesn't block shift join on sync failure
+---
 
-### 8. Admin ERLC Configuration (Production-Grade)
-- Settings page: "ERLC Server Configuration" section
-- API key input (password-masked)
-- Validation: tests key connection before saving
-- Shows what gets enabled
-- Route: POST `/set-erlc-api-key`
+## Database Changes
 
-### 9. Audit Log Dashboard (Production-Grade)
-- Full activity history: infractions, promotions, shifts
-- Filter by event type, user ID, date range
-- Export to CSV for reporting
-- Chronologically sorted, all events combined
-- Shows staff member, reason, exact timestamp
-- Route: GET `/audit` with query filters
+**New Functions (src/db/database.js)**
+```javascript
+updateShiftStatus(shiftId, status)    // Set shift to pending/started/paused/ended
+getShiftStatus(shiftId)                // Get current shift state
+startShift(shiftId)                    // Set to started
+pauseShift(shiftId)                    // Set to paused
+resumeShift(shiftId)                   // Set to started (from paused)
+endShift(shiftId)                      // Set to ended
+```
 
-### 10. Minimal M3 Polish (Complete)
-- Card hover states with shadow elevation
-- Status badges: success, warning, info variants
-- Status indicator dots with pulse animation
-- Smooth transitions on all interactive elements
-- M3 motion tokens + Catppuccin Mocha colors
+**Shifts Table Now Includes:**
+- `status` column (defaults to 'pending')
+- `updated_at` column (tracking last state change)
+
+---
+
+## Dashboard Routes
+
+**New Shift State Routes:**
+- `POST /:guildId/shift/:shiftId/start` - Start shift
+- `POST /:guildId/shift/:shiftId/pause` - Pause shift
+- `POST /:guildId/shift/:shiftId/resume` - Resume shift
+- `POST /:guildId/shift/:shiftId/end` - End shift
+
+**Updated Routes:**
+- `GET /:guildId/shift/:shiftId` - Now shows SSU status + shift status
+- `POST /:guildId/shift/:shiftId/join` - Checks SSU status before allowing join
+
+---
+
+## ERLC Integration Updates
+
+**New Function (src/handlers/erlcHandler.js)**
+```javascript
+async function checkSsuStatus(guildId, minPlayers = 25) {
+  // Returns: { ready: boolean, playerCount?: number, reason?: string, minPlayers?: number }
+  // ready=true: Server started and 25+ players
+  // ready=false: Server not started OR too few players
+}
+```
+
+**Response Examples:**
+```javascript
+// Success
+{ ready: true, playerCount: 42 }
+
+// Failures
+{ ready: false, reason: 'Server not started' }
+{ ready: false, reason: 'Only 18/25 players in-game', playerCount: 18, minPlayers: 25 }
+{ ready: false, reason: 'No ERLC API configured' }
+{ ready: false, reason: 'Failed to check server status' }
+```
+
+---
+
+## Removed Features
+
+**ERLC Auto-Sync on Shift Join:** Shifts no longer auto-assign staff to ERLC teams. This was causing workflow conflicts. Manual team assignment via separate admin workflow now.
 
 ---
 
 ## Current Live State
 
-**Deploy:** `dep-dai5jimq1p3s73beis4g`
-**Status:** ✓ LIVE (verified in logs)
+**Deploy:** `dep-daihc2oae00c73eh99h0`
+**Status:** ✓ LIVE (verified boot)
 **URL:** https://isrp-staff-bot.onrender.com
-**Uptime:** Self-ping every 10 min
 **Commands:** 9 total
 
 **Boot Sequence (Verified):**
@@ -109,129 +135,96 @@ Service is live
 
 ---
 
-## Database Schema
+## Complete Feature Set (All Live)
 
-**Tables:** shifts, shift_members, promotions, infractions, loas, settings (JSONB), ranks, infraction_types, tickets, web_sessions, data_deletion_requests, discord_roblox_links
+### 1. Roblox Account Verification (Production-Grade)
+- `/erlc-link` command
+- Generates 12-word censorship-safe phrase
+- Bot verifies phrase in Roblox bio (API-fetched)
+- Auto-grant in-game mod perms if Discord staff role exists
 
-**Settings Keys (JSONB):**
-- `ticket_categories` - Ticket types
-- `shift_types` - Shift types with duration limits
-- `moderation_presets` - 13 violation presets
-- `custom_violations` - Admin-added types
-- `erlc_api_key` - ERLC Private Server API key
-- `shift_type_team_map` - Shift type to ERLC team mapping
+### 2. In-Game Moderation System
+- `?moderate PlayerName violation reason` support
+- Smart violation matching (13 presets + custom)
+- Fetches player avatars for embeds
+- Auto-revokes perms if staff loses role
 
-**discord_roblox_links Table:**
-- Columns: id, guild_id, discord_user_id, roblox_username, roblox_user_id, verified, is_in_game_mod, linked_at, last_staff_check
-- Unique index: (guild_id, discord_user_id)
+### 3. ERLC Event Listener (30s Polling)
+- Detects `?moderate` commands from logs
+- Auto-processes and logs to Discord
+- Finds moderator by Roblox username link
 
----
+### 4. Real-Time Discord Moderation
+- Staff issue `?moderate` commands via Discord messages
+- Auto-validation and logging
 
-## All Functions Implemented
+### 5. SSU-Gated Shift System (NEW)
+- Shifts joinable only when server started + 25+ players
+- Start/Pause/Resume/End controls per shift
+- Live status indicators
 
-### Roblox Verification (src/utils/robloxVerification.js)
-```javascript
-generateVerificationPhrase()        // 12-word phrase
-verifyBioPhrase(bio, phrase)       // Case-insensitive match
-storeVerificationCode()            // 1-hour expiry
-getVerificationCode()              // Retrieve
-clearVerificationCode()            // Cleanup
-```
+### 6. Admin Shift Type Editor
+- Add/remove/configure shift types with duration limits
+- Settings page management
 
-### ERLC Client (src/erlc/erlcClient.js)
-```javascript
-getRobloxProfile(username)         // Fetch profile + bio
-getRobloxAvatar(userId)            // Fetch avatar URL
-getLogs(options)                   // Server logs
-getPlayers()                       // Live players
-setPlayerTeam(playerId, teamId)    // Team assignment
-```
+### 7. Shift Sync to ERLC Teams (Manual)
+- Available for admin workflow
 
-### ERLC Integration (src/handlers/erlcHandler.js)
-```javascript
-getErlcClient(guildId)             // Get/init client
-verifyApiKey(guildId, key)         // Test key
-setErlcApiKey(guildId, key)        // Store key
-linkRobloxAccount()                // Link Discord to Roblox
-getRobloxLink()                    // Get link
-syncShiftToErlc()                  // Assign to team
-```
+### 8. Admin ERLC Configuration
+- Settings page with API key validation
 
-### In-Game Moderation (src/handlers/inGameModerationHandler.js)
-```javascript
-parseModCommand(msg)               // Parse ?moderate
-verifyModStatus()                  // Check permissions
-logInGameModeration()              // Log + fetch avatar
-```
+### 9. Audit Log Dashboard
+- Full activity history with filters
+- CSV export
 
-### Database Functions (src/db/database.js)
-```javascript
-matchViolation(guildId, input)     // Smart matching
-getShiftTypes(guildId)             // Fetch types
-addShiftType(guildId, config)      // Create type
-removeShiftType(guildId, typeId)   // Delete type
-getInfractionsByGuild(guildId)     // Audit log data
-getPromotionsByGuild(guildId)      // Audit log data
-```
-
-### Event Handlers (src/events/ & src/handlers/)
-```javascript
-messageCreate                      // Real-time moderation
-erlcEventListener                  // ERLC polling
-handleModerationMessage()          // Discord mod commands
-handleErlcVerifyButton()           // Verification flow
-handleErlcRegenerateButton()       // Phrase regeneration
-```
+### 10. Minimal M3 Polish
+- Card hover states, status badges, animations
 
 ---
 
-## Dashboard Routes
+## UI Components & Styling
 
-**Staff-Accessible:**
-- `GET /dashboard/:guildId/staff` - Shift overview
-- `GET /dashboard/:guildId/shifts` - All shifts
-- `GET /dashboard/:guildId/shift/:shiftId` - Shift details
-- `GET /dashboard/:guildId/loa` - Leave of absence
-- `GET /dashboard/:guildId/data-deletion` - Data request
-- `GET /dashboard/:guildId/audit` - Audit log with filters
-- `POST /dashboard/:guildId/shift/:shiftId/join` - Join shift (syncs to ERLC)
+**Shift Detail Page Elements:**
+- `topbar` - Header with title and back button
+- `card-high` - Main content cards with padding
+- `badge` with variants: `badge-success`, `badge-warning`, `badge-info`
+- `shift-controls-menu` - 2x2 grid layout for state buttons
+- Status chips with icons
+- Member list with individual cards per member
 
-**Admin-Only:**
-- `GET /dashboard/:guildId` - Settings
-- `GET /dashboard/:guildId/deletion-requests` - Queue
-- `POST /dashboard/:guildId/set-erlc-api-key` - Configure ERLC
-- `POST /dashboard/:guildId/add-shift-type` - Create type
-- `POST /dashboard/:guildId/remove-shift-type` - Delete type
-- `POST /dashboard/:guildId/add-custom-violation` - Custom violation
+**New CSS Classes** (already in style.css):
+- `.shift-controls-menu` - Grid layout for state controls
+- `.status-chip` - Inline status indicator with background color
 
 ---
 
-## Configuration Checklist
+## Admin Workflow (Recommended)
 
-**Admin Setup:**
-1. Run `/config` to set Staff Manage role
-2. Go to Settings
-3. Enter ERLC API key in "ERLC Server Configuration"
-4. Click "Save API Key" (tests connection)
-5. Optional: Add custom violation types
-6. Optional: Map shift types to ERLC team IDs
+1. **Setup:** Ensure ERLC API key is configured in Settings
+2. **Server Start:** Wait for server to show 25+ players in-game
+3. **Join Shift:** Click Join when SSU ready button becomes active
+4. **Control Shift:** Use Start/Pause/Resume/End buttons in shift submenu
+5. **Team Assign:** Manual team assignment via separate ERLC admin tool (if needed)
 
-**Staff Onboarding:**
-1. Run `/erlc-link`
-2. Copy 12-word phrase to Roblox bio
-3. Click "Verify My Account"
-4. Enter Roblox username
-5. Done - ready for in-game commands
+---
+
+## Staff Workflow
+
+1. Go to Shifts page
+2. See shift availability (grayed out if SSU not ready)
+3. Click Join when button is active (server has 25+ players)
+4. Click Check In / Out to manage attendance
+5. See Start/Pause/Resume/End controls (only visible when joined)
 
 ---
 
 ## Known Behavior
 
-- **Verification:** Bio fetched from Roblox API, case-insensitive matching
-- **Event Listener:** 30-second poll interval, covers all commands in 90-second window
-- **Shift Sync:** Best-effort, graceful fallback if ERLC unreachable
-- **Avatar Fetch:** Graceful fallback to null if Roblox API down
-- **Mod Perms:** Auto-revoked on next command if staff role lost
+- **SSU Check:** Runs every time shift detail page loads, no caching
+- **Button State:** Disabled with reason text if SSU not ready
+- **Shift Controls:** Only visible to members who joined
+- **State Changes:** Async updates with automatic page reload
+- **Member List:** Shows check-in status per member
 
 ---
 
@@ -246,13 +239,12 @@ handleErlcRegenerateButton()       // Phrase regeneration
 
 ---
 
-## Remaining Opportunities (Future Sessions)
+## Files Modified (This Session)
 
-1. **Domain Rename** (skipped per request) - isrp-staff-bot.onrender.com
-2. **Shift Type Mapping UI** - Admin map shift types to ERLC team IDs
-3. **Advanced Filters** - Export filtering, date range exports
-4. **Paid Render Plan** - Replace free-tier self-ping with reliable uptime
-5. **Proper Roblox OAuth** - If bio API access becomes limited
+- `src/handlers/erlcHandler.js` - Added checkSsuStatus()
+- `src/db/database.js` - Added shift state functions
+- `src/web/dashboard.js` - SSU check on join, updated shift detail route
+- `src/web/views.js` - Completely redesigned shiftDetailsPage
 
 ---
 
@@ -263,8 +255,12 @@ git log --oneline -5
 Render:get_deploy <latest-dep-id>
 ```
 
-Check logs for clean boot, all systems operational.
+Check shift detail page visually, test:
+1. Join shift when SSU not ready (should see error)
+2. Join shift when SSU ready (should work)
+3. Click state buttons (Start/Pause/Resume/End)
+4. Verify page reloads with new state
 
 ---
 
-**All features delivered, tested, and live in production.**
+**Shift system completely rearchitected with SSU integration and modern UI.**
