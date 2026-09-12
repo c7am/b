@@ -38,6 +38,35 @@ async function verifyApiKey(guildId, apiKey) {
 }
 
 /**
+ * Check if ERLC server is started and has minimum player count
+ */
+async function checkSsuStatus(guildId, minPlayers = 25) {
+  try {
+    const client = await getErlcClient(guildId);
+    if (!client) {
+      return { ready: false, reason: 'No ERLC API configured' };
+    }
+
+    const status = await client.getServerStatus();
+    if (!status || status.status !== 'started') {
+      return { ready: false, reason: 'Server not started' };
+    }
+
+    const players = await client.getPlayers();
+    const playerCount = Array.isArray(players) ? players.length : 0;
+    
+    if (playerCount < minPlayers) {
+      return { ready: false, reason: `Only ${playerCount}/${minPlayers} players in-game`, playerCount, minPlayers };
+    }
+
+    return { ready: true, playerCount };
+  } catch (err) {
+    console.error(`[erlc] SSU status check failed: ${err.message}`);
+    return { ready: false, reason: 'Failed to check server status' };
+  }
+}
+
+/**
  * Store ERLC API key securely in database
  */
 async function setErlcApiKey(guildId, apiKey) {
@@ -375,6 +404,7 @@ async function handleErlcLinkModal(interaction) {
 module.exports = {
   getErlcClient,
   verifyApiKey,
+  checkSsuStatus,
   setErlcApiKey,
   linkRobloxAccount,
   getRobloxUsername,

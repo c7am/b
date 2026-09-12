@@ -258,91 +258,180 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin }) {
 }
 
 // ============= Shift Details Page =============
-function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId, shiftId }) {
-  const memberItems = members.map(m => `
-    <div class="user-item">
-      <div class="user-item-main">
-        <div class="user-item-label">User ${escapeHtml(m.user_id)}</div>
-        <div class="user-item-meta">Joined: ${formatDate(m.joined_at)}</div>
-      </div>
-      <span class="badge ${m.checked_in ? 'badge-active' : 'badge-inactive'}">
-        ${m.checked_in ? 'Checked in' : 'Not checked in'}
-      </span>
-    </div>`).join('\n');
-
+function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId, shiftId, ssuStatus = null, shiftStatus = 'pending' }) {
   const start = new Date(shift.starts_at);
   const end = new Date(shift.ends_at);
   const now = new Date();
   const isActive = start <= now && end > now;
+  const durationMs = end - start;
+  const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+  const durationMins = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
 
+  // Status badge styling
+  const statusBadgeClass = shiftStatus === 'started' ? 'badge-success' : 
+                           shiftStatus === 'paused' ? 'badge-warning' : 
+                           shiftStatus === 'ended' ? 'badge-info' : 'badge-info';
+  const statusText = shiftStatus === 'started' ? 'Started' :
+                     shiftStatus === 'paused' ? 'Paused' :
+                     shiftStatus === 'ended' ? 'Ended' : 'Pending';
+
+  // SSU status display
+  const ssuDisplay = ssuStatus ? (ssuStatus.ready ? 
+    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:12px;padding:4px 8px;border-radius:6px">
+      ${icon('checkCircle')} <strong>${ssuStatus.playerCount}</strong> players in-game
+    </div>` :
+    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:12px;padding:4px 8px;border-radius:6px">
+      ${icon('alertCircle')} ${escapeHtml(ssuStatus.reason || 'Server not ready')}
+    </div>`) : '';
+
+  // Join/Leave action
+  const joinDisabled = ssuStatus && !ssuStatus.ready;
   const joinLeaveAction = isJoined ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/leave" style="margin:0">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-      <button class="btn btn-tonal btn-danger" type="submit" style="gap:8px">
+      <button class="btn btn-tonal" type="submit" style="gap:8px;background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container)">
+        ${icon('logOut')}
         <span>Leave Shift</span>
       </button>
     </form>` : `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/join" style="margin:0">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-      <button class="btn btn-filled" type="submit" style="gap:8px">
+      <button class="btn btn-filled" type="submit" ${joinDisabled ? 'disabled' : ''} style="gap:8px">
         ${icon('plus')}
-        <span>Join Shift</span>
+        <span>${joinDisabled ? 'Server Not Ready' : 'Join Shift'}</span>
       </button>
     </form>`;
 
+  // Shift state controls (start/pause/resume/end)
+  const stateControls = isJoined ? `
+    <div class="shift-controls-menu" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+      <button class="btn btn-tonal" onclick="updateShiftState('start')" style="gap:8px">
+        ${icon('play')}
+        <span>Start</span>
+      </button>
+      <button class="btn btn-tonal" onclick="updateShiftState('pause')" style="gap:8px">
+        ${icon('pause')}
+        <span>Pause</span>
+      </button>
+      <button class="btn btn-tonal" onclick="updateShiftState('resume')" style="gap:8px">
+        ${icon('play')}
+        <span>Resume</span>
+      </button>
+      <button class="btn btn-tonal" onclick="updateShiftState('end')" style="gap:8px">
+        ${icon('square')}
+        <span>End</span>
+      </button>
+    </div>` : '';
+
+  // Member list with better formatting
+  const memberItems = members.map(m => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2);background:var(--md-sys-color-surface);border-radius:6px;border:1px solid var(--md-sys-color-outline)">
+      <div>
+        <div class="body-medium" style="font-weight:500">User ${escapeHtml(m.user_id)}</div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant)">Joined ${formatDate(m.joined_at)}</div>
+      </div>
+      <span class="badge ${m.checked_in ? 'badge-success' : 'badge-warning'}" style="white-space:nowrap">
+        ${m.checked_in ? 'Checked in' : 'Not checked in'}
+      </span>
+    </div>`).join('');
+
   const checkInLink = (isJoined && isActive) ? `
-    <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" class="btn btn-tonal" style="gap:8px">
+    <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" class="btn btn-tonal" style="gap:8px;width:100%">
       ${icon('clock')}
       <span>Check In / Out</span>
     </a>` : '';
 
   const body = `
 <header class="topbar">
-  <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
+  <div style="flex:1">
+    <h1 class="title-large" style="margin:0;margin-bottom:4px">${escapeHtml(shift.name)}</h1>
+    <div style="display:flex;gap:var(--space-2);align-items:center">
+      <span class="badge ${statusBadgeClass}">${statusText}</span>
+      ${isActive ? '<span class="badge badge-active">Active Now</span>' : ''}
+    </div>
+  </div>
   <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
     ${icon('chevronLeft')} Back
   </a>
 </header>
+
 <div class="page stack">
-  <div class="info-card">
-    <div class="info-card-header">
-      <div class="info-card-title">Shift Details</div>
-      ${isActive ? '<span class="badge badge-active">Active Now</span>' : ''}
+  <!-- Key Info Cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:var(--space-2)">
+    <div class="card-high" style="padding:var(--space-2)">
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">Start Time</div>
+      <div class="body-large" style="font-weight:500">${formatDate(shift.starts_at)}</div>
     </div>
-    <div class="info-card-body">
-      <div class="info-card-row">
-        <span class="info-card-label">Start</span>
-        <span class="info-card-value">${formatDate(shift.starts_at)}</span>
-      </div>
-      <div class="info-card-row">
-        <span class="info-card-label">End</span>
-        <span class="info-card-value">${formatDate(shift.ends_at)}</span>
-      </div>
-      <div class="info-card-row">
-        <span class="info-card-label">Members</span>
-        <span class="info-card-value">${members.length}</span>
-      </div>
-      ${shift.description ? `
-        <div class="info-card-row" style="flex-direction:column;align-items:flex-start">
-          <span class="info-card-label">Description</span>
-          <span class="info-card-value">${escapeHtml(shift.description)}</span>
-        </div>` : ''}
+    <div class="card-high" style="padding:var(--space-2)">
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">End Time</div>
+      <div class="body-large" style="font-weight:500">${formatDate(shift.ends_at)}</div>
+    </div>
+    <div class="card-high" style="padding:var(--space-2)">
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">Duration</div>
+      <div class="body-large" style="font-weight:500">${durationHours}h ${durationMins}m</div>
+    </div>
+    <div class="card-high" style="padding:var(--space-2)">
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">Members</div>
+      <div class="body-large" style="font-weight:500">${members.length}</div>
     </div>
   </div>
 
-  <div class="row" style="gap:var(--space-2)">
+  <!-- Description -->
+  ${shift.description ? `
+  <div class="card-high" style="padding:var(--space-3)">
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;text-transform:uppercase;font-weight:600">Notes</div>
+    <p class="body-medium">${escapeHtml(shift.description)}</p>
+  </div>` : ''}
+
+  <!-- SSU Status -->
+  ${ssuDisplay ? `
+  <div class="card-high" style="padding:var(--space-2)">
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:8px">Server Status</div>
+    ${ssuDisplay}
+  </div>` : ''}
+
+  <!-- Actions -->
+  <div style="display:grid;grid-template-columns:1fr;gap:var(--space-2)">
     ${joinLeaveAction}
     ${checkInLink}
   </div>
 
-  <div class="staff-section">
-    <div class="staff-section-header">
+  <!-- Shift State Controls -->
+  ${stateControls}
+
+  <!-- Members List -->
+  <div class="card-high" style="padding:var(--space-3)">
+    <div class="body-medium" style="font-weight:600;margin-bottom:var(--space-2);display:flex;gap:8px;align-items:center">
       ${icon('users')}
-      <h2 class="staff-section-title">Members (${members.length})</h2>
+      Shift Members (${members.length})
     </div>
-    ${members.length > 0 ? `<div class="user-section-list">${memberItems}</div>` : '<div class="empty-state"><div class="empty-state-text">No members yet</div></div>'}
+    ${members.length > 0 ? `
+      <div style="display:grid;gap:var(--space-1)">
+        ${memberItems}
+      </div>` : '<div style="padding:var(--space-2);text-align:center;color:var(--md-sys-color-on-surface-variant)">No members yet</div>'}
   </div>
-</div>`;
+</div>
+
+<script>
+async function updateShiftState(action) {
+  const csrf = '${escapeHtml(csrfToken)}';
+  try {
+    const res = await fetch('/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/' + action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+      body: JSON.stringify({})
+    });
+    if (res.ok) {
+      location.reload();
+    } else {
+      alert('Failed to update shift state');
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+</script>`;
+
   return layout({ title: 'Shift Details', body });
 }
 

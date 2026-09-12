@@ -187,6 +187,14 @@ function buildDashboardRouter(client) {
 
     const members = await getShiftMembers(shiftId);
     const isJoined = members.some(m => m.user_id === req.session.user.id);
+    
+    // Check ERLC SSU status
+    const { checkSsuStatus } = require('../handlers/erlcHandler');
+    const ssuStatus = await checkSsuStatus(guild.id);
+    
+    // Get shift state status
+    const { getShiftStatus } = require('../db/database');
+    const shiftStatus = await getShiftStatus(shiftId);
 
     res.send(shiftDetailsPage({
       guild,
@@ -196,6 +204,8 @@ function buildDashboardRouter(client) {
       csrfToken: req.session.csrfToken,
       guildId: guild.id,
       shiftId,
+      ssuStatus,
+      shiftStatus,
     }));
   }));
 
@@ -210,19 +220,15 @@ function buildDashboardRouter(client) {
       return res.status(404).send('Shift not found.');
     }
 
-    await joinShift(shiftId, userId);
-
-    // Sync to ERLC if configured
-    try {
-      const { syncShiftToErlc } = require('../handlers/erlcHandler');
-      const member = await guild.members.fetch(userId).catch(() => null);
-      if (member) {
-        await syncShiftToErlc(guild.id, member, shift);
-      }
-    } catch (err) {
-      console.warn(`[shift] Failed to sync to ERLC: ${err.message}`);
+    // Check SSU status before allowing join
+    const { checkSsuStatus } = require('../handlers/erlcHandler');
+    const ssuStatus = await checkSsuStatus(guild.id);
+    
+    if (!ssuStatus.ready) {
+      return res.status(400).send(`Cannot join shift: ${ssuStatus.reason}`);
     }
 
+    await joinShift(shiftId, userId);
     res.redirect(`/dashboard/${guild.id}/shift/${shiftId}`);
   }));
 
@@ -291,6 +297,55 @@ function buildDashboardRouter(client) {
 
     await deleteShift(shiftId);
     res.redirect(`/dashboard/${req.guild.id}/shifts`);
+  }));
+
+  // Shift state management (start/pause/resume/end)
+  router.post('/:guildId/shift/:shiftId/start', requireMember, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await startShift(shiftId);
+    res.json({ status: 'ok', message: 'Shift started' });
+  }));
+
+  router.post('/:guildId/shift/:shiftId/pause', requireMember, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await pauseShift(shiftId);
+    res.json({ status: 'ok', message: 'Shift paused' });
+  }));
+
+  router.post('/:guildId/shift/:shiftId/resume', requireMember, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await resumeShift(shiftId);
+    res.json({ status: 'ok', message: 'Shift resumed' });
+  }));
+
+  router.post('/:guildId/shift/:shiftId/end', requireMember, requireCsrf, asyncRoute(async (req, res) => {
+    const shiftId = parseInt(req.params.shiftId, 10);
+    const shift = await getShift(shiftId);
+    
+    if (!shift || shift.guild_id !== req.guild.id) {
+      return res.status(404).send('Shift not found.');
+    }
+
+    await endShift(shiftId);
+    res.json({ status: 'ok', message: 'Shift ended' });
   }));
 
   // Staff: Check-in/check-out page

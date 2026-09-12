@@ -392,6 +392,35 @@ async function getShiftMembers(shiftId) {
   return res.rows;
 }
 
+async function updateShiftStatus(shiftId, status) {
+  // status: 'pending', 'started', 'paused', 'ended'
+  await pool.query(
+    `UPDATE shifts SET status = $1, updated_at = NOW() WHERE id = $2`,
+    [status, shiftId]
+  );
+}
+
+async function getShiftStatus(shiftId) {
+  const res = await pool.query(`SELECT status FROM shifts WHERE id = $1`, [shiftId]);
+  return res.rows[0]?.status || 'pending';
+}
+
+async function startShift(shiftId) {
+  await updateShiftStatus(shiftId, 'started');
+}
+
+async function pauseShift(shiftId) {
+  await updateShiftStatus(shiftId, 'paused');
+}
+
+async function resumeShift(shiftId) {
+  await updateShiftStatus(shiftId, 'started');
+}
+
+async function endShift(shiftId) {
+  await updateShiftStatus(shiftId, 'ended');
+}
+
 async function getUserShifts(userId, guildId) {
   const res = await pool.query(
     `SELECT s.* FROM shifts s
@@ -787,6 +816,12 @@ module.exports = {
   joinShift,
   leaveShift,
   getShiftMembers,
+  updateShiftStatus,
+  getShiftStatus,
+  startShift,
+  pauseShift,
+  resumeShift,
+  endShift,
   getUserShifts,
   checkInShift,
   checkOutShift,
