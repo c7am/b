@@ -264,3 +264,33 @@ Check shift detail page visually, test:
 ---
 
 **Shift system completely rearchitected with SSU integration and modern UI.**
+
+---
+
+## Documentation Site (NEW)
+
+**Routes:**
+- `GET /docs` - Public documentation (no auth required)
+- `GET /:guildId/docs` - Guild-specific documentation (members only)
+
+**Sections:**
+1. **Getting Started** - Overview, features, quick navigation
+2. **Shift Management** - Joining, state controls, check-in/out
+3. **Server Requirements (SSU)** - 25+ player integration, status display
+4. **Account Verification** - Roblox linking, bio verification, regenerate phrase
+5. **Moderation** - In-game and Discord moderation commands, violation types, logging
+6. **Admin Settings** - ERLC config, shift types, custom violations, audit logs
+
+**Features:**
+- Interactive section navigation with smooth scrolling
+- Code examples and step-by-step instructions
+- Grid-based card layout with icons
+- Accessible from footer link on every page
+- Material Design 3 styling
+- Works for both authenticated and public access
+
+**Implementation:**
+- `docsPage()` function in views.js - 6 sections with full content
+- Inline JavaScript for section switching
+- Proper styling with card-high, body-medium, and M3 tokens
+- Responsive grid layout for section cards
