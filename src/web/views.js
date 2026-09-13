@@ -554,38 +554,30 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
   const upcomingShifts = shifts.filter(s => new Date(s.starts_at) > now);
   const completedShifts = shifts.filter(s => new Date(s.ends_at) < now);
 
-  // Quick stats
+  // Quick stats - Catppuccin Mocha colors
   const statsHtml = `
-    <div class="stats-grid">
+    <div class="dashboard-stats">
       <div class="stat-card">
-        <div class="stat-icon" style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success)">${icon('checkCircle')}</div>
+        <div class="stat-icon" style="color:#a6e3a1">${icon('checkCircle')}</div>
         <div class="stat-content">
-          <div class="stat-label">Active Shifts</div>
-          <div class="stat-value">${activeShifts.length}</div>
+          <div class="stat-label">Active</div>
+          <div class="stat-number">${activeShifts.length}</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:var(--md-sys-color-warning-container);color:var(--md-sys-color-warning)">${icon('clock')}</div>
+        <div class="stat-icon" style="color:#89dceb">${icon('clock')}</div>
         <div class="stat-content">
-          <div class="stat-label">Upcoming</div>
-          <div class="stat-value">${upcomingShifts.length}</div>
+          <div class="stat-label">Next</div>
+          <div class="stat-number">${upcomingShifts.length}</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:var(--md-sys-color-info-container);color:var(--md-sys-color-info)">${icon('check')}</div>
+        <div class="stat-icon" style="color:#cba6f7">${icon('check')}</div>
         <div class="stat-content">
-          <div class="stat-label">Completed</div>
-          <div class="stat-value">${completedShifts.length}</div>
+          <div class="stat-label">Done</div>
+          <div class="stat-number">${completedShifts.length}</div>
         </div>
       </div>
-      ${activeLoa ? `
-      <div class="stat-card" style="background:var(--md-sys-color-error-container);border-left:4px solid var(--md-sys-color-error)">
-        <div class="stat-icon" style="background:var(--md-sys-color-error-container);color:var(--md-sys-color-error)">${icon('alertCircle')}</div>
-        <div class="stat-content">
-          <div class="stat-label">On Leave</div>
-          <div class="stat-value" style="color:var(--md-sys-color-error)">Until ${formatDate(activeLoa.ends_at).split(' ')[0]}</div>
-        </div>
-      </div>` : ''}
     </div>
   `;
 
@@ -594,361 +586,450 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
     const start = new Date(s.starts_at);
     const end = new Date(s.ends_at);
     const isActive = start <= now && end > now;
-    const isUpcoming = start > now;
     
-    let status = 'Completed';
-    let statusClass = 'badge-inactive';
-    if (isActive) {
-      status = 'Active Now';
-      statusClass = 'badge-active';
-    } else if (isUpcoming) {
-      status = 'Upcoming';
-      statusClass = 'badge-info';
-    }
-
     const duration = end - start;
     const durationHours = Math.floor(duration / (1000 * 60 * 60));
     const durationMins = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+    const shortDate = start.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const timeStart = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const timeEnd = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    let badge = 'Done';
+    let badgeColor = '#6c7086';
+    if (isActive) {
+      badge = 'Live';
+      badgeColor = '#a6e3a1';
+    } else if (start > now) {
+      badge = 'Next';
+      badgeColor = '#89dceb';
+    }
 
     return `
-      <div class="shift-card-enhanced">
-        <div class="shift-card-header">
-          <div>
-            <div class="shift-card-title">${escapeHtml(s.name)}</div>
-            <div class="shift-card-time">${icon('clock')} ${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-          </div>
-          <div class="badge ${statusClass}">${status}</div>
+      <div class="shift-row">
+        <div class="shift-main">
+          <div class="shift-title">${escapeHtml(s.name)}</div>
+          <div class="shift-time">${shortDate} • ${timeStart}${timeEnd ? ' to ' + timeEnd : ''}</div>
+          <div class="shift-duration">${durationHours}h ${durationMins}m</div>
         </div>
-        <div class="shift-card-details">
-          <div class="shift-detail">
-            <span class="detail-label">Duration:</span>
-            <span class="detail-value">${durationHours}h ${durationMins}m</span>
-          </div>
-          <div class="shift-detail">
-            <span class="detail-label">Ends:</span>
-            <span class="detail-value">${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-          </div>
-        </div>
-        <div class="shift-card-actions">
-          <a href="/dashboard/${escapeHtml(guild.id)}/shift/${escapeHtml(s.id)}" class="btn btn-text" style="gap:4px">
-            ${icon('chevronRight')}
-            View Shift
-          </a>
-        </div>
+        <div class="shift-badge" style="color:${badgeColor}">${badge}</div>
+        <a href="/dashboard/${escapeHtml(guild.id)}/shift/${escapeHtml(s.id)}" class="shift-link">${icon('chevronRight')}</a>
       </div>`;
   };
 
   const toggleButton = trueAdmin ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/toggle-view-mode" style="display:inline">
-      <button type="submit" class="btn btn-filled" title="Switch between admin and staff views">
+      <button type="submit" class="btn-icon" title="Switch view mode">
         ${viewingAsStaff ? icon('shield') : icon('users')}
-        ${viewingAsStaff ? 'View as Admin' : 'View as Staff'}
       </button>
     </form>` : '';
 
-  const shiftsHtml = shifts.length > 0 ? `
-    ${activeShifts.length > 0 ? `
-    <div class="shifts-section">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="section-badge" style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success)">${activeShifts.length}</span>
-          <h3 class="headline-small">Active Shifts</h3>
-        </div>
+  const loaSection = activeLoa ? `
+    <div class="loa-banner">
+      <div class="loa-content">
+        <div class="loa-title">On Leave</div>
+        <div class="loa-date">Until ${formatDate(activeLoa.ends_at).split(' ')[0]}</div>
       </div>
-      <div class="shifts-list">
-        ${activeShifts.map(shiftCard).join('')}
-      </div>
-    </div>` : ''}
-
-    ${upcomingShifts.length > 0 ? `
-    <div class="shifts-section">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="section-badge" style="background:var(--md-sys-color-warning-container);color:var(--md-sys-color-warning)">${upcomingShifts.length}</span>
-          <h3 class="headline-small">Upcoming Shifts</h3>
-        </div>
-      </div>
-      <div class="shifts-list">
-        ${upcomingShifts.map(shiftCard).join('')}
-      </div>
-    </div>` : ''}
-
-    ${completedShifts.length > 0 ? `
-    <div class="shifts-section">
-      <div class="section-header">
-        <div class="section-title-group">
-          <span class="section-badge" style="background:var(--md-sys-color-info-container);color:var(--md-sys-color-info)">${completedShifts.length}</span>
-          <h3 class="headline-small">Completed Shifts</h3>
-        </div>
-      </div>
-      <div class="shifts-list">
-        ${completedShifts.slice(0, 3).map(shiftCard).join('')}
-        ${completedShifts.length > 3 ? `<div class="shifts-show-more"><a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-text">View all ${completedShifts.length} completed shifts</a></div>` : ''}
-      </div>
-    </div>` : ''}
-  ` : `
-    <div class="empty-state-enhanced">
-      <div class="empty-state-icon">${icon('clock')}</div>
-      <div class="empty-state-title">No Shifts Assigned</div>
-      <div class="empty-state-desc">You don't have any shifts yet. Contact your administrator to get assigned to a shift.</div>
-      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-tonal" style="gap:8px;margin-top:var(--space-2)">${icon('plus')} Create Shift</a>` : ''}
+      <a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn-icon">${icon('edit2')}</a>
     </div>
+  ` : '';
+
+  const shiftsHtml = shifts.length === 0 ? `
+    <div class="empty-state">
+      <div class="empty-icon">${icon('clock')}</div>
+      <div class="empty-title">No Shifts</div>
+      <div class="empty-text">No shifts assigned yet</div>
+    </div>
+  ` : `
+    ${activeShifts.length > 0 ? `<div class="shifts-section"><div class="section-label">Active</div>${activeShifts.map(shiftCard).join('')}</div>` : ''}
+    ${upcomingShifts.length > 0 ? `<div class="shifts-section"><div class="section-label">Upcoming</div>${upcomingShifts.map(shiftCard).join('')}</div>` : ''}
+    ${completedShifts.length > 0 ? `<div class="shifts-section"><div class="section-label">Past</div>${completedShifts.slice(0, 3).map(shiftCard).join('')}${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="view-more">View all ${completedShifts.length}</a>` : ''}</div>` : ''}
   `;
 
   const body = `
 <style>
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-.stat-card {
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline);
-  border-radius: 12px;
-  padding: var(--space-3);
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  transition: all 0.2s ease;
-}
-.stat-card:hover {
-  border-color: var(--md-sys-color-primary);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.stat-icon svg {
-  width: 24px;
-  height: 24px;
-}
-.stat-content {
-  flex: 1;
-  min-width: 0;
-}
-.stat-label {
-  font-size: 12px;
-  color: var(--md-sys-color-on-surface-variant);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-.stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--md-sys-color-on-surface);
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1e1e2e; color: #cdd6f4; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 
-.shifts-section {
-  margin-bottom: var(--space-4);
-}
-.section-header {
+.topbar {
+  background: #313244;
+  border-bottom: 1px solid #45475a;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
-}
-.section-title-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.section-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
+  gap: 12px;
 }
 
-.shifts-list {
-  display: grid;
-  gap: var(--space-2);
+.topbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #cdd6f4;
 }
-.shift-card-enhanced {
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline);
-  border-radius: 12px;
-  padding: var(--space-3);
-  transition: all 0.2s ease;
-}
-.shift-card-enhanced:hover {
-  border-color: var(--md-sys-color-primary);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  transform: translateY(-1px);
-}
-.shift-card-header {
+
+.topbar-right {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  gap: 6px;
+  align-items: center;
 }
-.shift-card-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--md-sys-color-on-surface);
-}
-.shift-card-time {
-  font-size: 13px;
-  color: var(--md-sys-color-on-surface-variant);
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #45475a;
+  background: transparent;
+  border-radius: 6px;
+  color: #cdd6f4;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
+  justify-content: center;
+  transition: all 0.2s;
+  text-decoration: none;
+  padding: 0;
 }
-.shift-card-time svg {
+
+.btn-icon:hover {
+  background: #585b70;
+  border-color: #585b70;
+}
+
+.btn-icon svg {
   width: 16px;
   height: 16px;
 }
-.shift-card-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
-}
-.shift-detail {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-}
-.detail-label {
-  color: var(--md-sys-color-on-surface-variant);
-  font-weight: 500;
-}
-.detail-value {
-  color: var(--md-sys-color-on-surface);
-  font-weight: 600;
-}
-.shift-card-actions {
-  text-align: right;
-}
 
-.empty-state-enhanced {
-  text-align: center;
-  padding: var(--space-5);
-  border: 2px dashed var(--md-sys-color-outline);
-  border-radius: 12px;
-  background: var(--md-sys-color-surface-variant);
-  opacity: 0.7;
-}
-.empty-state-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-primary);
-  margin-bottom: var(--space-2);
-}
-.empty-state-icon svg {
-  width: 32px;
-  height: 32px;
-}
-.empty-state-title {
-  font-weight: 600;
-  font-size: 18px;
-  color: var(--md-sys-color-on-surface);
-  margin-bottom: 8px;
-}
-.empty-state-desc {
-  font-size: 14px;
-  color: var(--md-sys-color-on-surface-variant);
-  max-width: 400px;
+.page-content {
+  padding: 16px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.shifts-show-more {
-  padding: var(--space-2);
+.loa-banner {
+  background: #313244;
+  border: 1px solid #fab387;
+  border-left: 3px solid #fab387;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.loa-content {
+  flex: 1;
+}
+
+.loa-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #cdd6f4;
+}
+
+.loa-date {
+  font-size: 13px;
+  color: #fab387;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  border-color: #585b70;
+}
+
+.stat-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: #a6adc8;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.stat-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: #cdd6f4;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.shifts-section {
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-size: 11px;
+  color: #a6adc8;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+.shift-row {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.shift-row:hover {
+  background: #585b70;
+  border-color: #585b70;
+}
+
+.shift-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.shift-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cdd6f4;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shift-time {
+  font-size: 11px;
+  color: #a6adc8;
+  margin-bottom: 1px;
+}
+
+.shift-duration {
+  font-size: 10px;
+  color: #cba6f7;
+  font-weight: 600;
+}
+
+.shift-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: rgba(166, 227, 161, 0.15);
+}
+
+.shift-link {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #a6adc8;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.shift-link:hover {
+  color: #89dceb;
+}
+
+.shift-link svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-state {
   text-align: center;
+  padding: 30px 16px;
+  color: #a6adc8;
+}
+
+.empty-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 10px;
+  opacity: 0.5;
+}
+
+.empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #cdd6f4;
+  margin-bottom: 4px;
+}
+
+.empty-text {
+  font-size: 12px;
+}
+
+.view-more {
+  display: block;
+  padding: 8px 12px;
+  margin-top: 6px;
+  color: #89dceb;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.view-more:hover {
+  background: #313244;
+  border-color: #89dceb;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.action-btn {
+  padding: 8px 10px;
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  color: #cdd6f4;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action-btn:hover {
+  background: #585b70;
+  border-color: #585b70;
+}
+
+@media (max-width: 640px) {
+  .page-content {
+    padding: 12px;
+  }
+
+  .topbar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .topbar-title {
+    font-size: 16px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .stat-card {
+    padding: 10px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .stat-number {
+    font-size: 16px;
+  }
+
+  .shift-row {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .shift-title {
+    font-size: 12px;
+  }
+
+  .shift-time {
+    font-size: 10px;
+  }
+
+  .action-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>
 
-<header class="topbar">
-  <div>
-    <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
-    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:8px 0 0 0">Welcome, ${escapeHtml(user.name)}</p>
-  </div>
-  <div class="row">
+<div class="topbar">
+  <h1 class="topbar-title">${escapeHtml(guild.name)}</h1>
+  <div class="topbar-right">
     ${toggleButton}
-    <a class="btn btn-text" href="/dashboard" style="gap:4px">
-      ${icon('chevronLeft')}
-      <span>Back</span>
-    </a>
-    <a class="btn btn-text" href="/auth/logout" style="gap:4px">
-      ${icon('logOut')}
-    </a>
+    <a href="/dashboard" class="btn-icon">${icon('chevronLeft')}</a>
+    <a href="/auth/logout" class="btn-icon">${icon('logOut')}</a>
   </div>
-</header>
+</div>
 
-<div class="page stack">
-  ${activeLoa ? `
-  <div class="info-card" style="border-left:4px solid var(--md-sys-color-error);background:var(--md-sys-color-error-container);opacity:0.95">
-    <div style="display:flex;gap:var(--space-2);align-items:flex-start">
-      ${icon('alertCircle')}
-      <div>
-        <div class="info-card-title">You're On Leave of Absence</div>
-        <div class="body-small" style="color:var(--md-sys-color-on-error-container);margin-top:4px">
-          Ends ${formatDate(activeLoa.ends_at)} - ${escapeHtml(activeLoa.reason)}
-          <div style="margin-top:8px"><a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn btn-text" style="gap:4px;font-weight:600">Manage Leave</a></div>
-        </div>
-      </div>
-    </div>
-  </div>` : ''}
-
+<div class="page-content">
+  ${loaSection}
   ${statsHtml}
-
-  <div class="section-divider"></div>
-
-  <div class="shifts-container">
-    ${shiftsHtml}
+  ${shiftsHtml}
+  
+  <div class="action-grid">
+    ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guild.id)}/loa" class="action-btn">Request</a>` : ''}
+    <a href="/dashboard/${escapeHtml(guild.id)}/audit" class="action-btn">Activity</a>
+    <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="action-btn">History</a>
+    <a href="/dashboard/${escapeHtml(guild.id)}/docs" class="action-btn">Docs</a>
+    ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}" class="action-btn">Settings</a>` : ''}
+    ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="action-btn">Shifts</a>` : ''}
   </div>
-
-  <div class="section-divider"></div>
-
-  <!-- Quick Actions -->
-  <div class="section">
-    <div class="section-header">
-      <h3 class="headline-small">Quick Actions</h3>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
-      ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn btn-tonal" style="gap:8px"><span>Request Leave</span></a>` : ''}
-      <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="gap:8px"><span>My History</span></a>
-      <a href="/dashboard/${escapeHtml(guild.id)}/audit" class="btn btn-tonal" style="gap:8px"><span>Activity Log</span></a>
-      <a href="/dashboard/${escapeHtml(guild.id)}/docs" class="btn btn-tonal" style="gap:8px"><span>Documentation</span></a>
-      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}" class="btn btn-tonal" style="gap:8px"><span>Settings</span></a>` : ''}
-    </div>
-  </div>
-
-  ${isAdmin ? `
-  <div class="section-divider"></div>
-  <div class="admin-section" style="background:var(--md-sys-color-primary-container);border-radius:12px;padding:var(--space-3);border-left:4px solid var(--md-sys-color-primary)">
-    <div class="section-header">
-      <h3 class="headline-small" style="color:var(--md-sys-color-on-primary-container)">Admin Tools</h3>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
-      <a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="btn btn-filled" style="gap:8px"><span>Shift Manager</span></a>
-      <a href="/dashboard/${escapeHtml(guild.id)}/deletion-requests" class="btn btn-filled" style="gap:8px"><span>Deletion Queue</span></a>
-    </div>
-  </div>` : ''}
 </div>
 `;
 
