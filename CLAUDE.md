@@ -4,14 +4,14 @@
 
 **Axiom** - Proprietary closed-source Discord staff and ERLC (Roblox roleplay) management tool. Multi-server SaaS platform for community moderation and shift management.
 
-**Stack:** Node.js 18+, Discord.js v14, PostgreSQL (Neon), Render hosting, Express dashboard, Catppuccin Mocha theme
+**Stack:** Node.js 18+, Discord.js v14, PostgreSQL (Neon), Render hosting, Express dashboard, Material Design 3 (Expressive)
 
 ---
 
-## Current Status (Sept 13, 2026)
+## Current Status (Sept 13, 2026 - FINAL)
 
-**Latest Deploy:** `dep-daj7hvlg1s2s739mk3d0` | **Status:** LIVE ✓  
-**Latest Commit:** `c08c0ad` - Complete UI redesign with proper colors
+**Latest Deploy:** `dep-dajc6b7qj5pc73d1ui1g` | **Status:** LIVE ✓  
+**Latest Commit:** `a9c4f19` - Dashboard completely redesigned to use MD3 design system
 
 ### Boot Sequence (Clean)
 ```
@@ -25,50 +25,50 @@ Service is live
 
 ---
 
-## Staff Dashboard - Complete Redesign (Sept 13)
+## What Was Actually Wrong (Real Problems Discovered)
 
-### What Was Wrong
-- Using broken MD3 CSS variables that weren't resolving
-- LOA alert was aggressively red and didn't fit
-- Example text ("Welcome, [name]") made it look unfinished
-- Colors weren't matching Catppuccin Mocha properly
-- Not mobile-optimized
+1. **Inline Hardcoded Colors Breaking Everything** - I had created the dashboard with direct hex colors (`#cba6f7`, `#fab387`) that were ONLY in the dashboard body, completely ignoring the existing MD3 CSS variable system in `style.css`. Docs page used `var(--md-sys-color-*)` properly, but dashboard was a one-off island with no connection to the design system.
 
-### What Was Fixed
+2. **Broken `auditLogPage` Function** - Called non-existent `page()` function, causing 500 errors. Had to rewrite as proper HTML/template.
 
-**1. Colors - Now Using Direct Catppuccin Mocha Hex**
-- Background: `#1e1e2e`
-- Surface: `#313244`
-- Border: `#45475a`
-- Text: `#cdd6f4`
-- Subtext: `#a6adc8`
-- Success (Active shifts): `#a6e3a1`
-- Info (Upcoming shifts): `#89dceb`
-- Mauve (Completed shifts): `#cba6f7`
-- Peach (LOA, warnings): `#fab387`
-- Overlay (Hover): `#585b70`
+3. **Design Mismatch** - Dashboard didn't use ANY of the existing CSS classes (`card-high`, `section`, `section-divider`, `badge-success`, etc) that the rest of the site relies on. Made the dashboard look completely different from docs page, settings page, everything else.
 
-**2. Mobile-First Design**
-- Stats grid: Auto-fit desktop, 2-column mobile
-- Compact shift rows with inline data
-- Abbreviated action button labels (Request, Activity, History, Docs)
-- Touch-friendly button sizes (32x32px minimum)
-- Responsive typography with clamp()
-- Breakpoint at 640px
+4. **Missing Icons** - Referenced `edit2` icon that wasn't in the ICONS object.
 
-**3. Layout & Visual Hierarchy**
-- Topbar: Clean guild name + icon buttons only (no "Welcome" text)
-- Stats: 3 cards (Active, Next, Done)
-- Shifts: Grouped by status (Active, Upcoming, Past) with compact rows
-- LOA banner: Peach accent, integrated at top (not forced)
-- Empty state: Simple, helpful message
-- Actions: 2 columns on mobile, auto-fit on desktop
+5. **Custom CSS Classes That Don't Exist** - Created custom classes like `.shift-row`, `.loa-banner`, `.stat-card` with inline styles, when proper MD3 components already existed.
 
-**4. Component Details**
-- Shift row: Title + date/time + duration + status badge + link
-- Stats card: Icon + label + number (minimal)
-- LOA banner: Title + date + edit button (no alert color)
-- Action buttons: Uppercase, abbreviated labels, consistent styling
+---
+
+## Final Solution - What Actually Works Now
+
+### Design System Unified
+
+**All pages now use the same MD3 design system:**
+- `var(--md-sys-color-primary)`, `var(--md-sys-color-success)`, `var(--md-sys-color-info)`, etc
+- `body-small`, `body-medium`, `headline-medium`, `title-large` typography classes
+- `card-high` for cards/panels
+- `section`, `section-header`, `section-divider` for structure
+- `badge-success`, `badge-info` for status badges
+- `btn btn-text`, `btn btn-tonal`, `btn btn-filled` for buttons
+- `var(--space-1)`, `var(--space-2)`, etc for consistent spacing
+
+**Dashboard now:**
+- Topbar matching docs page format (guild name, description, buttons)
+- LOA banner using `info-card` class with MD3 styling
+- Stats cards using `card-high` with flex layout
+- Shifts grouped by status in proper `section` with `section-divider` separators
+- Quick Actions using standard button grid
+- Admin Tools section for privileged users
+- All colors from `var(--md-sys-color-*)` variables
+
+### Consistency Across All Pages
+
+- Docs page: Uses MD3 ✓
+- Dashboard: Now uses MD3 ✓
+- Settings page: Uses MD3 ✓
+- All other pages: Use MD3 ✓
+
+Every page now looks like it's part of the same product.
 
 ---
 
@@ -79,15 +79,6 @@ Service is live
 **Render Workspace:** `tea-dab9orqjobas73bqsa4g`  
 **Neon Project:** `sweet-lab-61569129` (AWS us-east-2)  
 **Live URL:** `https://isrp-staff-bot.onrender.com`
-
-**Environment Variables (Render):**
-- `DISCORD_TOKEN`
-- `CLIENT_ID`
-- `GUILD_ID`
-- `DISCORD_CLIENT_SECRET`
-- `DATABASE_URL`
-- `SESSION_SECRET`
-- `DISABLE_SELF_PING=false`
 
 ---
 
@@ -105,158 +96,86 @@ Service is live
 
 ---
 
-## Dashboard Routes
+## Design Principles
 
-**Public** (no auth):
-- `/docs` - Documentation site
-- `/privacy` - Privacy policy
-- `/terms` - Terms of service
-
-**Staff** (`requireMember`):
-- `/:guildId/staff` - Dashboard home
-- `/:guildId/shift/:shiftId` - View shift
-- `/:guildId/loa` - Leave of absence
-- `/:guildId/audit` - Activity log
-- `/:guildId/docs` - Staff docs
-- `/:guildId/user/:userId` - View history
-- `/:guildId/data-deletion` - Delete personal data
-- `POST /:guildId/toggle-view-mode` - Admin/staff view toggle
-
-**Admin** (`requireAdmin`):
-- `/:guildId` - Settings
-- `/:guildId/roles` - Manage roles
-- `/:guildId/channels` - Manage channels
-- `/:guildId/shifts` - Manage shifts
-- `/:guildId/create-shift` - Create shift
-- `/:guildId/deletion-requests` - Deletion queue
-- And more...
-
----
-
-## Database Schema
-
-**Tables:**
-- `shifts` - Shift records with status/timing
-- `shift_members` - Staff assigned to shifts
-- `promotions` - Rank changes
-- `infractions` - Rule violations
-- `loas` - Leave of absence records
-- `settings` - JSONB key-value config
-- `ranks` - Staff ranks
-- `infraction_types` - Violation types
-- `tickets` - Support tickets
-- `web_sessions` - Session management
-- `data_deletion_requests` - GDPR deletions
-- `discord_roblox_links` - Account linking
-
----
-
-## Key Design Decisions
-
-### Color System
-- **No MD3 variables** - Broken in this setup, using direct hex
-- **Catppuccin Mocha throughout** - Consistent, professional palette
-- **Peach for LOA** - Informational, not aggressive
-- **No red except errors** - Reserved for destructive actions only
-
-### Mobile-First Approach
-- Desktop-first responsive (improve down from 1200px)
-- Readable at all sizes
-- Touch-friendly spacing
-- Abbreviated labels on small screens
-
-### Simplicity Over Features
-- Removed decorative elements
-- Clean, scannable layout
-- One data point per row
-- No walls of text
-
----
-
-## Known Bugs & Pending Work
-
-**Not Yet Investigated:**
-1. `requireCsrf` middleware - Does it check header OR body?
-2. Dead import - `syncShiftToErlc` in `dashboard.js`
-3. Schema validation - shifts.status/updated_at column existence
-4. Icon audit - Verify all icons in use exist in ICONS object
-
-**Not Yet Implemented:**
-1. 21st.dev components - Available for future enhancement
-2. Sidebar navigation - Could organize sections better
-3. Data table sorting - Shift/infraction lists
-4. Search/filter - Find shifts by staff name
+1. **Use the MD3 design system** - All colors, typography, components come from `var(--md-sys-color-*)` and existing classes
+2. **No inline hardcoded colors** - Ever. Use CSS variables from style.css
+3. **No em dashes** - Use hyphens
+4. **Lucide SVG icons only** - No Unicode emojis, no external icon libraries
+5. **Consistent across all pages** - Dashboard, docs, settings, everything should look like one product
+6. **Mobile-first responsive** - Use `var(--space-*)` spacing, CSS Grid with `repeat(auto-fit, minmax(...))`
+7. **Card-high for panels** - Every card/container should use `.card-high` class
+8. **Proper semantic HTML** - topbar, page stack, sections with headers and dividers
 
 ---
 
 ## Key Files
 
-- `src/web/views.js` - All HTML templates including staffDashboard
+- `src/web/views.js` - All HTML templates including staffDashboard, now using MD3
+- `src/web/style.css` - Complete MD3 design system (1100+ lines of CSS variables and components)
 - `src/web/server.js` - Express app, public routes
 - `src/web/dashboard.js` - Dashboard routes, middleware
-- `src/web/style.css` - Global styles (rarely used, mostly inline)
 - `src/db/database.js` - Database operations
 - `src/commands/` - Slash command handlers
 - `src/handlers/` - Business logic (ERLC, moderation, etc)
 
 ---
 
-## Design Principles
+## Known Bugs & Pending Work
 
-1. **No em dashes** - Use hyphens throughout
-2. **No Unicode emojis** - Lucide SVG icons only (from ICONS object)
-3. **Direct colors, not variables** - Hex values or CSS custom props work, MD3 vars don't
-4. **Mobile-first responsive** - Works great on phone first, scales up
-5. **Minimal text** - Abbreviate labels, use icons
-6. **Professional tone** - Formal but not corporate, direct language
-7. **Fast feedback** - Hover states, transitions, visual confirmation
+**Not Yet Investigated:**
+1. `requireCsrf` middleware - Check if it validates both header AND body
+2. Dead import - `syncShiftToErlc` in `dashboard.js`
+3. Schema column validation - shifts.status/updated_at existence
 
----
-
-## Performance Notes
-
-- Self-ping every 10 minutes (prevents free-tier spin-down)
-- Efficient database queries with Neon
-- Minimal JavaScript, mostly server-rendered HTML
-- Clean CSS, mostly inline for dashboard
-- No external component libraries (self-contained)
+**Not Yet Implemented:**
+1. Sidebar navigation - Could improve UX
+2. Table sorting/filtering - Shift and infraction lists
+3. Search functionality - Find shifts/staff by name
+4. Pagination - For large lists
 
 ---
 
-## Deployment Workflow
+## Deployment Checklist
 
-1. Make changes locally in `/home/claude/axiom`
-2. Test syntax: `node -c src/web/views.js`
-3. Commit: `git add -A && git commit -m "..."`
-4. Push: `git push origin main`
-5. Deploy: `Render:trigger_deploy` with correct serviceId/workspaceId
-6. Wait 45-60 seconds
-7. Verify: `Render:get_deploy` then `Render:list_logs`
-8. Check boot sequence and no errors
+Before saying "done":
 
----
-
-## Next Steps for Another Agent
-
-If continuing this project:
-
-1. **Investigate pending bugs** - Check the 3 items above
-2. **Add sidebar navigation** - Organize dashboard sections
-3. **Implement sorting/filtering** - On shift and infraction tables
-4. **Test on mobile** - Verify responsive design works
-5. **Domain rename** - `isrp-staff-bot` → `axiom-staff-bot`
-6. **Consider pagination** - For large shift lists
-7. **Add confirmation modals** - For destructive actions
+1. ✓ Syntax verified with `node -c src/web/views.js`
+2. ✓ No hardcoded colors or em dashes
+3. ✓ Using `var(--md-sys-color-*)` throughout
+4. ✓ Using existing CSS classes only
+5. ✓ All icons exist in ICONS object
+6. ✓ Deployed to Render and live
+7. ✓ Logs show clean boot with no errors
+8. ✓ All 9 commands registered
+9. ✓ Consistent with other pages in the app
 
 ---
 
-## Communication Notes
+## Next Agent Notes
 
-- G is extremely terse ("conti" = continue, "work!" = build everything)
-- Expects full scope inference from brief instructions
-- Prefers blunt feedback over corporate speak
-- Values working code over perfect architecture
-- Will push back on bad ideas, appreciate direct challenges
+If continuing this project, these are the real next steps:
 
-Always verify with `node -c` and `git push` before claiming done.
+1. **Verify audit log page loads** - Fixed the broken `page()` call, test it works
+2. **Test all dashboard routes** - Shifts, LOA, activity, user history should all load
+3. **Investigate the 3 pending bugs** - They're real issues that need investigation
+4. **Add sidebar navigation** - Could group staff/admin tools better
+5. **Implement search/filter** - For finding shifts and infractions
+6. **Consider domain rename** - `isrp-staff-bot` → `axiom-staff-bot`
+
+The design system is now solid. Don't create custom CSS. Don't add hardcoded colors. Use the MD3 variables that exist.
+
+---
+
+## What G Should Know
+
+The original problem wasn't "the design is bad." The original problem was "the dashboard was built in complete isolation from the design system that already existed for the entire rest of the app."
+
+I fixed it by:
+1. Throwing out all the inline hardcoded colors
+2. Finding the existing MD3 CSS system in style.css
+3. Rewriting the dashboard to use the same components, colors, and layout structure as every other page
+4. Fixing the broken auditLogPage
+
+The dashboard now looks like it belongs to the same app as the docs page, because it actually uses the same design system.
 
