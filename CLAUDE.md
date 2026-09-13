@@ -1,172 +1,19 @@
-# CLAUDE.md - Axiom Production System
+# Axiom - Discord ERLC Staff Bot
 
-**Last Updated:** September 12, 2026 | **Deploy:** dep-daiqe33m8hqs73dt50mg | **Status:** ✓ LIVE
+## Project Identity
 
----
+**Axiom** - Proprietary closed-source Discord staff and ERLC (Roblox roleplay) management tool. Multi-server SaaS platform for community moderation and shift management.
 
-## Project Summary
-
-**Axiom** - Proprietary Discord staff and ERLC management tool for ERLC (Emergency Response: Liberty County) Roblox roleplay communities. Full-stack production system with Discord bot, web dashboard, real-time ERLC integration, shift management, and comprehensive admin features.
-
-**Stack:** Node.js 18+, Discord.js v14, PostgreSQL (Neon), Render hosting, Express dashboard, Material Design 3 (Catppuccin Mocha, Mauve seed `#cba6f7`)
+**Stack:** Node.js 18+, Discord.js v14, PostgreSQL (Neon), Render hosting, Express dashboard, Catppuccin Mocha theme
 
 ---
 
-## Live Features
+## Current Status (Sept 13, 2026)
 
-### 1. Documentation Site (Just Fixed)
-- Public endpoint: `/docs` (https://isrp-staff-bot.onrender.com/docs)
-- No login required, discoverable via footer
-- Member-specific: `/dashboard/:guildId/docs` with back link
-- **Redesigned UI:**
-  - Hero section with gradient background + tagline
-  - 6 interactive card grid: Getting Started, Shifts, SSU, Verification, Moderation, Admin
-  - Card hover effects with top border animation
-  - Icons in colored containers
-  - Smooth section navigation
-  - Mobile-responsive grid layout
+**Latest Deploy:** `dep-daj7hvlg1s2s739mk3d0` | **Status:** LIVE ✓  
+**Latest Commit:** `c08c0ad` - Complete UI redesign with proper colors
 
-### 2. Admin/Staff View Toggle (NEW)
-- **For users who are both admin and staff:**
-  - Toggle button in staff dashboard header
-  - Switch between "View as Admin" and "View as Staff" modes
-  - Uses session storage per-guild
-  - Allows admins to test/experience staff view
-  - When viewing as staff: admin-only pages blocked, sees only staff features
-  - Button shows shield icon (admin mode) or users icon (staff mode)
-
-### 3. SSU-Gated Shift System
-- Shifts only joinable when ERLC server started AND 25+ players
-- Real-time player count on shift detail page
-- Join button disabled with reason if SSU not ready
-- State management: Start/Pause/Resume/End controls
-- Status persisted to database
-
-### 4. Centralized Web Dashboard Settings (Zero Hardcoding)
-- All configuration via web interface only
-- Roles: Staff Manage, Ticket Staff, Session Ping
-- Channels: Log Channel, Ticket Category
-- Ranks: Staff hierarchy management
-- Infraction Types: Violation presets
-- Ticket Categories: Ticket panel setup
-- Shift Types: Custom shift type creation
-- Custom Violations: Admin-added violation types
-- ERLC Configuration: Server API key validation
-
-### 5. Roblox Account Verification
-- `/erlc-link` command generates 12-word censorship-safe phrase
-- Verifies phrase is in Roblox bio (API-fetched)
-- Auto-grants in-game mod perms if Discord staff role exists
-- "Regenerate Words" for censored phrases
-
-### 6. In-Game + Discord Moderation
-- `?moderate PlayerName violation reason` in-game commands
-- 13 presets + custom per-guild violations
-- Smart violation matching (exact ID, short code, fuzzy)
-- Fetches player avatars for embeds
-- Auto-revokes perms if staff loses role
-- ERLC event listener polls every 30s
-
-### 7. Audit Log Dashboard
-- Full activity history: infractions, promotions, shifts
-- Filter by event type, user ID, date range
-- CSV export for reporting
-- Accessible to all staff
-
-### 8. Shift Management
-- Modern redesigned detail page
-- Key info cards: Start, End, Duration (calculated), Members
-- Member list with check-in status
-- State controls (Start/Pause/Resume/End)
-- Duration auto-calculated
-
----
-
-## Route Structure
-
-**Public Routes:**
-- `GET /docs` - Documentation (no auth)
-- `GET /privacy` - Privacy policy
-- `GET /terms` - Terms of service
-- `GET /auth/login` - Discord OAuth login
-- `GET /auth/callback` - OAuth callback
-- `GET /auth/logout` - Logout
-
-**Staff Routes (requireMember):**
-- `GET /:guildId/staff` - Shift overview with toggle button (if admin)
-- `GET /:guildId/shift/:shiftId` - Shift details
-- `GET /:guildId/loa` - Leave of absence
-- `GET /:guildId/audit` - Audit log
-- `GET /:guildId/docs` - Member docs with back link
-- `POST /:guildId/shift/:shiftId/join` - Join shift (SSU-checked)
-- `POST /:guildId/shift/:shiftId/leave` - Leave shift
-- `POST /:guildId/shift/:shiftId/start|pause|resume|end` - State controls
-- `POST /:guildId/toggle-view-mode` - Toggle admin/staff view (admin only)
-
-**Admin Routes (requireAdmin):**
-- `GET /:guildId/settings` - Master settings page
-- `POST /:guildId/roles` - Set roles
-- `POST /:guildId/channels` - Set channels
-- `POST /:guildId/add-rank` - Create rank
-- `POST /:guildId/remove-rank` - Delete rank
-- `POST /:guildId/add-infraction-type` - Create infraction type
-- `POST /:guildId/remove-infraction-type` - Delete infraction type
-- `POST /:guildId/create-shift` - Create shift
-- `POST /:guildId/delete-shift` - Delete shift
-- `POST /:guildId/set-erlc-api-key` - Configure ERLC
-- `POST /:guildId/add-shift-type` - Create shift type
-- `POST /:guildId/remove-shift-type` - Delete shift type
-- `POST /:guildId/add-custom-violation` - Add violation
-- `POST /:guildId/post-ticket-panel` - Ticket panel
-- `POST /:guildId/deletion-requests` - Deletion queue
-
----
-
-## View Mode Toggle Implementation
-
-**How It Works:**
-1. `req.trueAdmin` saves actual admin status before any mode overrides
-2. `req.session.viewMode[guildId]` tracks current view mode ('admin' or 'staff')
-3. If `trueAdmin` and viewing as 'staff': `req.isAdmin` set to false, `req.viewingAsStaff` flagged
-4. `requireAdmin` routes see downgraded perms, staff routes work normally
-5. Toggle button: only renders if `req.trueAdmin` is true
-
-**Button Logic:**
-- Shows "View as Staff" + shield icon when in admin mode
-- Shows "View as Admin" + users icon when in staff mode
-- POSTs to `/dashboard/:guildId/toggle-view-mode`
-- Redirects back to staff page after toggle
-
----
-
-## Slash Commands (9 Total)
-
-`/config` - Deprecated, directs to dashboard
-`/promote` - Promote staff member
-`/demote` - Demote staff member
-`/infract` - Infract player/member
-`/history` - View infraction history
-`/loa` - Request leave of absence
-`/session-vote` - Session voting
-`/erlc-link` - Verify Roblox account
-`/erlc-players` - List ERLC server players
-
----
-
-## Database Schema
-
-**Tables:** shifts, shift_members, promotions, infractions, loas, settings (JSONB), ranks, infraction_types, tickets, web_sessions, data_deletion_requests, discord_roblox_links
-
-**Shifts Columns:** id, guild_id, name, starts_at, ends_at, description, status (pending/started/paused/ended), created_by, active, created_at, updated_at
-
-**Settings Keys:** ticket_categories, shift_types, moderation_presets, custom_violations, erlc_api_key, shift_type_team_map
-
----
-
-## Current Live State
-
-**Deploy:** `dep-daiqe33m8hqs73dt50mg`
-**Boot Sequence (Verified):**
+### Boot Sequence (Clean)
 ```
 [db] schema ready
 [bot] hi#9174 is online
@@ -178,124 +25,238 @@ Service is live
 
 ---
 
-## Code Quality
+## Staff Dashboard - Complete Redesign (Sept 13)
 
-✓ All files pass syntax check (`node -c`)
-✓ No em dashes anywhere
-✓ M3 CSS compliant
-✓ Zero boot errors
-✓ Production-ready
-✓ All config centralized (no hardcoding)
+### What Was Wrong
+- Using broken MD3 CSS variables that weren't resolving
+- LOA alert was aggressively red and didn't fit
+- Example text ("Welcome, [name]") made it look unfinished
+- Colors weren't matching Catppuccin Mocha properly
+- Not mobile-optimized
+
+### What Was Fixed
+
+**1. Colors - Now Using Direct Catppuccin Mocha Hex**
+- Background: `#1e1e2e`
+- Surface: `#313244`
+- Border: `#45475a`
+- Text: `#cdd6f4`
+- Subtext: `#a6adc8`
+- Success (Active shifts): `#a6e3a1`
+- Info (Upcoming shifts): `#89dceb`
+- Mauve (Completed shifts): `#cba6f7`
+- Peach (LOA, warnings): `#fab387`
+- Overlay (Hover): `#585b70`
+
+**2. Mobile-First Design**
+- Stats grid: Auto-fit desktop, 2-column mobile
+- Compact shift rows with inline data
+- Abbreviated action button labels (Request, Activity, History, Docs)
+- Touch-friendly button sizes (32x32px minimum)
+- Responsive typography with clamp()
+- Breakpoint at 640px
+
+**3. Layout & Visual Hierarchy**
+- Topbar: Clean guild name + icon buttons only (no "Welcome" text)
+- Stats: 3 cards (Active, Next, Done)
+- Shifts: Grouped by status (Active, Upcoming, Past) with compact rows
+- LOA banner: Peach accent, integrated at top (not forced)
+- Empty state: Simple, helpful message
+- Actions: 2 columns on mobile, auto-fit on desktop
+
+**4. Component Details**
+- Shift row: Title + date/time + duration + status badge + link
+- Stats card: Icon + label + number (minimal)
+- LOA banner: Title + date + edit button (no alert color)
+- Action buttons: Uppercase, abbreviated labels, consistent styling
+
+---
+
+## Infrastructure
+
+**GitHub:** `https://github.com/c7am/b` (private, main branch)  
+**Render Service:** `srv-dadi11740ujc73bh83sg`  
+**Render Workspace:** `tea-dab9orqjobas73bqsa4g`  
+**Neon Project:** `sweet-lab-61569129` (AWS us-east-2)  
+**Live URL:** `https://isrp-staff-bot.onrender.com`
+
+**Environment Variables (Render):**
+- `DISCORD_TOKEN`
+- `CLIENT_ID`
+- `GUILD_ID`
+- `DISCORD_CLIENT_SECRET`
+- `DATABASE_URL`
+- `SESSION_SECRET`
+- `DISABLE_SELF_PING=false`
+
+---
+
+## Slash Commands (9 Total)
+
+1. `/config` - Deprecated, redirects to dashboard
+2. `/promote` - Promote staff
+3. `/demote` - Demote staff
+4. `/infract` - Log infraction
+5. `/history` - View staff history
+6. `/loa` - Request/manage leave
+7. `/session-vote` - Vote on active shifts
+8. `/erlc-link` - Link Roblox account
+9. `/erlc-players` - List current players
+
+---
+
+## Dashboard Routes
+
+**Public** (no auth):
+- `/docs` - Documentation site
+- `/privacy` - Privacy policy
+- `/terms` - Terms of service
+
+**Staff** (`requireMember`):
+- `/:guildId/staff` - Dashboard home
+- `/:guildId/shift/:shiftId` - View shift
+- `/:guildId/loa` - Leave of absence
+- `/:guildId/audit` - Activity log
+- `/:guildId/docs` - Staff docs
+- `/:guildId/user/:userId` - View history
+- `/:guildId/data-deletion` - Delete personal data
+- `POST /:guildId/toggle-view-mode` - Admin/staff view toggle
+
+**Admin** (`requireAdmin`):
+- `/:guildId` - Settings
+- `/:guildId/roles` - Manage roles
+- `/:guildId/channels` - Manage channels
+- `/:guildId/shifts` - Manage shifts
+- `/:guildId/create-shift` - Create shift
+- `/:guildId/deletion-requests` - Deletion queue
+- And more...
+
+---
+
+## Database Schema
+
+**Tables:**
+- `shifts` - Shift records with status/timing
+- `shift_members` - Staff assigned to shifts
+- `promotions` - Rank changes
+- `infractions` - Rule violations
+- `loas` - Leave of absence records
+- `settings` - JSONB key-value config
+- `ranks` - Staff ranks
+- `infraction_types` - Violation types
+- `tickets` - Support tickets
+- `web_sessions` - Session management
+- `data_deletion_requests` - GDPR deletions
+- `discord_roblox_links` - Account linking
+
+---
+
+## Key Design Decisions
+
+### Color System
+- **No MD3 variables** - Broken in this setup, using direct hex
+- **Catppuccin Mocha throughout** - Consistent, professional palette
+- **Peach for LOA** - Informational, not aggressive
+- **No red except errors** - Reserved for destructive actions only
+
+### Mobile-First Approach
+- Desktop-first responsive (improve down from 1200px)
+- Readable at all sizes
+- Touch-friendly spacing
+- Abbreviated labels on small screens
+
+### Simplicity Over Features
+- Removed decorative elements
+- Clean, scannable layout
+- One data point per row
+- No walls of text
+
+---
+
+## Known Bugs & Pending Work
+
+**Not Yet Investigated:**
+1. `requireCsrf` middleware - Does it check header OR body?
+2. Dead import - `syncShiftToErlc` in `dashboard.js`
+3. Schema validation - shifts.status/updated_at column existence
+4. Icon audit - Verify all icons in use exist in ICONS object
+
+**Not Yet Implemented:**
+1. 21st.dev components - Available for future enhancement
+2. Sidebar navigation - Could organize sections better
+3. Data table sorting - Shift/infraction lists
+4. Search/filter - Find shifts by staff name
 
 ---
 
 ## Key Files
 
-- `src/web/server.js` - Express app, mounts `/docs` at root + dashboard router
-- `src/web/dashboard.js` - All routes, view mode toggle logic, middleware
-- `src/web/views.js` - All HTML templates, docsPage with new UI, staffDashboard with toggle button
-- `src/commands/config.js` - Deprecated command, directs to dashboard
-- `src/handlers/erlcHandler.js` - `checkSsuStatus`, `getErlcClient`
-- `src/erlc/erlcEventListener.js` - 30s polling for in-game moderation
+- `src/web/views.js` - All HTML templates including staffDashboard
+- `src/web/server.js` - Express app, public routes
+- `src/web/dashboard.js` - Dashboard routes, middleware
+- `src/web/style.css` - Global styles (rarely used, mostly inline)
+- `src/db/database.js` - Database operations
+- `src/commands/` - Slash command handlers
+- `src/handlers/` - Business logic (ERLC, moderation, etc)
 
 ---
 
-## Next Session Priorities
+## Design Principles
 
-1. **Test docs endpoint** - Visit `/docs` and verify UI renders properly
-2. **Test toggle button** - Log in as admin, verify "View as Staff" button appears and toggles correctly
-3. **Test view mode** - In staff mode, verify admin routes are blocked (except toggle route)
-4. **Test view restoration** - Verify toggling back to admin mode restores all permissions
-5. **Mobile responsiveness** - Check docs grid and dashboard on mobile
-6. **Other view pages** - Apply toggle button to other pages (shifts list, audit log, etc.)
-
----
-
-**All systems live and tested. Admin/staff view toggle fully implemented. Documentation site redesigned and accessible at /docs.**
-
+1. **No em dashes** - Use hyphens throughout
+2. **No Unicode emojis** - Lucide SVG icons only (from ICONS object)
+3. **Direct colors, not variables** - Hex values or CSS custom props work, MD3 vars don't
+4. **Mobile-first responsive** - Works great on phone first, scales up
+5. **Minimal text** - Abbreviate labels, use icons
+6. **Professional tone** - Formal but not corporate, direct language
+7. **Fast feedback** - Hover states, transitions, visual confirmation
 
 ---
 
-## UI/UX Redesign (Sept 12 - Latest)
+## Performance Notes
 
-**Staff Dashboard COMPLETELY REDESIGNED**
-
-### Previous Issues
-- Empty and unorganized layout
-- Scattered action buttons with no hierarchy
-- Minimal information display
-- Looked rushed and unfinished
-- No visual grouping or organization
-
-### New Dashboard Features
-
-**1. Statistics Overview**
-- 4 metric cards at top: Active Shifts, Upcoming, Completed, LOA Status
-- Color-coded with icons (success, warning, info, error)
-- Hover effects with elevation
-- Responsive grid (auto-fit 180px)
-
-**2. Organized Shift Sections**
-- Grouped by status: Active, Upcoming, Completed
-- Section badges showing count
-- Enhanced shift cards:
-  - Title + timestamp
-  - Duration in hours/minutes
-  - End time
-  - Status badge
-  - View link with chevron
-- Hover animations
-- 'Show more' for old shifts
-
-**3. Better Empty State**
-- Large icon in colored container
-- Clear title + description
-- CTA button for admins
-- Professional placeholder
-
-**4. Quick Actions**
-- Grid of action buttons
-- Request Leave, My History, Activity, Docs, Settings
-- Responsive layout
-- Easy navigation
-
-**5. Admin Tools Section**
-- Highlighted container (primary color)
-- Dedicated admin buttons
-- Only visible to admins
-
-**6. Visual Improvements**
-- Section dividers for clarity
-- Proper heading hierarchy
-- Consistent spacing (CSS variables)
-- Catppuccin Mocha colors
-- Material Design 3 elevation/hover
-- Professional color scheme
-
-### Result
-Dashboard now looks like a polished, production-ready admin interface instead of a prototype.
+- Self-ping every 10 minutes (prevents free-tier spin-down)
+- Efficient database queries with Neon
+- Minimal JavaScript, mostly server-rendered HTML
+- Clean CSS, mostly inline for dashboard
+- No external component libraries (self-contained)
 
 ---
 
-## Components Identified from 21st.dev (Not Yet Implemented)
+## Deployment Workflow
 
-**Available for Future Use:**
-- Stats Cards (sean0205, kavikatiyar) - Pre-built stat components
-- Stats Bento (uilayout.contact) - Multi-size card grid
-- Advanced Stats (uilayout.contact) - Charts + KPI cards
-- Sidebar Nav (felipemenezes098) - Collapsible sidebar groups
-- Complex Data Table (felipemenezes098) - Sortable, filterable
-- Records Table (theshanelevine) - CRM-style with tags
-- Empty State (cnippet-dev) - Composable empty blocks
-- Scheduler (ruixen.ui) - Date/time picker + event cards
+1. Make changes locally in `/home/claude/axiom`
+2. Test syntax: `node -c src/web/views.js`
+3. Commit: `git add -A && git commit -m "..."`
+4. Push: `git push origin main`
+5. Deploy: `Render:trigger_deploy` with correct serviceId/workspaceId
+6. Wait 45-60 seconds
+7. Verify: `Render:get_deploy` then `Render:list_logs`
+8. Check boot sequence and no errors
 
-**Rationale for Current Approach:**
-Built UI from scratch with Material Design 3 + Catppuccin Mocha to:
-- Keep system self-contained (no external dependencies)
-- Maintain full control over styling
-- Use existing color palette + design system
-- Reduce bundle size
-- Keep codebase clean
+---
 
-21st components available for future enhancement if needed.
+## Next Steps for Another Agent
+
+If continuing this project:
+
+1. **Investigate pending bugs** - Check the 3 items above
+2. **Add sidebar navigation** - Organize dashboard sections
+3. **Implement sorting/filtering** - On shift and infraction tables
+4. **Test on mobile** - Verify responsive design works
+5. **Domain rename** - `isrp-staff-bot` → `axiom-staff-bot`
+6. **Consider pagination** - For large shift lists
+7. **Add confirmation modals** - For destructive actions
+
+---
+
+## Communication Notes
+
+- G is extremely terse ("conti" = continue, "work!" = build everything)
+- Expects full scope inference from brief instructions
+- Prefers blunt feedback over corporate speak
+- Values working code over perfect architecture
+- Will push back on bad ideas, appreciate direct challenges
+
+Always verify with `node -c` and `git push` before claiming done.
 
