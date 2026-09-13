@@ -554,6 +554,14 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
   const upcomingShifts = shifts.filter(s => new Date(s.starts_at) > now);
   const completedShifts = shifts.filter(s => new Date(s.ends_at) < now);
 
+  const formatDate = (date) => {
+    try {
+      return new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   // Quick stats - Catppuccin Mocha colors
   const statsHtml = `
     <div class="dashboard-stats">
@@ -590,446 +598,172 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
     const duration = end - start;
     const durationHours = Math.floor(duration / (1000 * 60 * 60));
     const durationMins = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-    const shortDate = start.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    const timeStart = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const timeEnd = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    let badge = 'Done';
-    let badgeColor = '#6c7086';
+    const startStr = start.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const endStr = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    let status = 'Completed';
+    let statusClass = 'badge-secondary';
     if (isActive) {
-      badge = 'Live';
-      badgeColor = '#a6e3a1';
+      status = 'Active';
+      statusClass = 'badge-success';
     } else if (start > now) {
-      badge = 'Next';
-      badgeColor = '#89dceb';
+      status = 'Upcoming';
+      statusClass = 'badge-info';
     }
 
     return `
-      <div class="shift-row">
-        <div class="shift-main">
-          <div class="shift-title">${escapeHtml(s.name)}</div>
-          <div class="shift-time">${shortDate} • ${timeStart}${timeEnd ? ' to ' + timeEnd : ''}</div>
-          <div class="shift-duration">${durationHours}h ${durationMins}m</div>
+      <div class="card-high" style="padding:var(--space-3);display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="body-large" style="font-weight:600">${escapeHtml(s.name)}</div>
+          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">
+            ${startStr} to ${endStr}
+          </div>
+          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:2px">
+            ${durationHours}h ${durationMins}m
+          </div>
         </div>
-        <div class="shift-badge" style="color:${badgeColor}">${badge}</div>
-        <a href="/dashboard/${escapeHtml(guild.id)}/shift/${escapeHtml(s.id)}" class="shift-link">${icon('chevronRight')}</a>
+        <div style="display:flex;gap:var(--space-2);align-items:center">
+          <span class="badge ${statusClass}">${status}</span>
+          <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text" style="gap:4px;padding:4px 8px">
+            ${icon('chevronRight')}
+          </a>
+        </div>
       </div>`;
   };
 
   const toggleButton = trueAdmin ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/toggle-view-mode" style="display:inline">
-      <button type="submit" class="btn-icon" title="Switch view mode">
+      <button type="submit" class="btn btn-text" title="Switch view mode" style="gap:4px">
         ${viewingAsStaff ? icon('shield') : icon('users')}
       </button>
     </form>` : '';
 
   const loaSection = activeLoa ? `
-    <div class="loa-banner">
-      <div class="loa-content">
-        <div class="loa-title">On Leave</div>
-        <div class="loa-date">Until ${formatDate(activeLoa.ends_at).split(' ')[0]}</div>
+    <div class="info-card" style="border-left:4px solid var(--md-sys-color-primary);background:var(--md-sys-color-primary-container);opacity:0.95">
+      <div style="display:flex;gap:var(--space-2);align-items:flex-start">
+        ${icon('alertCircle')}
+        <div>
+          <div class="info-card-title">You're On Leave</div>
+          <div class="body-small" style="color:var(--md-sys-color-on-primary-container);margin-top:4px">
+            Until ${formatDate(activeLoa.ends_at)}
+            <div style="margin-top:8px"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text" style="gap:4px;font-weight:600">Manage Leave</a></div>
+          </div>
+        </div>
       </div>
-      <a href="/dashboard/${escapeHtml(guild.id)}/loa" class="btn-icon">${icon('edit2')}</a>
-    </div>
-  ` : '';
+    </div>` : '';
 
   const shiftsHtml = shifts.length === 0 ? `
-    <div class="empty-state">
-      <div class="empty-icon">${icon('clock')}</div>
-      <div class="empty-title">No Shifts</div>
-      <div class="empty-text">No shifts assigned yet</div>
+    <div style="text-align:center;padding:var(--space-5);color:var(--md-sys-color-on-surface-variant)">
+      <div style="width:48px;height:48px;margin:0 auto var(--space-2);opacity:0.5">${icon('clock')}</div>
+      <div class="headline-small">No Shifts Assigned</div>
+      <div class="body-small">Contact your administrator to get assigned to a shift.</div>
     </div>
   ` : `
-    ${activeShifts.length > 0 ? `<div class="shifts-section"><div class="section-label">Active</div>${activeShifts.map(shiftCard).join('')}</div>` : ''}
-    ${upcomingShifts.length > 0 ? `<div class="shifts-section"><div class="section-label">Upcoming</div>${upcomingShifts.map(shiftCard).join('')}</div>` : ''}
-    ${completedShifts.length > 0 ? `<div class="shifts-section"><div class="section-label">Past</div>${completedShifts.slice(0, 3).map(shiftCard).join('')}${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="view-more">View all ${completedShifts.length}</a>` : ''}</div>` : ''}
+    <div class="section">
+      <div class="section-header">
+        <h3 class="headline-small">Your Shifts</h3>
+      </div>
+      <div style="display:grid;gap:var(--space-2)">
+        ${activeShifts.length > 0 ? `
+          <div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Active</div>
+            ${activeShifts.map(shiftCard).join('')}
+          </div>
+        ` : ''}
+        ${upcomingShifts.length > 0 ? `
+          <div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Upcoming</div>
+            ${upcomingShifts.map(shiftCard).join('')}
+          </div>
+        ` : ''}
+        ${completedShifts.length > 0 ? `
+          <div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Past</div>
+            ${completedShifts.slice(0, 3).map(shiftCard).join('')}
+            ${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-text" style="gap:4px;font-size:12px;justify-content:center;margin-top:var(--space-2)">View all ${completedShifts.length}</a>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    </div>
   `;
 
   const body = `
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #1e1e2e; color: #cdd6f4; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-
-.topbar {
-  background: #313244;
-  border-bottom: 1px solid #45475a;
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.topbar-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #cdd6f4;
-}
-
-.topbar-right {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #45475a;
-  background: transparent;
-  border-radius: 6px;
-  color: #cdd6f4;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  text-decoration: none;
-  padding: 0;
-}
-
-.btn-icon:hover {
-  background: #585b70;
-  border-color: #585b70;
-}
-
-.btn-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.page-content {
-  padding: 16px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.loa-banner {
-  background: #313244;
-  border: 1px solid #fab387;
-  border-left: 3px solid #fab387;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.loa-content {
-  flex: 1;
-}
-
-.loa-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #cdd6f4;
-}
-
-.loa-date {
-  font-size: 13px;
-  color: #fab387;
-  font-weight: 600;
-  margin-top: 2px;
-}
-
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: #313244;
-  border: 1px solid #45475a;
-  border-radius: 8px;
-  padding: 12px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  transition: all 0.2s;
-}
-
-.stat-card:hover {
-  border-color: #585b70;
-}
-
-.stat-icon {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-label {
-  font-size: 10px;
-  color: #a6adc8;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
-}
-
-.stat-number {
-  font-size: 18px;
-  font-weight: 700;
-  color: #cdd6f4;
-  line-height: 1;
-  margin-top: 2px;
-}
-
-.shifts-section {
-  margin-bottom: 16px;
-}
-
-.section-label {
-  font-size: 11px;
-  color: #a6adc8;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-  padding-left: 2px;
-}
-
-.shift-row {
-  display: flex;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #313244;
-  border: 1px solid #45475a;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  align-items: center;
-  transition: all 0.2s;
-}
-
-.shift-row:hover {
-  background: #585b70;
-  border-color: #585b70;
-}
-
-.shift-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.shift-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #cdd6f4;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.shift-time {
-  font-size: 11px;
-  color: #a6adc8;
-  margin-bottom: 1px;
-}
-
-.shift-duration {
-  font-size: 10px;
-  color: #cba6f7;
-  font-weight: 600;
-}
-
-.shift-badge {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  padding: 3px 6px;
-  border-radius: 3px;
-  background: rgba(166, 227, 161, 0.15);
-}
-
-.shift-link {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  color: #a6adc8;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-}
-
-.shift-link:hover {
-  color: #89dceb;
-}
-
-.shift-link svg {
-  width: 100%;
-  height: 100%;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 30px 16px;
-  color: #a6adc8;
-}
-
-.empty-icon {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 10px;
-  opacity: 0.5;
-}
-
-.empty-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.empty-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #cdd6f4;
-  margin-bottom: 4px;
-}
-
-.empty-text {
-  font-size: 12px;
-}
-
-.view-more {
-  display: block;
-  padding: 8px 12px;
-  margin-top: 6px;
-  color: #89dceb;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-  border: 1px solid #45475a;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.view-more:hover {
-  background: #313244;
-  border-color: #89dceb;
-}
-
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 6px;
-  margin-top: 16px;
-}
-
-.action-btn {
-  padding: 8px 10px;
-  background: #313244;
-  border: 1px solid #45475a;
-  border-radius: 6px;
-  color: #cdd6f4;
-  text-decoration: none;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.action-btn:hover {
-  background: #585b70;
-  border-color: #585b70;
-}
-
-@media (max-width: 640px) {
-  .page-content {
-    padding: 12px;
-  }
-
-  .topbar {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-
-  .topbar-title {
-    font-size: 16px;
-  }
-
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-
-  .stat-card {
-    padding: 10px;
-  }
-
-  .stat-label {
-    font-size: 9px;
-  }
-
-  .stat-number {
-    font-size: 16px;
-  }
-
-  .shift-row {
-    padding: 8px 10px;
-    gap: 8px;
-  }
-
-  .shift-title {
-    font-size: 12px;
-  }
-
-  .shift-time {
-    font-size: 10px;
-  }
-
-  .action-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-</style>
-
-<div class="topbar">
-  <h1 class="topbar-title">${escapeHtml(guild.name)}</h1>
-  <div class="topbar-right">
+<header class="topbar">
+  <div>
+    <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:8px 0 0 0">Dashboard</p>
+  </div>
+  <div class="row">
     ${toggleButton}
-    <a href="/dashboard" class="btn-icon">${icon('chevronLeft')}</a>
-    <a href="/auth/logout" class="btn-icon">${icon('logOut')}</a>
+    <a class="btn btn-text" href="/dashboard" style="gap:4px">
+      ${icon('chevronLeft')}
+      <span>Back</span>
+    </a>
+    <a class="btn btn-text" href="/auth/logout" style="gap:4px">
+      ${icon('logOut')}
+    </a>
   </div>
-</div>
+</header>
 
-<div class="page-content">
+<div class="page stack">
   ${loaSection}
-  ${statsHtml}
-  ${shiftsHtml}
-  
-  <div class="action-grid">
-    ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guild.id)}/loa" class="action-btn">Request</a>` : ''}
-    <a href="/dashboard/${escapeHtml(guild.id)}/audit" class="action-btn">Activity</a>
-    <a href="/dashboard/${escapeHtml(guild.id)}/user/${escapeHtml(user.id)}" class="action-btn">History</a>
-    <a href="/dashboard/${escapeHtml(guild.id)}/docs" class="action-btn">Docs</a>
-    ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}" class="action-btn">Settings</a>` : ''}
-    ${isAdmin ? `<a href="/dashboard/${escapeHtml(guild.id)}/shifts" class="action-btn">Shifts</a>` : ''}
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2);margin-bottom:var(--space-4)">
+    <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
+      <div style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success);width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('checkCircle')}</div>
+      <div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Active</div>
+        <div class="headline-medium">${activeShifts.length}</div>
+      </div>
+    </div>
+    <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
+      <div style="background:var(--md-sys-color-info-container);color:var(--md-sys-color-info);width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('clock')}</div>
+      <div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Upcoming</div>
+        <div class="headline-medium">${upcomingShifts.length}</div>
+      </div>
+    </div>
+    <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
+      <div style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-primary);width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('check')}</div>
+      <div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Completed</div>
+        <div class="headline-medium">${completedShifts.length}</div>
+      </div>
+    </div>
   </div>
+
+  <div class="section-divider"></div>
+
+  ${shiftsHtml}
+
+  <div class="section-divider"></div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3 class="headline-small">Quick Actions</h3>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
+      ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-tonal">Request Leave</a>` : ''}
+      <a href="/dashboard/${escapeHtml(guildId)}/user/${escapeHtml(user.id)}" class="btn btn-tonal">My History</a>
+      <a href="/dashboard/${escapeHtml(guildId)}/audit" class="btn btn-tonal">Activity</a>
+      <a href="/dashboard/${escapeHtml(guildId)}/docs" class="btn btn-tonal">Docs</a>
+      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guildId)}" class="btn btn-tonal">Settings</a>` : ''}
+      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-tonal">Shift Manager</a>` : ''}
+    </div>
+  </div>
+
+  ${isAdmin ? `
+  <div class="section-divider"></div>
+  <div class="section">
+    <div class="section-header">
+      <h3 class="headline-small" style="color:var(--md-sys-color-on-primary-container)">Admin Tools</h3>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
+      <a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-filled">Create Shift</a>
+      <a href="/dashboard/${escapeHtml(guildId)}/deletion-requests" class="btn btn-filled">Deletion Queue</a>
+    </div>
+  </div>` : ''}
 </div>
 `;
 
@@ -2183,11 +1917,7 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
       '}' +
     '</script>';
 
-  return page(guild, {
-    title: 'Audit Log',
-    activeSection: 'audit',
-    content: content,
-  });
+  return content + '<div style="text-align:center;margin-top:var(--space-4)"><a href="/dashboard/' + escapeHtml(guildId) + '/staff" class="btn btn-text">Back to Dashboard</a></div>';
 }
 
 // ============= Data Deletion Requests Queue (Admin) =============
