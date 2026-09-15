@@ -1381,3 +1381,277 @@ button:active,
     transform: scale(0.95);
   }
 }
+
+/* ---- Material Design 3 Elevation System ---- */
+/* Tonal elevation creates subtle depth without hard shadows (M3 approach) */
+:root {
+  /* Elevation shadows (official M3 spec for web) */
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --md-sys-elevation-level2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --md-sys-elevation-level3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --md-sys-elevation-level4: 0 15px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05);
+  --md-sys-elevation-level5: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Apply elevation to card components */
+.card-high {
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+.card-high:hover {
+  box-shadow: var(--md-sys-elevation-level4);
+}
+
+.shift-card {
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.shift-card:hover {
+  box-shadow: var(--md-sys-elevation-level3);
+}
+
+.info-card {
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* ---- Material Design 3 Density Support ---- */
+/* Density: Comfortable (default), Compact, Expanded */
+/* Add 'data-density="compact"' or 'data-density="expanded"' to root for different densities */
+
+/* Compact density (tighter spacing, smaller touch targets for desktop) */
+[data-density="compact"] {
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+}
+
+[data-density="compact"] .button,
+[data-density="compact"] button,
+[data-density="compact"] .btn-filled,
+[data-density="compact"] .btn-outlined,
+[data-density="compact"] .btn-text,
+[data-density="compact"] .btn-icon {
+  padding: 6px 12px;
+  min-height: 36px;
+}
+
+[data-density="compact"] .card-high,
+[data-density="compact"] .info-card {
+  padding: var(--space-3);
+}
+
+/* Expanded density (more spacing, larger touch targets) */
+[data-density="expanded"] {
+  --space-1: 6px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+}
+
+[data-density="expanded"] .button,
+[data-density="expanded"] button,
+[data-density="expanded"] .btn-filled,
+[data-density="expanded"] .btn-outlined,
+[data-density="expanded"] .btn-text,
+[data-density="expanded"] .btn-icon {
+  padding: 12px 24px;
+  min-height: 52px;
+}
+
+[data-density="expanded"] .card-high,
+[data-density="expanded"] .info-card {
+  padding: var(--space-5);
+}
+
+/* ---- Material Design 3 State Layer System ---- */
+/* State layers provide visual feedback for interactive elements */
+/* Hover, focus, pressed, dragged, and disabled states */
+
+/* State layer opacity (official M3) */
+:root {
+  --md-sys-state-layer-opacity-hover: 0.08;
+  --md-sys-state-layer-opacity-focus: 0.12;
+  --md-sys-state-layer-opacity-pressed: 0.12;
+  --md-sys-state-layer-opacity-dragged: 0.16;
+}
+
+/* Apply state layers to interactive components */
+.button:hover,
+button:hover,
+.btn-filled:hover,
+.btn-outlined:hover,
+.btn-text:hover,
+.btn-icon:hover {
+  background-color: rgba(var(--md-sys-color-primary-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.button:focus,
+button:focus,
+.btn-filled:focus,
+.btn-outlined:focus,
+.btn-text:focus,
+.btn-icon:focus {
+  background-color: rgba(var(--md-sys-color-primary-rgb), var(--md-sys-state-layer-opacity-focus));
+}
+
+/* ---- Material Design 3 Semantic Text Hierarchy ---- */
+/* Headings with proper hierarchy and spacing */
+h1 {
+  font-size: var(--md-sys-typescale-display-large-size);
+  font-weight: var(--md-sys-typescale-display-large-weight);
+  line-height: var(--md-sys-typescale-display-large-line-height);
+  letter-spacing: var(--md-sys-typescale-display-large-tracking);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-4);
+}
+
+h2 {
+  font-size: var(--md-sys-typescale-headline-large-size);
+  font-weight: var(--md-sys-typescale-headline-large-weight);
+  line-height: var(--md-sys-typescale-headline-large-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-large-tracking);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-3);
+}
+
+h3 {
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: var(--md-sys-typescale-headline-medium-weight);
+  line-height: var(--md-sys-typescale-headline-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-medium-tracking);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-2);
+}
+
+h4 {
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-small-tracking);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-2);
+}
+
+body,
+p {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  color: var(--md-sys-color-on-surface);
+}
+
+small {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---- Material Design 3 Component Refinement ---- */
+/* Improved spacing and alignment for standard patterns */
+
+/* List items with proper spacing */
+li {
+  margin-bottom: var(--space-2);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Form field improvements */
+input,
+textarea,
+select {
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: var(--space-2) var(--space-3);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  transition: border-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+              background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container-lowest);
+  outline: none;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.38;
+}
+
+/* Link styling with motion */
+a {
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  transition: color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard),
+              opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+a:hover {
+  color: var(--md-sys-color-primary);
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: var(--md-sys-color-tertiary);
+}
+
+/* Table improvements */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-4);
+}
+
+thead {
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 2px solid var(--md-sys-color-outline-variant);
+}
+
+th {
+  padding: var(--space-3);
+  text-align: left;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+}
+
+tbody tr {
+  transition: background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+tbody tr:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+/* Improved text selection color */
+::selection {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+::-moz-selection {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
