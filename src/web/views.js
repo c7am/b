@@ -113,7 +113,7 @@ function docsPage({ guild = null, guildId = null } = {}) {
 .docs-hero {
   background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-secondary-container));
   padding: var(--space-5);
-  border-radius: 12px;
+  border-radius: var(--md-sys-shape-corner-medium);
   margin-bottom: var(--space-3);
   text-align: center;
 }
@@ -169,7 +169,7 @@ function docsPage({ guild = null, guildId = null } = {}) {
   align-items: center;
   justify-content: center;
   background: var(--md-sys-color-primary-container);
-  border-radius: 8px;
+  border-radius: var(--md-sys-shape-corner-small);
   margin-bottom: 12px;
   color: var(--md-sys-color-primary);
 }
@@ -208,7 +208,7 @@ function docsPage({ guild = null, guildId = null } = {}) {
 }
 .docs-nav-btn {
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--md-sys-shape-corner-small);
   background: var(--md-sys-color-surface-variant);
   color: var(--md-sys-color-on-surface-variant);
   border: none;
@@ -386,7 +386,7 @@ const sections = {
         <p>Verifying your Roblox account links your Discord identity with your in-game account. This enables in-game moderation logging and staff tracking.</p>
 
         <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Verification Steps</h3>
-        <p><strong>Step 1:</strong> Run <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:4px">/erlc-link</code> in Discord</p>
+        <p><strong>Step 1:</strong> Run <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:var(--md-sys-shape-corner-extra-small)">/erlc-link</code> in Discord</p>
         <p><strong>Step 2:</strong> Bot sends you a 12-word verification phrase</p>
         <p><strong>Step 3:</strong> Add the phrase to your Roblox bio/description</p>
         <p><strong>Step 4:</strong> Click <strong>Verify My Account</strong> button</p>
@@ -413,14 +413,14 @@ const sections = {
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
         <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">In-Game Moderation</h3>
         <p>If you have verified your Roblox account and have Discord staff role, you can issue moderation commands in-game:</p>
-        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:6px;font-family:monospace;margin:8px 0">
+        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:8px 0">
           ?moderate PlayerName violation reason
         </p>
-        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:4px">?moderate JohnDoe VDM Rammed officer</code></p>
+        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:var(--md-sys-shape-corner-extra-small)">?moderate JohnDoe VDM Rammed officer</code></p>
 
         <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Discord Moderation</h3>
         <p>Alternatively, issue moderation commands directly in Discord using the same format:</p>
-        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:6px;font-family:monospace;margin:8px 0">
+        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:8px 0">
           ?moderate PlayerName violation reason
         </p>
 
@@ -711,21 +711,21 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2);margin-bottom:var(--space-4)">
     <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
-      <div style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success);width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('checkCircle')}</div>
+      <div style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('checkCircle')}</div>
       <div>
         <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Active</div>
         <div class="headline-medium">${activeShifts.length}</div>
       </div>
     </div>
     <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
-      <div style="background:var(--md-sys-color-info-container);color:var(--md-sys-color-info);width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('clock')}</div>
+      <div style="background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-secondary);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('clock')}</div>
       <div>
         <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Upcoming</div>
         <div class="headline-medium">${upcomingShifts.length}</div>
       </div>
     </div>
     <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
-      <div style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-primary);width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('check')}</div>
+      <div style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-primary);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('check')}</div>
       <div>
         <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Completed</div>
         <div class="headline-medium">${completedShifts.length}</div>
@@ -790,10 +790,10 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 
   // SSU status display
   const ssuDisplay = ssuStatus ? (ssuStatus.ready ? 
-    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:12px;padding:4px 8px;border-radius:6px">
+    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:12px;padding:4px 8px;border-radius:var(--md-sys-shape-corner-small)">
       ${icon('checkCircle')} <strong>${ssuStatus.playerCount}</strong> players in-game
     </div>` :
-    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:12px;padding:4px 8px;border-radius:6px">
+    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:12px;padding:4px 8px;border-radius:var(--md-sys-shape-corner-small)">
       ${icon('alertCircle')} ${escapeHtml(ssuStatus.reason || 'Server not ready')}
     </div>`) : '';
 
@@ -817,7 +817,7 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 
   // Shift state controls (start/pause/resume/end)
   const stateControls = isJoined ? `
-    <div class="shift-controls-menu" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+    <div class="shift-controls-menu" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small)">
       <button class="btn btn-tonal" onclick="updateShiftState('start')" style="gap:8px">
         ${icon('play')}
         <span>Start</span>
@@ -838,7 +838,7 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 
   // Member list with better formatting
   const memberItems = members.map(m => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2);background:var(--md-sys-color-surface);border-radius:6px;border:1px solid var(--md-sys-color-outline)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2);background:var(--md-sys-color-surface);border-radius:var(--md-sys-shape-corner-small);border:1px solid var(--md-sys-color-outline)">
       <div>
         <div class="body-medium" style="font-weight:500">User ${escapeHtml(m.user_id)}</div>
         <div class="body-small" style="color:var(--md-sys-color-on-surface-variant)">Joined ${formatDate(m.joined_at)}</div>
@@ -1483,7 +1483,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
     
     <div style="display:grid;gap:var(--space-2);margin-top:var(--space-2)">
       ${shiftTypes.map((type, idx) => `
-        <div style="display:grid;grid-template-columns:1fr 80px 80px auto;gap:var(--space-2);align-items:flex-end;padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+        <div style="display:grid;grid-template-columns:1fr 80px 80px auto;gap:var(--space-2);align-items:flex-end;padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small)">
           <div class="field-group" style="margin-bottom:0">
             <label>Type</label>
             <input type="text" value="${escapeHtml(type.label)}" disabled style="opacity:0.7">
@@ -1550,7 +1550,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       </div>
     </form>
 
-    <div style="margin-top:var(--space-3);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px;border-left:4px solid var(--md-sys-color-outline)">
+    <div style="margin-top:var(--space-3);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid var(--md-sys-color-outline)">
       <p class="body-small"><strong>What this enables:</strong></p>
       <ul style="margin:var(--space-1) 0;padding-left:var(--space-3);list-style:disc;color:var(--md-sys-color-on-surface-variant)">
         <li class="body-small">Live player list with /erlc-players command</li>
@@ -1569,7 +1569,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       <h3 class="title-small">Default Presets</h3>
       <div style="display:grid;gap:var(--space-1);margin-top:var(--space-2)">
         ${moderationPresets.map(preset => `
-        <div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px">
+        <div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small)">
           <p class="label-large"><strong>${escapeHtml(preset.label)}</strong></p>
           <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Codes: ${escapeHtml(preset.shortCodes.join(', '))}</p>
           <p class="body-small" style="color:var(--md-sys-color-on-surface-variant)">${escapeHtml(preset.description)}</p>
@@ -1583,7 +1583,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       <h3 class="title-small">Custom Violations</h3>
       <div style="display:grid;gap:var(--space-1);margin-top:var(--space-2)">
         ${customViolations.map(custom => `
-        <div style="padding:var(--space-2);background:var(--md-sys-color-secondary-container);border-radius:8px">
+        <div style="padding:var(--space-2);background:var(--md-sys-color-secondary-container);border-radius:var(--md-sys-shape-corner-small)">
           <p class="label-large"><strong>${escapeHtml(custom.label)}</strong></p>
           <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Codes: ${escapeHtml((custom.shortCodes || []).join(', '))}</p>
         </div>
@@ -1738,7 +1738,7 @@ function inGameModerationPage({ guild, guildId, moderations, presets, searchPlay
         ${filtered.slice(0, 50).map(mod => {
           const preset = presets.find(p => p.id === mod.preset_id);
           return `
-        <div style="padding:var(--space-3);background:var(--md-sys-color-surface-dim);border-radius:8px;border-left:4px solid ${
+        <div style="padding:var(--space-3);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid ${
           mod.severity === 'severe' ? 'var(--md-sys-color-error)' :
           mod.severity === 'medium' ? 'var(--md-sys-color-tertiary)' :
           'var(--md-sys-color-outline)'
@@ -1854,7 +1854,7 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
     ? '<p class="body-medium">No events found.</p>'
     : filtered.map(e => {
       const staffLine = e.staff ? '<p class="body-small" style="color:var(--md-sys-color-on-surface-variant)">By: ' + escapeHtml(e.staff) + '</p>' : '';
-      return '<div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:8px;border-left:4px solid var(--md-sys-color-primary)">' +
+      return '<div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid var(--md-sys-color-primary)">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-1)">' +
           '<div>' +
             '<span class="badge badge-info">' + escapeHtml(formatType(e.type)) + '</span>' +

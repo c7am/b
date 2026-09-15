@@ -65,6 +65,9 @@
   --md-sys-color-success-container: #005233;
   --md-sys-color-on-success-container: #90f7be;
 
+  /* Semantic alias for surface with lowest elevation (used throughout views.js) */
+  --md-sys-color-surface-dim: var(--md-sys-color-surface-container-lowest);
+
   /* ---- Typography (--md-sys-typescale-*). Google Sans Flex per this
      project's own choice, loaded via the @import above. Roboto Flex is
      the MD3 spec default and stays as the fallback chain so text still
