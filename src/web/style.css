@@ -1145,3 +1145,239 @@ select {
 .shifts-container {
   margin-bottom: var(--space-3);
 }
+
+/* ---- Material Design 3 Motion System ---- */
+/* Official M3 motion tokens for web (from m3.material.io) */
+:root {
+  /* Duration tokens (milliseconds) */
+  --md-sys-motion-duration-short1: 50ms;
+  --md-sys-motion-duration-short2: 100ms;
+  --md-sys-motion-duration-short3: 150ms;
+  --md-sys-motion-duration-short4: 200ms;
+  --md-sys-motion-duration-medium1: 250ms;
+  --md-sys-motion-duration-medium2: 300ms;
+  --md-sys-motion-duration-medium3: 350ms;
+  --md-sys-motion-duration-medium4: 400ms;
+  --md-sys-motion-duration-long1: 450ms;
+  --md-sys-motion-duration-long2: 500ms;
+  --md-sys-motion-duration-long3: 550ms;
+  --md-sys-motion-duration-long4: 600ms;
+
+  /* Easing curves (official M3 spec) */
+  /* Standard: responsive, natural motion for most use cases */
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Emphasized: faster, more dynamic (for primary interactions) */
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  /* Decelerated: slowing entrance (elements entering from off-screen) */
+  --md-sys-motion-easing-decelerated: cubic-bezier(0, 0, 0, 1);
+  /* Accelerated: quick exit (elements leaving the screen) */
+  --md-sys-motion-easing-accelerated: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  /* Prefers reduced motion (accessibility) */
+  --md-sys-motion-duration-short1-reduced: 20ms;
+  --md-sys-motion-duration-medium2-reduced: 100ms;
+  --md-sys-motion-duration-long2-reduced: 250ms;
+}
+
+/* Apply reduced motion when user prefers it */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --md-sys-motion-duration-short1: var(--md-sys-motion-duration-short1-reduced);
+    --md-sys-motion-duration-medium2: var(--md-sys-motion-duration-medium2-reduced);
+    --md-sys-motion-duration-long2: var(--md-sys-motion-duration-long2-reduced);
+  }
+  
+  /* Disable all animations globally for accessibility */
+  * {
+    animation-duration: var(--md-sys-motion-duration-short1) !important;
+    transition-duration: var(--md-sys-motion-duration-short1) !important;
+  }
+}
+
+/* ---- Responsive Layout Breakpoints (Material Design 3) ---- */
+/* Mobile: < 600dp (standard smartphones) */
+/* Tablet: 600-840dp (small tablets) */
+/* Desktop: > 840dp (large tablets and desktops) */
+
+/* Base mobile styles already defined above */
+
+@media (min-width: 600px) {
+  /* Tablet layout adjustments */
+  .dashboard {
+    padding: var(--space-5);
+  }
+
+  .stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .shifts-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (min-width: 840px) {
+  /* Desktop layout adjustments */
+  .dashboard {
+    padding: var(--space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .stat-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .shifts-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  /* Desktop: faster animations, simplified transitions */
+  .card-high,
+  .button,
+  .shift-card {
+    transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+  }
+}
+
+/* ---- Focus and Keyboard Navigation (Accessibility) ---- */
+/* Visible focus states for keyboard navigation (WCAG 2.1 Success Criterion 2.4.7) */
+:focus-visible {
+  outline: 3px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* Better focus for buttons */
+.button:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+.btn-filled:focus-visible,
+.btn-outlined:focus-visible,
+.btn-text:focus-visible,
+.btn-icon:focus-visible {
+  outline: 3px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Focus for interactive elements */
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* Remove default browser outline and use custom */
+*:focus {
+  outline: none;
+}
+
+/* ---- Transition Classes (Motion System Application) ---- */
+/* Short transitions for small interactions (buttons, icons) */
+.transition-short {
+  transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+/* Medium transitions for component state changes */
+.transition-medium {
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+/* Long transitions for large layout/visibility changes */
+.transition-long {
+  transition: all var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-decelerated);
+}
+
+/* Emphasized motion for primary interactions */
+.transition-emphasized {
+  transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+}
+
+/* ---- Interactive Element Hover/Active States (with motion) ---- */
+.card-high {
+  transition: box-shadow var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard),
+              transform var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.card-high:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.shift-card {
+  transition: box-shadow var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard),
+              transform var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard),
+              background var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.shift-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  background: var(--md-sys-color-surface-container-high);
+}
+
+/* Button states with motion */
+.button,
+button,
+.btn-filled,
+.btn-outlined,
+.btn-text,
+.btn-icon {
+  transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.button:active,
+button:active,
+.btn-filled:active,
+.btn-outlined:active,
+.btn-text:active,
+.btn-icon:active {
+  transform: scale(0.98);
+  transition: transform var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-accelerated);
+}
+
+/* Badge entrance animation */
+@keyframes badgeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.badge-success,
+.badge-warning,
+.badge-error,
+.badge-info {
+  animation: badgeSlideIn var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-decelerated);
+}
+
+/* Status indicator with refined pulsing */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: mdiPulse var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-standard) infinite;
+}
+
+@keyframes mdiPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
