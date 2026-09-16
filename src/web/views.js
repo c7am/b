@@ -2099,3 +2099,303 @@ function termsOfServicePage() {
 </div>`;
   return layout({ title: 'Terms of Service', body });
 }
+
+/* ============================================================================
+   FORM COMPONENT TEMPLATES - PHASE 1
+   ============================================================================ */
+
+// Text Field Component
+function renderTextField(options = {}) {
+  const {
+    id = 'text-field-' + Math.random().toString(36).substr(2, 9),
+    label = 'Input',
+    placeholder = '',
+    value = '',
+    type = 'text',
+    variant = 'outlined', // 'outlined' or 'filled'
+    error = false,
+    errorMessage = '',
+    helperText = '',
+    disabled = false,
+    required = false,
+    icon = null,
+    iconPosition = 'left'
+  } = options;
+
+  let inputClass = `text-field ${variant}`;
+  if (error) inputClass += ' error';
+
+  let iconHTML = '';
+  if (icon) {
+    iconHTML = `<span class="input-icon">${icon}</span>`;
+  }
+
+  const requiredHTML = required ? '<span class="required">*</span>' : '';
+  const helperHTML = helperText ? `<div class="helper-text">${helperText}</div>` : '';
+  const errorHTML = error && errorMessage ? `<div class="error-message">${errorMessage}</div>` : '';
+
+  const containerClass = icon ? `input-with-icon icon-${iconPosition}` : '';
+
+  return `
+    <div class="form-field ${error ? 'error' : ''}">
+      <label for="${id}">${label}${requiredHTML}</label>
+      <div class="${containerClass}">
+        <input
+          id="${id}"
+          type="${type}"
+          class="${inputClass}"
+          placeholder="${placeholder}"
+          value="${value}"
+          ${disabled ? 'disabled' : ''}
+          ${required ? 'required' : ''}
+        />
+        ${iconHTML}
+      </div>
+      ${helperHTML}
+      ${errorHTML}
+    </div>
+  `;
+}
+
+// Checkbox Component
+function renderCheckbox(options = {}) {
+  const {
+    id = 'checkbox-' + Math.random().toString(36).substr(2, 9),
+    label = 'Checkbox',
+    checked = false,
+    disabled = false,
+    name = ''
+  } = options;
+
+  return `
+    <div class="checkbox">
+      <input
+        id="${id}"
+        type="checkbox"
+        name="${name || id}"
+        ${checked ? 'checked' : ''}
+        ${disabled ? 'disabled' : ''}
+      />
+      <label for="${id}">${label}</label>
+    </div>
+  `;
+}
+
+// Radio Button Component
+function renderRadio(options = {}) {
+  const {
+    id = 'radio-' + Math.random().toString(36).substr(2, 9),
+    label = 'Option',
+    name = 'radio-group',
+    value = '',
+    checked = false,
+    disabled = false
+  } = options;
+
+  return `
+    <div class="radio">
+      <input
+        id="${id}"
+        type="radio"
+        name="${name}"
+        value="${value}"
+        ${checked ? 'checked' : ''}
+        ${disabled ? 'disabled' : ''}
+      />
+      <label for="${id}">${label}</label>
+    </div>
+  `;
+}
+
+// Radio Group Component
+function renderRadioGroup(options = {}) {
+  const {
+    name = 'radio-group',
+    label = 'Select one',
+    options: items = [],
+    selected = '',
+    disabled = false
+  } = options;
+
+  const itemsHTML = items.map((item, idx) =>
+    renderRadio({
+      id: `${name}-${idx}`,
+      name,
+      label: item.label,
+      value: item.value,
+      checked: selected === item.value,
+      disabled: disabled || item.disabled
+    })
+  ).join('');
+
+  return `
+    <fieldset class="radio-group">
+      <legend>${label}</legend>
+      ${itemsHTML}
+    </fieldset>
+  `;
+}
+
+// Switch Component
+function renderSwitch(options = {}) {
+  const {
+    id = 'switch-' + Math.random().toString(36).substr(2, 9),
+    label = 'Toggle',
+    checked = false,
+    disabled = false,
+    name = ''
+  } = options;
+
+  return `
+    <div class="switch">
+      <input
+        id="${id}"
+        type="checkbox"
+        name="${name || id}"
+        ${checked ? 'checked' : ''}
+        ${disabled ? 'disabled' : ''}
+      />
+      <label for="${id}">${label}</label>
+    </div>
+  `;
+}
+
+// Slider Component
+function renderSlider(options = {}) {
+  const {
+    id = 'slider-' + Math.random().toString(36).substr(2, 9),
+    label = 'Adjust',
+    min = 0,
+    max = 100,
+    value = 50,
+    step = 1,
+    disabled = false,
+    showValue = true
+  } = options;
+
+  const valueHTML = showValue ? `<div class="slider-value"><span id="${id}-value">${value}</span></div>` : '';
+
+  return `
+    <div class="slider-group">
+      <label for="${id}">${label}</label>
+      <input
+        id="${id}"
+        type="range"
+        class="slider"
+        min="${min}"
+        max="${max}"
+        value="${value}"
+        step="${step}"
+        ${disabled ? 'disabled' : ''}
+      />
+      ${valueHTML}
+    </div>
+  `;
+}
+
+// Checkbox Group Component
+function renderCheckboxGroup(options = {}) {
+  const {
+    label = 'Select options',
+    options: items = [],
+    selected = [],
+    disabled = false
+  } = options;
+
+  const itemsHTML = items.map((item, idx) =>
+    renderCheckbox({
+      id: `checkbox-${idx}`,
+      label: item.label,
+      checked: selected.includes(item.value),
+      disabled: disabled || item.disabled,
+      name: item.name || `checkbox-${idx}`
+    })
+  ).join('');
+
+  return `
+    <fieldset class="checkbox-group">
+      <legend>${label}</legend>
+      ${itemsHTML}
+    </fieldset>
+  `;
+}
+
+// Complete Form Example
+function renderExampleForm() {
+  return `
+    <form class="form">
+      <h2>Staff Registration Form</h2>
+      
+      <div class="form-row">
+        ${renderTextField({
+          label: 'Full Name',
+          placeholder: 'John Doe',
+          required: true,
+          helperText: 'Enter your full legal name'
+        })}
+        ${renderTextField({
+          label: 'Email Address',
+          type: 'email',
+          placeholder: 'john@example.com',
+          required: true,
+          helperText: 'We\'ll use this for notifications'
+        })}
+      </div>
+
+      <div class="form-row">
+        ${renderTextField({
+          label: 'Discord Handle',
+          placeholder: '@username',
+          required: true,
+          icon: '#'
+        })}
+        ${renderTextField({
+          label: 'Department',
+          placeholder: 'e.g. Moderation',
+          variant: 'filled'
+        })}
+      </div>
+
+      ${renderRadioGroup({
+        name: 'role',
+        label: 'Select Role',
+        options: [
+          { label: 'Moderator', value: 'mod' },
+          { label: 'Administrator', value: 'admin' },
+          { label: 'Staff', value: 'staff' }
+        ],
+        selected: 'mod'
+      })}
+
+      ${renderCheckboxGroup({
+        label: 'Permissions',
+        options: [
+          { label: 'Can kick members', value: 'kick' },
+          { label: 'Can ban members', value: 'ban' },
+          { label: 'Can manage roles', value: 'roles' },
+          { label: 'Can access logs', value: 'logs' }
+        ],
+        selected: ['kick', 'ban']
+      })}
+
+      ${renderSwitch({
+        label: 'Email notifications enabled',
+        checked: true
+      })}
+
+      ${renderSlider({
+        label: 'Max warnings before kick',
+        min: 1,
+        max: 10,
+        value: 3,
+        showValue: true
+      })}
+
+      <div class="form-actions">
+        <button class="btn-outlined">Cancel</button>
+        <button class="btn-filled">Save Changes</button>
+      </div>
+    </form>
+  `;
+}
+
