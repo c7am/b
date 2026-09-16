@@ -3376,3 +3376,349 @@ main.with-rail {
   font-weight: 500;
 }
 
+
+/* ============================================================================
+   MATERIAL DESIGN 3 - DATA DISPLAY COMPONENTS (PHASE 3)
+   ============================================================================
+   List Items, Tables, Pagination, Data Grid
+   ============================================================================ */
+
+/* ---- LIST ITEM ---- */
+.list {
+  display: flex;
+  flex-direction: column;
+  background: var(--md-sys-color-surface);
+  border-radius: var(--md-sys-shape-corner-small);
+  overflow: hidden;
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  cursor: pointer;
+  transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item:hover {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.list-item:active {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-pressed));
+}
+
+.list-item.selected {
+  background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+}
+
+/* List item sections */
+.list-item-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  object-fit: cover;
+  margin-right: var(--space-3);
+  flex-shrink: 0;
+}
+
+.list-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-item-headline {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.list-item-supporting {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.list-item-trailing {
+  margin-left: var(--space-3);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.list-item-trailing-badge {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* THREE-LINE LIST ITEM */
+.list-item.three-line {
+  padding: 16px;
+  align-items: flex-start;
+}
+
+.list-item.three-line .list-item-content {
+  gap: 8px;
+}
+
+.list-item.three-line .list-item-headline {
+  font-weight: 600;
+}
+
+/* DENSE LIST ITEM */
+.list.compact .list-item {
+  padding: 8px 12px;
+}
+
+.list.compact .list-item-avatar {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+}
+
+/* ---- TABLE ---- */
+.table-container {
+  overflow-x: auto;
+  border-radius: var(--md-sys-shape-corner-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--md-sys-color-surface);
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+th {
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 600;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 2px solid var(--md-sys-color-outline-variant);
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+}
+
+tbody tr:hover {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+tbody tr:active {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-pressed));
+}
+
+tbody tr.selected {
+  background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+}
+
+/* Table header stickiness */
+.table-container.sticky-header table thead {
+  position: sticky;
+  top: 0;
+}
+
+/* Table checkbox column */
+th.table-checkbox,
+td.table-checkbox {
+  width: 48px;
+  padding: 8px;
+  text-align: center;
+}
+
+/* Table actions column */
+th.table-actions,
+td.table-actions {
+  width: 120px;
+  text-align: right;
+}
+
+.table-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--md-sys-color-primary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--md-sys-shape-corner-small);
+  transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  font-size: 14px;
+}
+
+.table-action-btn:hover {
+  background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+}
+
+/* Table dense mode */
+table.dense th,
+table.dense td {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* ---- PAGINATION ---- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.pagination-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  text-decoration: none;
+}
+
+.pagination-item:hover:not(.disabled):not(.active) {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.pagination-item.active {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border-color: var(--md-sys-color-primary);
+}
+
+.pagination-item.disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 600;
+  cursor: default;
+}
+
+.pagination-label {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0 var(--space-2);
+  white-space: nowrap;
+}
+
+/* ---- DATA GRID (Advanced Table) ---- */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-3);
+}
+
+.data-grid-item {
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-3);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  cursor: pointer;
+}
+
+.data-grid-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--md-sys-elevation-level2);
+  border-color: var(--md-sys-color-outline);
+}
+
+.data-grid-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.data-grid-item-title {
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.data-grid-item-subtitle {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 4px;
+}
+
+.data-grid-item-content {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.6;
+  margin: var(--space-2) 0;
+}
+
+.data-grid-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.data-grid-item-meta {
+  font-size: var(--md-sys-typescale-label-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---- NO DATA STATE ---- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  gap: var(--space-4);
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.empty-state-description {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 300px;
+}
+
+.empty-state-action {
+  margin-top: var(--space-2);
+}
+

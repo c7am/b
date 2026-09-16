@@ -2952,3 +2952,281 @@ function createStaffDashboardNav() {
     .render();
 }
 
+
+/* ============================================================================
+   DATA DISPLAY COMPONENT TEMPLATES - PHASE 3
+   ============================================================================ */
+
+// List Item Component
+function renderListItem(options = {}) {
+  const {
+    headline = 'Item title',
+    supporting = 'Supporting text',
+    avatar = null,
+    trailing = null,
+    onClick = null,
+    selected = false,
+    threeLineMode = false
+  } = options;
+
+  const selectedClass = selected ? 'selected' : '';
+  const threeLineClass = threeLineMode ? 'three-line' : '';
+  const onclick = onClick ? `onclick="${onClick}"` : '';
+
+  let avatarHTML = '';
+  if (avatar) {
+    avatarHTML = `<img src="${avatar}" alt="" class="list-item-avatar" />`;
+  }
+
+  let trailingHTML = '';
+  if (trailing) {
+    trailingHTML = `
+      <div class="list-item-trailing">
+        ${typeof trailing === 'string' ? trailing : JSON.stringify(trailing)}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="list-item ${selectedClass} ${threeLineClass}" ${onclick}>
+      ${avatarHTML}
+      <div class="list-item-content">
+        <div class="list-item-headline">${headline}</div>
+        <div class="list-item-supporting">${supporting}</div>
+      </div>
+      ${trailingHTML}
+    </div>
+  `;
+}
+
+// List Component
+function renderList(options = {}) {
+  const {
+    items = [],
+    compact = false,
+    onItemClick = null
+  } = options;
+
+  const compactClass = compact ? 'compact' : '';
+  let itemsHTML = items.map((item, idx) =>
+    renderListItem({
+      ...item,
+      onClick: onItemClick ? `${onItemClick}(${idx})` : null
+    })
+  ).join('');
+
+  return `<div class="list ${compactClass}">${itemsHTML}</div>`;
+}
+
+// Table Component
+function renderTable(options = {}) {
+  const {
+    headers = [],
+    rows = [],
+    dense = false,
+    stickyHeader = false,
+    onRowClick = null,
+    hasCheckboxes = false,
+    hasActions = false
+  } = options;
+
+  const denseClass = dense ? 'dense' : '';
+  const stickyClass = stickyHeader ? 'sticky-header' : '';
+
+  // Build header
+  let headerHTML = '<tr>';
+  if (hasCheckboxes) {
+    headerHTML += '<th class="table-checkbox"><input type="checkbox" /></th>';
+  }
+  headers.forEach(header => {
+    headerHTML += `<th>${header}</th>`;
+  });
+  if (hasActions) {
+    headerHTML += '<th class="table-actions">Actions</th>';
+  }
+  headerHTML += '</tr>';
+
+  // Build rows
+  let rowsHTML = '';
+  rows.forEach((row, idx) => {
+    rowsHTML += '<tr>';
+    if (hasCheckboxes) {
+      rowsHTML += '<td class="table-checkbox"><input type="checkbox" /></td>';
+    }
+    Object.values(row).forEach(cell => {
+      rowsHTML += `<td>${cell}</td>`;
+    });
+    if (hasActions) {
+      rowsHTML += `
+        <td class="table-actions">
+          <button class="table-action-btn" onclick="editRow(${idx})">Edit</button>
+          <button class="table-action-btn" onclick="deleteRow(${idx})">Delete</button>
+        </td>
+      `;
+    }
+    rowsHTML += '</tr>';
+  });
+
+  return `
+    <div class="table-container ${stickyClass}">
+      <table class="${denseClass}">
+        <thead>${headerHTML}</thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Pagination Component
+function renderPagination(options = {}) {
+  const {
+    totalPages = 10,
+    currentPage = 1,
+    onPageChange = null,
+    maxVisiblePages = 5
+  } = options;
+
+  let itemsHTML = '';
+
+  // Previous button
+  const prevDisabled = currentPage === 1 ? 'disabled' : '';
+  const prevOnClick = onPageChange && currentPage > 1 ? `onclick="${onPageChange}(${currentPage - 1})"` : '';
+  itemsHTML += `<button class="pagination-item ${prevDisabled}" ${prevOnClick}>←</button>`;
+
+  // Page numbers
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+  if (startPage > 1) {
+    itemsHTML += `<button class="pagination-item" onclick="${onPageChange}(1)">1</button>`;
+    if (startPage > 2) {
+      itemsHTML += '<span class="pagination-ellipsis">...</span>';
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const activeClass = i === currentPage ? 'active' : '';
+    const onClick = onPageChange ? `onclick="${onPageChange}(${i})"` : '';
+    itemsHTML += `<button class="pagination-item ${activeClass}" ${onClick}>${i}</button>`;
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      itemsHTML += '<span class="pagination-ellipsis">...</span>';
+    }
+    const onClick = onPageChange ? `onclick="${onPageChange}(${totalPages})"` : '';
+    itemsHTML += `<button class="pagination-item" ${onClick}>${totalPages}</button>`;
+  }
+
+  // Next button
+  const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+  const nextOnClick = onPageChange && currentPage < totalPages ? `onclick="${onPageChange}(${currentPage + 1})"` : '';
+  itemsHTML += `<button class="pagination-item ${nextDisabled}" ${nextOnClick}>→</button>`;
+
+  const label = `Page ${currentPage} of ${totalPages}`;
+
+  return `
+    <div class="pagination">
+      ${itemsHTML}
+      <span class="pagination-label">${label}</span>
+    </div>
+  `;
+}
+
+// Data Grid Component
+function renderDataGrid(options = {}) {
+  const {
+    items = [],
+    onItemClick = null
+  } = options;
+
+  let itemsHTML = items.map((item, idx) => `
+    <div class="data-grid-item" onclick="${onItemClick ? onItemClick + '(' + idx + ')' : ''}">
+      <div class="data-grid-item-header">
+        <h3 class="data-grid-item-title">${item.title}</h3>
+        ${item.badge ? `<span class="list-item-trailing-badge">${item.badge}</span>` : ''}
+      </div>
+      ${item.subtitle ? `<div class="data-grid-item-subtitle">${item.subtitle}</div>` : ''}
+      ${item.content ? `<div class="data-grid-item-content">${item.content}</div>` : ''}
+      ${item.footer ? `
+        <div class="data-grid-item-footer">
+          <span class="data-grid-item-meta">${item.footer}</span>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+
+  return `<div class="data-grid">${itemsHTML}</div>`;
+}
+
+// Empty State Component
+function renderEmptyState(options = {}) {
+  const {
+    icon = '📭',
+    title = 'No data',
+    description = 'There\'s nothing to display here',
+    actionLabel = 'Create',
+    onAction = null
+  } = options;
+
+  const actionButton = onAction ? `
+    <div class="empty-state-action">
+      <button class="btn-filled" onclick="${onAction}">${actionLabel}</button>
+    </div>
+  ` : '';
+
+  return `
+    <div class="empty-state">
+      <div class="empty-state-icon">${icon}</div>
+      <h3 class="empty-state-title">${title}</h3>
+      <p class="empty-state-description">${description}</p>
+      ${actionButton}
+    </div>
+  `;
+}
+
+// Example: Staff List
+function renderStaffList() {
+  return renderList({
+    items: [
+      {
+        avatar: 'https://via.placeholder.com/40',
+        headline: 'John Moderator',
+        supporting: 'Moderator • Online',
+        trailing: '<span class="list-item-trailing-badge">MOD</span>',
+        onClick: 'selectStaff'
+      },
+      {
+        avatar: 'https://via.placeholder.com/40',
+        headline: 'Jane Administrator',
+        supporting: 'Administrator • Away',
+        trailing: '<span class="list-item-trailing-badge">ADMIN</span>',
+        onClick: 'selectStaff'
+      },
+      {
+        avatar: 'https://via.placeholder.com/40',
+        headline: 'Bob Helper',
+        supporting: 'Helper • Offline',
+        trailing: '<span class="list-item-trailing-badge">HELPER</span>',
+        onClick: 'selectStaff'
+      }
+    ]
+  });
+}
+
+// Example: Staff Table
+function renderStaffTable() {
+  return renderTable({
+    headers: ['Name', 'Role', 'Status', 'Warnings'],
+    rows: [
+      { Name: 'John Moderator', Role: 'Moderator', Status: 'Online', Warnings: '2' },
+      { Name: 'Jane Administrator', Role: 'Admin', Status: 'Away', Warnings: '0' },
+      { Name: 'Bob Helper', Role: 'Helper', Status: 'Offline', Warnings: '1' }
+    ],
+    hasCheckboxes: true,
+    hasActions: true,
+    dense: false,
+    stickyHeader: true
+  });
+}
+
