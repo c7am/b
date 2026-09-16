@@ -3021,3 +3021,358 @@ fieldset:disabled {
   pointer-events: none;
 }
 
+
+/* ============================================================================
+   MATERIAL DESIGN 3 - NAVIGATION COMPONENTS (PHASE 2)
+   ============================================================================
+   Top App Bar, Bottom Navigation, Navigation Rail, Menu, Breadcrumbs
+   ============================================================================ */
+
+/* ---- TOP APP BAR (Standard) ---- */
+.top-app-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 16px;
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: var(--space-2);
+}
+
+.top-app-bar-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.top-app-bar-title {
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+.top-app-bar-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.top-app-bar .btn-icon,
+.top-app-bar .icon-button {
+  width: 48px;
+  height: 48px;
+}
+
+/* Compact Top App Bar */
+.top-app-bar.compact {
+  height: 56px;
+}
+
+.top-app-bar.compact .top-app-bar-title {
+  font-size: var(--md-sys-typescale-title-large-size);
+}
+
+/* Centered Top App Bar */
+.top-app-bar.centered {
+  justify-content: center;
+}
+
+/* ---- BOTTOM NAVIGATION ---- */
+.bottom-navigation {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 80px;
+  background: var(--md-sys-color-surface-container);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  gap: 0;
+  padding-bottom: max(var(--space-1), env(safe-area-inset-bottom));
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  position: relative;
+  text-decoration: none;
+}
+
+.bottom-nav-item:hover {
+  color: var(--md-sys-color-on-surface);
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.bottom-nav-item.active {
+  color: var(--md-sys-color-primary);
+}
+
+.bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--md-sys-color-primary);
+}
+
+.bottom-nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav-label {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+}
+
+/* Add padding to body when bottom nav is present */
+body.has-bottom-nav {
+  padding-bottom: 80px;
+}
+
+/* ---- NAVIGATION RAIL (Desktop Sidebar) ---- */
+.navigation-rail {
+  display: none;
+  flex-direction: column;
+  width: 80px;
+  height: 100vh;
+  background: var(--md-sys-color-surface-container);
+  border-right: 1px solid var(--md-sys-color-outline-variant);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9;
+  padding: var(--space-3) 0;
+  gap: var(--space-1);
+}
+
+@media (min-width: 840px) {
+  .navigation-rail {
+    display: flex;
+  }
+}
+
+.nav-rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-rail-item:hover {
+  color: var(--md-sys-color-on-surface);
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.nav-rail-item.active {
+  color: var(--md-sys-color-primary);
+}
+
+.nav-rail-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  height: 48px;
+  width: 4px;
+  background: var(--md-sys-color-primary);
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-rail-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-rail-label {
+  font-size: 10px;
+  text-align: center;
+  width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Add margin to main content when rail is present */
+main.with-rail {
+  margin-left: 80px;
+}
+
+/* ---- MENU (Dropdown) ---- */
+.menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.menu-trigger {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 8px 12px;
+  border-radius: var(--md-sys-shape-corner-small);
+  color: var(--md-sys-color-on-surface);
+  transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.menu-trigger:hover {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 200px;
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: var(--md-sys-elevation-level4);
+  display: none;
+  flex-direction: column;
+  z-index: 20;
+  overflow: hidden;
+  animation: slideDown var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-decelerated);
+}
+
+.menu.open {
+  display: flex;
+}
+
+.menu-item {
+  padding: 12px 16px;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.menu-item:hover {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-hover));
+}
+
+.menu-item:active {
+  background: rgba(var(--md-sys-color-on-surface-rgb), var(--md-sys-state-layer-opacity-pressed));
+}
+
+.menu-item.disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--md-sys-color-outline-variant);
+  margin: 4px 0;
+}
+
+/* ---- TABS ---- */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface);
+  gap: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px 16px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--md-sys-color-on-surface-variant);
+  border: none;
+  background: transparent;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  position: relative;
+  transition: color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.tab:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.tab.active {
+  color: var(--md-sys-color-primary);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--md-sys-color-primary);
+}
+
+/* ---- BREADCRUMBS ---- */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  padding: var(--space-2) 0;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.breadcrumb-link {
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.breadcrumb-link:hover {
+  opacity: 0.8;
+}
+
+.breadcrumb-separator {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.breadcrumb-current {
+  color: var(--md-sys-color-on-surface);
+  font-weight: 500;
+}
+

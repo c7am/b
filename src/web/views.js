@@ -2668,3 +2668,287 @@ function resetForm(formElement, options = {}) {
   }
 }
 
+
+/* ============================================================================
+   NAVIGATION COMPONENT TEMPLATES - PHASE 2
+   ============================================================================ */
+
+// Top App Bar Component
+function renderTopAppBar(options = {}) {
+  const {
+    title = 'Dashboard',
+    variant = 'standard', // 'standard' or 'compact' or 'centered'
+    leadingIcon = null,
+    leadingAction = null,
+    actions = [], // Array of { icon, label, action }
+    showSearch = false
+  } = options;
+
+  let leadingHTML = '';
+  if (leadingIcon) {
+    leadingHTML = `
+      <button class="icon-button" onclick="${leadingAction || ''}" aria-label="Back">
+        ${leadingIcon}
+      </button>
+    `;
+  }
+
+  let actionsHTML = '';
+  if (showSearch) {
+    actionsHTML += `
+      <input 
+        type="search" 
+        placeholder="Search..." 
+        class="text-field outlined search-input"
+        style="width: 200px; height: 40px;"
+      />
+    `;
+  }
+
+  actions.forEach(action => {
+    actionsHTML += `
+      <button class="icon-button" onclick="${action.action || ''}" aria-label="${action.label}">
+        ${action.icon}
+      </button>
+    `;
+  });
+
+  return `
+    <header class="top-app-bar ${variant}">
+      <div class="top-app-bar-section">
+        ${leadingHTML}
+        <h1 class="top-app-bar-title">${title}</h1>
+      </div>
+      <div class="top-app-bar-section top-app-bar-actions">
+        ${actionsHTML}
+      </div>
+    </header>
+  `;
+}
+
+// Bottom Navigation Component
+function renderBottomNavigation(options = {}) {
+  const {
+    items = [],
+    activeIndex = 0,
+    onSelect = null
+  } = options;
+
+  let itemsHTML = '';
+  items.forEach((item, idx) => {
+    const activeClass = idx === activeIndex ? 'active' : '';
+    const onclick = onSelect ? `onclick="${onSelect}(${idx})"` : '';
+    itemsHTML += `
+      <a href="${item.href || '#'}" class="bottom-nav-item ${activeClass}" ${onclick}>
+        <span class="bottom-nav-icon">${item.icon}</span>
+        <span class="bottom-nav-label">${item.label}</span>
+      </a>
+    `;
+  });
+
+  return `
+    <nav class="bottom-navigation" role="navigation">
+      ${itemsHTML}
+    </nav>
+  `;
+}
+
+// Navigation Rail Component
+function renderNavigationRail(options = {}) {
+  const {
+    items = [],
+    activeIndex = 0,
+    onSelect = null,
+    floatingActionButton = null
+  } = options;
+
+  let itemsHTML = '';
+  items.forEach((item, idx) => {
+    const activeClass = idx === activeIndex ? 'active' : '';
+    const onclick = onSelect ? `onclick="${onSelect}(${idx})"` : '';
+    itemsHTML += `
+      <a href="${item.href || '#'}" class="nav-rail-item ${activeClass}" ${onclick} title="${item.label}">
+        <span class="nav-rail-icon">${item.icon}</span>
+        <span class="nav-rail-label">${item.label}</span>
+      </a>
+    `;
+  });
+
+  return `
+    <nav class="navigation-rail" role="navigation">
+      ${itemsHTML}
+      ${floatingActionButton ? `<div style="flex: 1;"></div>${floatingActionButton}` : ''}
+    </nav>
+  `;
+}
+
+// Menu Component
+function renderMenu(options = {}) {
+  const {
+    id = 'menu-' + Math.random().toString(36).substr(2, 9),
+    trigger = '⋮',
+    items = [],
+    onSelect = null
+  } = options;
+
+  let itemsHTML = '';
+  items.forEach((item, idx) => {
+    if (item.divider) {
+      itemsHTML += '<div class="menu-divider"></div>';
+    } else {
+      const onclick = onSelect ? `onclick="${onSelect}(${idx})"` : '';
+      const disabledClass = item.disabled ? 'disabled' : '';
+      itemsHTML += `
+        <button class="menu-item ${disabledClass}" ${onclick} ${item.disabled ? 'disabled' : ''}>
+          ${item.icon ? `<span>${item.icon}</span>` : ''}
+          <span>${item.label}</span>
+        </button>
+      `;
+    }
+  });
+
+  return `
+    <div class="menu-container">
+      <button class="menu-trigger" onclick="document.getElementById('${id}').classList.toggle('open')">
+        ${trigger}
+      </button>
+      <div class="menu" id="${id}">
+        ${itemsHTML}
+      </div>
+    </div>
+  `;
+}
+
+// Tabs Component
+function renderTabs(options = {}) {
+  const {
+    tabs = [],
+    activeIndex = 0,
+    onSelect = null
+  } = options;
+
+  let tabsHTML = '';
+  tabs.forEach((tab, idx) => {
+    const activeClass = idx === activeIndex ? 'active' : '';
+    const onclick = onSelect ? `onclick="${onSelect}(${idx})"` : '';
+    tabsHTML += `
+      <button class="tab ${activeClass}" ${onclick} role="tab">
+        ${tab.icon ? `<span>${tab.icon}</span>` : ''}
+        ${tab.label}
+      </button>
+    `;
+  });
+
+  return `<div class="tabs" role="tablist">${tabsHTML}</div>`;
+}
+
+// Breadcrumbs Component
+function renderBreadcrumbs(options = {}) {
+  const {
+    items = [],
+    separator = '/'
+  } = options;
+
+  let html = '<nav class="breadcrumbs" aria-label="Breadcrumb">';
+  
+  items.forEach((item, idx) => {
+    if (idx > 0) {
+      html += `<span class="breadcrumb-separator">${separator}</span>`;
+    }
+
+    if (idx === items.length - 1) {
+      // Current page
+      html += `
+        <div class="breadcrumb-item">
+          <span class="breadcrumb-current">${item.label}</span>
+        </div>
+      `;
+    } else {
+      // Link
+      html += `
+        <div class="breadcrumb-item">
+          <a href="${item.href || '#'}" class="breadcrumb-link">${item.label}</a>
+        </div>
+      `;
+    }
+  });
+
+  html += '</nav>';
+  return html;
+}
+
+// Navigation Builder Class
+class NavigationBuilder {
+  constructor() {
+    this.topBar = null;
+    this.bottomNav = null;
+    this.navRail = null;
+    this.breadcrumbs = null;
+  }
+
+  setTopBar(options) {
+    this.topBar = renderTopAppBar(options);
+    return this;
+  }
+
+  setBottomNav(options) {
+    this.bottomNav = renderBottomNavigation(options);
+    return this;
+  }
+
+  setNavRail(options) {
+    this.navRail = renderNavigationRail(options);
+    return this;
+  }
+
+  setBreadcrumbs(options) {
+    this.breadcrumbs = renderBreadcrumbs(options);
+    return this;
+  }
+
+  render() {
+    let html = '';
+    if (this.topBar) html += this.topBar;
+    if (this.navRail) html += this.navRail;
+    if (this.breadcrumbs) html += this.breadcrumbs;
+    if (this.bottomNav) html += this.bottomNav;
+    return html;
+  }
+}
+
+// Example Navigation Setup for Staff Dashboard
+function createStaffDashboardNav() {
+  return new NavigationBuilder()
+    .setTopBar({
+      title: 'ISRP Staff Dashboard',
+      variant: 'standard',
+      leadingIcon: '☰',
+      actions: [
+        { icon: '🔔', label: 'Notifications', action: 'showNotifications()' },
+        { icon: '👤', label: 'Profile', action: 'showProfile()' }
+      ],
+      showSearch: true
+    })
+    .setBottomNav({
+      items: [
+        { icon: '📊', label: 'Dashboard', href: '/dashboard' },
+        { icon: '👥', label: 'Members', href: '/members' },
+        { icon: '⚠️', label: 'Reports', href: '/reports' },
+        { icon: '⚙️', label: 'Settings', href: '/settings' }
+      ],
+      activeIndex: 0
+    })
+    .setNavRail({
+      items: [
+        { icon: '📊', label: 'Dashboard', href: '/dashboard' },
+        { icon: '👥', label: 'Members', href: '/members' },
+        { icon: '⚠️', label: 'Warnings', href: '/warnings' },
+        { icon: '🔒', label: 'Permissions', href: '/permissions' },
+        { icon: '📝', label: 'Logs', href: '/logs' },
+        { icon: '⚙️', label: 'Settings', href: '/settings' }
+      ],
+      activeIndex: 0
+    })
+    .render();
+}
+
