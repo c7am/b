@@ -3230,3 +3230,256 @@ function renderStaffTable() {
   });
 }
 
+
+/* ============================================================================
+   SEARCH & FILTER COMPONENT TEMPLATES - PHASE 4
+   ============================================================================ */
+
+// Search Bar Component
+function renderSearchBar(options = {}) {
+  const {
+    placeholder = 'Search...',
+    value = '',
+    onSearch = null,
+    onClear = null,
+    variant = 'filled', // 'filled' or 'outlined'
+    compact = false,
+    showIcon = true
+  } = options;
+
+  const variantClass = variant === 'outlined' ? 'outlined' : '';
+  const compactClass = compact ? 'compact' : '';
+
+  return `
+    <div class="search-bar ${variantClass} ${compactClass}">
+      ${showIcon ? '<span class="search-icon">🔍</span>' : ''}
+      <input
+        type="text"
+        class="search-input"
+        placeholder="${placeholder}"
+        value="${value}"
+        ${onSearch ? `onkeyup="${onSearch}(this.value)"` : ''}
+      />
+      ${value ? `<button class="search-clear" onclick="${onClear || 'this.parentElement.querySelector(\\\\'input\\\\').value = \\\\'\\\\'; this.parentElement.querySelector(\\\\'input\\\\').focus()'}">✕</button>` : ''}
+    </div>
+  `;
+}
+
+// Filter Chip Component
+function renderFilterChip(options = {}) {
+  const {
+    label = 'Filter',
+    active = false,
+    removable = false,
+    onClick = null,
+    onRemove = null,
+    icon = null
+  } = options;
+
+  const activeClass = active ? 'active' : '';
+  const removableClass = removable ? 'removable' : '';
+
+  let removeButton = '';
+  if (removable) {
+    removeButton = `
+      <button class="filter-chip-remove" onclick="${onRemove || ''}" aria-label="Remove filter">
+        ✕
+      </button>
+    `;
+  }
+
+  return `
+    <button class="filter-chip ${activeClass} ${removableClass}" onclick="${onClick || ''}">
+      ${icon ? `<span>${icon}</span>` : ''}
+      <span>${label}</span>
+      ${removeButton}
+    </button>
+  `;
+}
+
+// Filter Chips Group
+function renderFilterChips(options = {}) {
+  const {
+    chips = [],
+    onChipClick = null,
+    onChipRemove = null
+  } = options;
+
+  let chipsHTML = chips.map((chip, idx) =>
+    renderFilterChip({
+      ...chip,
+      onClick: onChipClick ? `${onChipClick}(${idx})` : null,
+      onRemove: onChipRemove ? `${onChipRemove}(${idx})` : null
+    })
+  ).join('');
+
+  return `<div class="filter-chips">${chipsHTML}</div>`;
+}
+
+// Advanced Filter Panel
+function renderFilterPanel(options = {}) {
+  const {
+    sections = [], // Array of { title, filters: [{ type, label, options, selected }] }
+    onApply = null,
+    onReset = null
+  } = options;
+
+  let sectionsHTML = '';
+  sections.forEach((section, sIdx) => {
+    sectionsHTML += `
+      <div class="filter-panel-section">
+        <div class="filter-panel-title">${section.title}</div>
+        <div class="filter-group">
+    `;
+
+    section.filters.forEach((filter, fIdx) => {
+      if (filter.type === 'checkbox') {
+        sectionsHTML += `
+          <label class="filter-option">
+            <input type="checkbox" ${filter.selected ? 'checked' : ''} />
+            <span>${filter.label}</span>
+            ${filter.count ? `<span class="filter-option-count">${filter.count}</span>` : ''}
+          </label>
+        `;
+      } else if (filter.type === 'radio') {
+        sectionsHTML += `
+          <label class="filter-option">
+            <input type="radio" name="filter-${sIdx}" ${filter.selected ? 'checked' : ''} />
+            <span>${filter.label}</span>
+            ${filter.count ? `<span class="filter-option-count">${filter.count}</span>` : ''}
+          </label>
+        `;
+      }
+    });
+
+    sectionsHTML += `</div></div>`;
+    if (sIdx < sections.length - 1) {
+      sectionsHTML += '<div class="filter-panel-divider"></div>';
+    }
+  });
+
+  return `
+    <div class="filter-panel">
+      ${sectionsHTML}
+      <div class="filter-panel-actions">
+        <button class="btn-outlined" onclick="${onReset || ''}">Reset</button>
+        <button class="btn-filled" onclick="${onApply || ''}">Apply Filters</button>
+      </div>
+    </div>
+  `;
+}
+
+// Autocomplete Component
+function renderAutocomplete(options = {}) {
+  const {
+    id = 'autocomplete-' + Math.random().toString(36).substr(2, 9),
+    placeholder = 'Search...',
+    suggestions = [],
+    onSelect = null,
+    minChars = 2
+  } = options;
+
+  let suggestionsHTML = suggestions.map((item, idx) => `
+    <div class="autocomplete-result" onclick="${onSelect ? onSelect + '(' + idx + ')' : ''}">
+      ${item.icon ? `<span>${item.icon}</span>` : ''}
+      <span>${item.highlight ? item.text.replace(new RegExp(\`(\${item.highlight})\`, 'gi'), '<span class=\\\"autocomplete-result-bold\\\">$1</span>') : item.text}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="autocomplete-container">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input
+          id="${id}"
+          type="text"
+          class="search-input"
+          placeholder="${placeholder}"
+          data-min-chars="${minChars}"
+          onkeyup="handleAutocomplete(this)"
+        />
+      </div>
+      <div class="autocomplete-results" id="${id}-results">
+        ${suggestionsHTML}
+      </div>
+    </div>
+  `;
+}
+
+// Search Results Display
+function renderSearchResults(options = {}) {
+  const {
+    results = {}, // { category: [items] }
+    loading = false,
+    noResults = false
+  } = options;
+
+  if (loading) {
+    return `
+      <div class="search-loading">
+        <div class="search-loading-spinner"></div>
+        <span>Searching...</span>
+      </div>
+    `;
+  }
+
+  if (noResults) {
+    return renderEmptyState({
+      icon: '🔍',
+      title: 'No results found',
+      description: 'Try a different search term'
+    });
+  }
+
+  let html = '<div class="search-results-container">';
+  Object.entries(results).forEach(([category, items]) => {
+    html += `<div class="search-result-group">`;
+    html += `<div class="search-result-group-title">${category}</div>`;
+    items.forEach(item => {
+      html += renderListItem({
+        headline: item.title,
+        supporting: item.subtitle,
+        trailing: item.trailing
+      });
+    });
+    html += `</div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// Example: Advanced Filter for Staff Dashboard
+function renderStaffFilters() {
+  return renderFilterPanel({
+    sections: [
+      {
+        title: 'Role',
+        filters: [
+          { type: 'radio', label: 'All Roles', count: 15 },
+          { type: 'radio', label: 'Moderator', count: 8, selected: true },
+          { type: 'radio', label: 'Administrator', count: 3 },
+          { type: 'radio', label: 'Helper', count: 4 }
+        ]
+      },
+      {
+        title: 'Status',
+        filters: [
+          { type: 'checkbox', label: 'Online', count: 6 },
+          { type: 'checkbox', label: 'Away', count: 4, selected: true },
+          { type: 'checkbox', label: 'Offline', count: 5 }
+        ]
+      },
+      {
+        title: 'Warnings',
+        filters: [
+          { type: 'radio', label: 'No warnings', count: 10 },
+          { type: 'radio', label: '1-2 warnings', count: 3 },
+          { type: 'radio', label: '3+ warnings', count: 2 }
+        ]
+      }
+    ],
+    onApply: 'applyStaffFilters()',
+    onReset: 'resetStaffFilters()'
+  });
+}
+
