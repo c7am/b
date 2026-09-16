@@ -2735,3 +2735,289 @@ input.filled.error {
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
 
+
+/* ============================================================================
+   ADVANCED FORM VALIDATION & STATES
+   ============================================================================ */
+
+/* VALIDATION MESSAGE WITH ANIMATION */
+.validation-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--md-sys-typescale-label-small-size);
+  margin-top: var(--space-1);
+  animation: slideDown var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-decelerated);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.validation-message.error {
+  color: var(--md-sys-color-error);
+}
+
+.validation-message.success {
+  color: var(--md-sys-color-success);
+}
+
+.validation-message.warning {
+  color: var(--md-sys-color-tertiary);
+}
+
+.validation-message-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+/* INLINE VALIDATION FEEDBACK */
+.input-feedback {
+  display: inline-block;
+  margin-left: var(--space-2);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+.input-feedback.valid {
+  background: rgba(var(--md-sys-color-success-rgb), 0.12);
+  color: var(--md-sys-color-success);
+}
+
+.input-feedback.invalid {
+  background: rgba(var(--md-sys-color-error-rgb), 0.12);
+  color: var(--md-sys-color-error);
+}
+
+.input-feedback.pending {
+  background: rgba(var(--md-sys-color-tertiary-rgb), 0.12);
+  color: var(--md-sys-color-tertiary);
+}
+
+/* CHARACTER COUNTER */
+.character-counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--md-sys-typescale-label-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: var(--space-1);
+}
+
+.character-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.character-count.warning {
+  color: var(--md-sys-color-tertiary);
+}
+
+.character-count.error {
+  color: var(--md-sys-color-error);
+}
+
+/* INPUT STATE COMBINATIONS */
+/* Filled + Error */
+.text-field.filled.error {
+  border-bottom-color: var(--md-sys-color-error);
+}
+
+.text-field.filled.error:focus,
+.text-field.filled.error:focus-visible {
+  border-bottom-color: var(--md-sys-color-error);
+  box-shadow: inset 0 -2px 0 var(--md-sys-color-error);
+}
+
+/* Filled + Success */
+.text-field.filled.valid {
+  border-bottom-color: var(--md-sys-color-success);
+}
+
+.text-field.filled.valid:focus,
+.text-field.filled.valid:focus-visible {
+  border-bottom-color: var(--md-sys-color-success);
+  box-shadow: inset 0 -2px 0 var(--md-sys-color-success);
+}
+
+/* Input with prefix/suffix */
+.input-addon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  pointer-events: none;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-large-size);
+  padding: 0 12px;
+}
+
+.input-addon.prefix {
+  left: 0;
+}
+
+.input-addon.suffix {
+  right: 0;
+}
+
+.input-with-addon {
+  position: relative;
+}
+
+.input-with-addon input {
+  padding-left: 40px;
+}
+
+.input-with-addon.suffix input {
+  padding-right: 40px;
+}
+
+/* FLOATING LABEL (Advanced) */
+.form-field.floating-label {
+  position: relative;
+}
+
+.form-field.floating-label label {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+}
+
+.form-field.floating-label input:not(:placeholder-shown) ~ label,
+.form-field.floating-label input:focus ~ label {
+  top: -6px;
+  left: 12px;
+  font-size: var(--md-sys-typescale-label-small-size);
+  background: var(--md-sys-color-surface);
+  padding: 0 4px;
+}
+
+/* FORM FIELD WITH COUNTER */
+.form-field.has-counter {
+  position: relative;
+}
+
+.form-field.has-counter textarea {
+  padding-bottom: 24px;
+}
+
+.counter-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 12px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* REQUIRED FIELD INDICATOR */
+.required-indicator {
+  color: var(--md-sys-color-error);
+  margin-left: 2px;
+}
+
+/* FORM SECTION DIVIDER */
+.form-section {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section-title {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-4);
+}
+
+.form-section-description {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: var(--space-3);
+}
+
+/* COMPACT FORM (Dense) */
+.form.compact .form-field,
+.form.compact .input-group {
+  margin-bottom: var(--space-3);
+  gap: var(--space-1);
+}
+
+.form.compact .text-field,
+.form.compact input,
+.form.compact textarea {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* HORIZONTAL FORM LAYOUT */
+.form.horizontal .form-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.form.horizontal .form-field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* INLINE FORM (Single line) */
+.form.inline {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.form.inline .form-field {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* READONLY STATE */
+input:read-only,
+textarea:read-only,
+.text-field[readonly] {
+  background: var(--md-sys-color-surface-container-low);
+  border-color: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: default;
+}
+
+input:read-only:focus,
+textarea:read-only:focus,
+.text-field[readonly]:focus {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* FOCUSED FORM STATE */
+form:focus-within {
+  /* Optional: highlight entire form when any field is focused */
+}
+
+/* DISABLED FORM STATE */
+.form:disabled,
+fieldset:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+

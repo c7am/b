@@ -2399,3 +2399,272 @@ function renderExampleForm() {
   `;
 }
 
+
+// ADVANCED FORM UTILITIES
+
+// Validation Rules
+const ValidationRules = {
+  required: (value) => {
+    if (!value || value.trim() === '') return 'This field is required';
+    return null;
+  },
+  
+  email: (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (value && !emailRegex.test(value)) return 'Please enter a valid email';
+    return null;
+  },
+  
+  minLength: (min) => (value) => {
+    if (value && value.length < min) return `Minimum ${min} characters required`;
+    return null;
+  },
+  
+  maxLength: (max) => (value) => {
+    if (value && value.length > max) return `Maximum ${max} characters allowed`;
+    return null;
+  },
+  
+  minValue: (min) => (value) => {
+    if (value && Number(value) < min) return `Minimum value is ${min}`;
+    return null;
+  },
+  
+  maxValue: (max) => (value) => {
+    if (value && Number(value) > max) return `Maximum value is ${max}`;
+    return null;
+  },
+  
+  pattern: (regex, message) => (value) => {
+    if (value && !regex.test(value)) return message || 'Invalid format';
+    return null;
+  },
+  
+  match: (otherFieldId, fieldName) => (value) => {
+    const other = document.getElementById(otherFieldId);
+    if (value !== other?.value) return `${fieldName} must match`;
+    return null;
+  }
+};
+
+// Form Builder Class
+class FormBuilder {
+  constructor(options = {}) {
+    this.options = options;
+    this.fields = [];
+    this.sections = [];
+    this.validators = {};
+  }
+
+  addSection(title, description = '') {
+    this.sections.push({ title, description, fieldIndices: [] });
+    return this;
+  }
+
+  addField(fieldOptions) {
+    const index = this.fields.length;
+    this.fields.push(fieldOptions);
+    if (this.sections.length > 0) {
+      this.sections[this.sections.length - 1].fieldIndices.push(index);
+    }
+    return this;
+  }
+
+  addValidator(fieldId, validationRules) {
+    this.validators[fieldId] = validationRules;
+    return this;
+  }
+
+  render() {
+    if (this.sections.length === 0) {
+      // Single section render
+      return this.renderFields(this.fields);
+    }
+
+    let html = '<form class="form">';
+    this.sections.forEach((section, idx) => {
+      html += `<div class="form-section">`;
+      if (section.title) {
+        html += `<h3 class="form-section-title">${section.title}</h3>`;
+      }
+      if (section.description) {
+        html += `<p class="form-section-description">${section.description}</p>`;
+      }
+
+      section.fieldIndices.forEach(fieldIdx => {
+        html += this.renderField(this.fields[fieldIdx]);
+      });
+
+      html += `</div>`;
+    });
+    html += '</form>';
+    return html;
+  }
+
+  renderFields(fields) {
+    let html = '<form class="form">';
+    fields.forEach(field => {
+      html += this.renderField(field);
+    });
+    html += '</form>';
+    return html;
+  }
+
+  renderField(fieldOptions) {
+    const type = fieldOptions.type || 'text';
+    switch (type) {
+      case 'text':
+      case 'email':
+      case 'password':
+        return renderTextField(fieldOptions);
+      case 'checkbox':
+        return renderCheckbox(fieldOptions);
+      case 'radio':
+        return renderRadio(fieldOptions);
+      case 'radio-group':
+        return renderRadioGroup(fieldOptions);
+      case 'switch':
+        return renderSwitch(fieldOptions);
+      case 'slider':
+        return renderSlider(fieldOptions);
+      case 'checkbox-group':
+        return renderCheckboxGroup(fieldOptions);
+      default:
+        return renderTextField(fieldOptions);
+    }
+  }
+}
+
+// Form Validation Function
+function validateForm(formElement) {
+  const errors = {};
+  const formData = new FormData(formElement);
+
+  for (let [name, value] of formData) {
+    const input = formElement.querySelector(`[name="${name}"]`);
+    if (!input) continue;
+
+    const validators = input.dataset.validators?.split(',') || [];
+    const rules = [];
+
+    validators.forEach(validatorName => {
+      const ruleStr = input.dataset[`validate${validatorName.charAt(0).toUpperCase()}${validatorName.slice(1)}`];
+      if (ruleStr && ValidationRules[validatorName]) {
+        rules.push(ValidationRules[validatorName](ruleStr));
+      }
+    });
+
+    if (input.required) rules.push(ValidationRules.required);
+
+    let fieldError = null;
+    for (let rule of rules) {
+      fieldError = rule(value);
+      if (fieldError) break;
+    }
+
+    if (fieldError) {
+      errors[name] = fieldError;
+      input.classList.add('error');
+      input.classList.remove('valid');
+    } else {
+      input.classList.remove('error');
+      input.classList.add('valid');
+    }
+  }
+
+  return Object.keys(errors).length === 0 ? null : errors;
+}
+
+// Real-time Validation Setup
+function setupRealtimeValidation(formElement) {
+  const inputs = formElement.querySelectorAll('input, textarea, select');
+
+  inputs.forEach(input => {
+    input.addEventListener('blur', () => {
+      validateField(input);
+    });
+
+    if (input.dataset.debounce) {
+      let debounceTimer;
+      input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          validateField(input);
+        }, 500);
+      });
+    }
+  });
+}
+
+// Validate Single Field
+function validateField(input) {
+  const value = input.value;
+  const validators = input.dataset.validators?.split(',') || [];
+  
+  let error = null;
+
+  if (input.required && !value.trim()) {
+    error = 'This field is required';
+  }
+
+  if (!error && input.type === 'email' && value) {
+    error = ValidationRules.email(value);
+  }
+
+  if (!error && input.minLength && value) {
+    error = ValidationRules.minLength(input.minLength)(value);
+  }
+
+  const errorElement = input.closest('.form-field')?.querySelector('.error-message');
+  if (errorElement) {
+    if (error) {
+      errorElement.textContent = error;
+      errorElement.style.display = 'block';
+      input.classList.add('error');
+      input.classList.remove('valid');
+    } else {
+      errorElement.style.display = 'none';
+      input.classList.remove('error');
+      input.classList.add('valid');
+    }
+  }
+
+  return !error;
+}
+
+// Form Data Extractor
+function getFormData(formElement) {
+  const data = {};
+  const formData = new FormData(formElement);
+
+  for (let [name, value] of formData) {
+    if (data[name] === undefined) {
+      data[name] = value;
+    } else if (Array.isArray(data[name])) {
+      data[name].push(value);
+    } else {
+      data[name] = [data[name], value];
+    }
+  }
+
+  return data;
+}
+
+// Reset Form with Options
+function resetForm(formElement, options = {}) {
+  formElement.reset();
+
+  if (options.clearErrors !== false) {
+    formElement.querySelectorAll('input, textarea').forEach(input => {
+      input.classList.remove('error', 'valid');
+    });
+  }
+
+  if (options.clearMessages !== false) {
+    formElement.querySelectorAll('.error-message').forEach(msg => {
+      msg.textContent = '';
+      msg.style.display = 'none';
+    });
+  }
+}
+
