@@ -4082,3 +4082,303 @@ table.dense td {
   animation: spin 0.6s linear infinite;
 }
 
+
+/* ============================================================================
+   MATERIAL DESIGN 3 - EXPRESSIVE MOTION (PHASE 5)
+   ============================================================================
+   Spring Physics, Spatial Animations, Effect Animations
+   Reference: MD3 2025 Motion System (approximated with cubic-bezier)
+   ============================================================================ */
+
+:root {
+  /* SPRING-BASED EASING TOKENS (NEW - Phase 5)
+     Replaces duration-based easing with physics-based spring presets
+     Two spring types: SPATIAL (position/scale) + EFFECT (color/opacity) */
+
+  /* SPATIAL ANIMATIONS (Position, Scale, Size)
+     Controls how elements move through space */
+  
+  /* Expressive Spatial: Bouncy, energetic movement (low damping) */
+  --md-sys-motion-easing-spatial-expressive: cubic-bezier(0.17, 0.67, 0.12, 0.95);
+  /* Standard Spatial: Smooth, controlled movement (high damping) */
+  --md-sys-motion-easing-spatial-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* EFFECT ANIMATIONS (Color, Opacity, Elevation)
+     Controls how non-spatial properties change */
+
+  /* Expressive Effect: Energetic color/opacity changes (spring overshoot) */
+  --md-sys-motion-easing-effect-expressive: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Standard Effect: Subtle, refined changes */
+  --md-sys-motion-easing-effect-standard: cubic-bezier(0.2, 0, 0.8, 1);
+
+  /* SPRING DURATION TOKENS
+     Time for spring to settle (replace old short1/short2/etc for spring anims) */
+  --md-sys-motion-duration-spring-short: 150ms;   /* Quick snappy interactions */
+  --md-sys-motion-duration-spring-medium: 250ms;  /* Standard UI transitions */
+  --md-sys-motion-duration-spring-long: 350ms;    /* Complex multi-element */
+
+  /* MOTION COMPLEXITY PRESETS
+     Predefined combinations for common patterns */
+  --md-sys-motion-spatial-expressive: all var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive);
+  --md-sys-motion-spatial-standard: all var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-standard);
+  --md-sys-motion-effect-expressive: all var(--md-sys-motion-duration-spring-short) var(--md-sys-motion-easing-effect-expressive);
+  --md-sys-motion-effect-standard: all var(--md-sys-motion-duration-spring-short) var(--md-sys-motion-easing-effect-standard);
+}
+
+/* ============================================================================
+   SPRING ANIMATION UTILITIES
+   ============================================================================ */
+
+/* Spatial animations (position, scale, size) */
+.animate-spatial-expressive {
+  transition: var(--md-sys-motion-spatial-expressive);
+}
+
+.animate-spatial-standard {
+  transition: var(--md-sys-motion-spatial-standard);
+}
+
+/* Effect animations (color, opacity, elevation) */
+.animate-effect-expressive {
+  transition: var(--md-sys-motion-effect-expressive);
+}
+
+.animate-effect-standard {
+  transition: var(--md-sys-motion-effect-standard);
+}
+
+/* ---- SCALE ANIMATIONS ---- */
+@keyframes scaleInExpressive {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleInStandard {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.scale-in-expressive {
+  animation: scaleInExpressive var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive) forwards;
+}
+
+.scale-in-standard {
+  animation: scaleInStandard var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-standard) forwards;
+}
+
+/* ---- FADE ANIMATIONS ---- */
+@keyframes fadeInExpressive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in-expressive {
+  animation: fadeInExpressive var(--md-sys-motion-duration-spring-short) var(--md-sys-motion-easing-effect-expressive) forwards;
+}
+
+.fade-in-standard {
+  animation: fadeInExpressive var(--md-sys-motion-duration-spring-short) var(--md-sys-motion-easing-effect-standard) forwards;
+}
+
+/* ---- SLIDE ANIMATIONS ---- */
+@keyframes slideUpExpressive {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownExpressive {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up-expressive {
+  animation: slideUpExpressive var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive) forwards;
+}
+
+.slide-down-expressive {
+  animation: slideDownExpressive var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive) forwards;
+}
+
+/* ---- HOVER SCALE (Element Interaction) ---- */
+.interactive-scale {
+  transition: transform var(--md-sys-motion-duration-spring-short) var(--md-sys-motion-easing-spatial-expressive);
+}
+
+.interactive-scale:hover {
+  transform: scale(1.02);
+}
+
+.interactive-scale:active {
+  transform: scale(0.98);
+}
+
+/* ---- RIPPLE EFFECT (Material Feedback) ---- */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: radial-gradient(circle, 
+    rgba(var(--md-sys-color-on-surface-rgb), 0.3) 0%,
+    rgba(var(--md-sys-color-on-surface-rgb), 0) 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.ripple-effect:active::after {
+  width: 100px;
+  height: 100px;
+  animation: rippleWave var(--md-sys-motion-duration-spring-long) var(--md-sys-motion-easing-effect-standard) forwards;
+}
+
+@keyframes rippleWave {
+  from {
+    width: 100px;
+    height: 100px;
+    opacity: 1;
+  }
+  to {
+    width: 400px;
+    height: 400px;
+    opacity: 0;
+  }
+}
+
+/* ---- ELEVATION CHANGE (Shadow Expansion) ---- */
+.elevation-interactive {
+  transition: box-shadow var(--md-sys-motion-duration-spring-short) var(--md-sys-motion-easing-effect-expressive);
+}
+
+.elevation-interactive:hover {
+  box-shadow: var(--md-sys-elevation-level3);
+}
+
+.elevation-interactive:active {
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+/* ---- STAGGER ANIMATION (Multi-element Sequential) ---- */
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: staggerFadeIn var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive) forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 30ms; }
+.stagger-item:nth-child(3) { animation-delay: 60ms; }
+.stagger-item:nth-child(4) { animation-delay: 90ms; }
+.stagger-item:nth-child(5) { animation-delay: 120ms; }
+
+/* ---- SPRING-BASED BUTTON ANIMATIONS ---- */
+.btn-spring {
+  position: relative;
+  overflow: hidden;
+  transition: var(--md-sys-motion-spatial-expressive);
+}
+
+.btn-spring:active {
+  transform: scale(0.96);
+}
+
+/* ---- DIALOG/MODAL SPRING ENTRANCE ---- */
+.dialog-spring-enter {
+  animation: dialogSpringEnter var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive) forwards;
+}
+
+@keyframes dialogSpringEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ---- EXPAND/COLLAPSE ANIMATIONS ---- */
+.collapse-spring {
+  transition: all var(--md-sys-motion-duration-spring-medium) var(--md-sys-motion-easing-spatial-expressive);
+  max-height: 1000px;
+  overflow: hidden;
+}
+
+.collapse-spring.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* ============================================================================
+   PREFERS-REDUCED-MOTION HANDLING
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Override all spring animations when user prefers reduced motion */
+  :root {
+    --md-sys-motion-easing-spatial-expressive: ease;
+    --md-sys-motion-easing-spatial-standard: ease;
+    --md-sys-motion-easing-effect-expressive: ease;
+    --md-sys-motion-easing-effect-standard: ease;
+    --md-sys-motion-duration-spring-short: 10ms;
+    --md-sys-motion-duration-spring-medium: 10ms;
+    --md-sys-motion-duration-spring-long: 10ms;
+  }
+
+  /* Disable all animations */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

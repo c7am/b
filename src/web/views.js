@@ -3483,3 +3483,104 @@ function renderStaffFilters() {
   });
 }
 
+
+/* ============================================================================
+   MOTION UTILITIES - PHASE 5
+   ============================================================================ */
+
+// Spring Animation Controller
+class SpringAnimation {
+  static applyMotion(element, type = 'spatial', preset = 'expressive') {
+    const className = `animate-${type}-${preset}`;
+    element.classList.add(className);
+  }
+
+  static scaleIn(element, preset = 'expressive') {
+    const className = `scale-in-${preset}`;
+    element.classList.add(className);
+  }
+
+  static fadeIn(element, preset = 'expressive') {
+    const className = `fade-in-${preset}`;
+    element.classList.add(className);
+  }
+
+  static slideUp(element, preset = 'expressive') {
+    element.classList.add(`slide-up-${preset}`);
+  }
+
+  static slideDown(element, preset = 'expressive') {
+    element.classList.add(`slide-down-${preset}`);
+  }
+
+  static stagger(container, delay = 30) {
+    const items = container.querySelectorAll('.stagger-item');
+    items.forEach((item, idx) => {
+      item.style.setProperty('--stagger-delay', `${idx * delay}ms`);
+    });
+  }
+}
+
+// Motion Preset Combos
+const MotionPresets = {
+  BUTTON_PRESS: {
+    spatial: 'expressive',
+    effect: 'standard',
+    duration: 'spring-short'
+  },
+  MODAL_OPEN: {
+    spatial: 'expressive',
+    effect: 'expressive',
+    duration: 'spring-medium'
+  },
+  LIST_ITEM_APPEAR: {
+    spatial: 'standard',
+    effect: 'standard',
+    duration: 'spring-medium'
+  },
+  HOVER_LIFT: {
+    spatial: 'expressive',
+    effect: 'expressive',
+    duration: 'spring-short'
+  },
+  DISMISS: {
+    spatial: 'standard',
+    effect: 'standard',
+    duration: 'spring-short'
+  }
+};
+
+// Apply preset to element
+function applyMotionPreset(element, presetName) {
+  const preset = MotionPresets[presetName];
+  if (!preset) return;
+
+  element.classList.add(
+    `animate-${preset.spatial}-${preset.effect}`,
+    `duration-${preset.duration}`
+  );
+}
+
+// Stagger animation helper
+function staggerAnimateChildren(containerSelector, animationType = 'fade-in') {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+
+  const children = container.querySelectorAll('[data-stagger]');
+  children.forEach((child, idx) => {
+    setTimeout(() => {
+      child.classList.add(`${animationType}-expressive`);
+    }, idx * 30);
+  });
+}
+
+// Motion preferences detector
+const motionPrefs = {
+  prefersReducedMotion: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  getEasing: (type = 'spatial', preset = 'expressive') => {
+    if (motionPrefs.prefersReducedMotion()) return 'ease';
+    const token = `--md-sys-motion-easing-${type}-${preset}`;
+    return getComputedStyle(document.documentElement).getPropertyValue(token);
+  }
+};
+
