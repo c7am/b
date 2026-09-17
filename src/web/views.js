@@ -35,6 +35,14 @@ function formatDate(date) {
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function clearSearchInput(button) {
+  const input = button.parentElement.querySelector('input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+}
+
 function layout({ title, body, showNav = true }) {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -3250,6 +3258,8 @@ function renderSearchBar(options = {}) {
   const variantClass = variant === 'outlined' ? 'outlined' : '';
   const compactClass = compact ? 'compact' : '';
 
+  const clearHandler = onClear || 'clearSearchInput(this)';
+  
   return `
     <div class="search-bar ${variantClass} ${compactClass}">
       ${showIcon ? '<span class="search-icon">🔍</span>' : ''}
@@ -3260,7 +3270,7 @@ function renderSearchBar(options = {}) {
         value="${value}"
         ${onSearch ? `onkeyup="${onSearch}(this.value)"` : ''}
       />
-      ${value ? `<button class="search-clear" onclick="${onClear || 'this.parentElement.querySelector(\\\\'input\\\\').value = \\\\'\\\\'; this.parentElement.querySelector(\\\\'input\\\\').focus()'}">✕</button>` : ''}
+      ${value ? `<button class="search-clear" onclick="${clearHandler}">✕</button>` : ''}
     </div>
   `;
 }
