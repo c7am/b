@@ -3981,3 +3981,237 @@ function renderStaffDashboardLayout() {
   });
 }
 
+
+/* ============================================================================
+   STATES & FEEDBACK UTILITIES - PHASE 7
+   ============================================================================ */
+
+// Skeleton loader templates
+class SkeletonLoader {
+  static renderCardSkeleton() {
+    return `
+      <div class="skeleton-card">
+        <div class="skeleton-card-header">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-card-title"></div>
+        </div>
+        <div class="skeleton-card-content">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  static renderListItemSkeleton() {
+    return `
+      <div class="skeleton-list-item">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-list-item-content">
+          <div class="skeleton-line large"></div>
+          <div class="skeleton-line"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  static renderTableSkeleton(rows = 5) {
+    let html = '';
+    for (let i = 0; i < rows; i++) {
+      html += `
+        <div class="skeleton-table-row">
+          <div class="skeleton-table-cell"></div>
+          <div class="skeleton-table-cell"></div>
+          <div class="skeleton-table-cell"></div>
+          <div class="skeleton-table-cell"></div>
+        </div>
+      `;
+    }
+    return html;
+  }
+
+  static showSkeletonInElement(elementId, type = 'card') {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    element.innerHTML = this.renderCardSkeleton();
+  }
+}
+
+// State notification containers
+class StateNotification {
+  static error(title, message, actionText = null) {
+    return `
+      <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <div class="error-content">
+          <div class="error-title">${title}</div>
+          <div class="error-message">${message}</div>
+          ${actionText ? `<div class="error-action"><button class="btn-outlined">${actionText}</button></div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  static success(title, message) {
+    return `
+      <div class="success-container">
+        <div class="success-icon">✓</div>
+        <div class="success-content">
+          <div class="success-title">${title}</div>
+          <div class="success-message">${message}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  static warning(title, message) {
+    return `
+      <div class="warning-container">
+        <div class="warning-icon">⚡</div>
+        <div class="warning-content">
+          <div class="warning-title">${title}</div>
+          <div class="warning-message">${message}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  static info(title, message) {
+    return `
+      <div class="info-container">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-content">
+          <div class="info-title">${title}</div>
+          <div class="info-message">${message}</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Progress indicators
+class Progress {
+  static renderCircular(percent = 50) {
+    return `<div class="progress-circular" style="--progress: ${percent * 3.6}deg">${percent}%</div>`;
+  }
+
+  static renderLinear(percent = 50, indeterminate = false) {
+    const indeterminateClass = indeterminate ? 'indeterminate' : '';
+    return `
+      <div class="progress-linear">
+        <div class="progress-linear-bar ${indeterminateClass}" style="--progress: ${percent}%"></div>
+      </div>
+    `;
+  }
+
+  static updateLinear(elementId, percent) {
+    const element = document.querySelector(`#${elementId} .progress-linear-bar`);
+    if (element) {
+      element.style.setProperty('--progress', `${percent}%`);
+    }
+  }
+}
+
+// Inline validation
+function renderInlineValidation(options = {}) {
+  const {
+    message = '',
+    state = 'valid', // 'valid', 'invalid', 'pending'
+    icon = '✓'
+  } = options;
+
+  const iconMap = {
+    valid: '✓',
+    invalid: '✕',
+    pending: '⏳'
+  };
+
+  return `
+    <div class="inline-validation ${state}">
+      <span class="inline-validation-icon">${iconMap[state] || icon}</span>
+      <span>${message}</span>
+    </div>
+  `;
+}
+
+// Badge renderer
+function renderBadge(options = {}) {
+  const {
+    text = 'Badge',
+    variant = 'primary' // 'primary', 'secondary', 'tertiary', 'error', 'success'
+  } = options;
+
+  return `<span class="badge ${variant}">${text}</span>`;
+}
+
+// Toast notification system
+class Toast {
+  static show(options = {}) {
+    const {
+      message = 'Notification',
+      type = 'info', // 'success', 'error', 'warning', 'info'
+      duration = 5000,
+      action = null
+    } = options;
+
+    const container = document.querySelector('.toast-container') || this.createContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const iconMap = {
+      success: '✓',
+      error: '⚠️',
+      warning: '⚡',
+      info: 'ℹ️'
+    };
+
+    toast.innerHTML = `
+      <div class="toast-icon">${iconMap[type]}</div>
+      <div class="toast-content">
+        <div class="toast-message">${message}</div>
+      </div>
+      ${action ? `<button class="toast-action">${action.label}</button>` : ''}
+    `;
+
+    container.appendChild(toast);
+
+    if (action && action.onClick) {
+      toast.querySelector('.toast-action').onclick = action.onClick;
+    }
+
+    if (duration > 0) {
+      setTimeout(() => {
+        toast.classList.add('fade-exit');
+        setTimeout(() => toast.remove(), 200);
+      }, duration);
+    }
+
+    return toast;
+  }
+
+  static createContainer() {
+    const container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+    return container;
+  }
+
+  static success(message, action = null) {
+    return this.show({ message, type: 'success', action });
+  }
+
+  static error(message, action = null) {
+    return this.show({ message, type: 'error', action });
+  }
+
+  static warning(message, action = null) {
+    return this.show({ message, type: 'warning', action });
+  }
+
+  static info(message, action = null) {
+    return this.show({ message, type: 'info', action });
+  }
+}
+

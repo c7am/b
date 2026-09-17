@@ -4877,3 +4877,534 @@ table.dense td {
   padding-top: max(var(--space-4), env(safe-area-inset-top));
 }
 
+
+/* ============================================================================
+   MATERIAL DESIGN 3 - STATES & FEEDBACK (PHASE 7)
+   ============================================================================
+   Skeleton Screens, Empty States, Error/Success/Loading Feedback
+   ============================================================================ */
+
+/* ============================================================================
+   SKELETON SCREENS (Placeholder Loading)
+   ============================================================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--md-sys-color-surface-container) 25%,
+    var(--md-sys-color-surface-container-high) 50%,
+    var(--md-sys-color-surface-container) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonWave 1.5s infinite;
+  border-radius: var(--md-sys-shape-corner-small);
+  color: transparent;
+  user-select: none;
+}
+
+@keyframes skeletonWave {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-text.large {
+  height: 24px;
+}
+
+.skeleton-text.small {
+  height: 12px;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  display: inline-block;
+}
+
+.skeleton-card {
+  padding: var(--space-4);
+  background: var(--md-sys-color-surface);
+  border-radius: var(--md-sys-shape-corner-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.skeleton-card-header {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.skeleton-card-title {
+  flex: 1;
+  height: 20px;
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.skeleton-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-line {
+  height: 16px;
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.skeleton-line:last-child {
+  width: 85%;
+}
+
+.skeleton-list-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.skeleton-list-item .skeleton-avatar {
+  flex-shrink: 0;
+}
+
+.skeleton-list-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Table skeleton */
+.skeleton-table-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.skeleton-table-cell {
+  height: 16px;
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--md-sys-color-primary);
+  border-top-color: transparent;
+  border-radius: var(--md-sys-shape-corner-full);
+  animation: spin 0.6s linear infinite;
+}
+
+.loading-spinner.large {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+.loading-spinner.small {
+  width: 12px;
+  height: 12px;
+  border-width: 1.5px;
+}
+
+/* Circular progress */
+.progress-circular {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: conic-gradient(
+    var(--md-sys-color-primary) 0deg,
+    var(--md-sys-color-primary) var(--progress, 90deg),
+    var(--md-sys-color-outline-variant) var(--progress, 90deg),
+    var(--md-sys-color-outline-variant) 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+}
+
+/* Linear progress bar */
+.progress-linear {
+  width: 100%;
+  height: 4px;
+  background: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+}
+
+.progress-linear-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--md-sys-color-primary) 0%,
+    var(--md-sys-color-tertiary) 100%
+  );
+  width: var(--progress, 50%);
+  transition: width var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+.progress-linear-indeterminate .progress-linear-bar {
+  width: 30%;
+  animation: indeterminateProgress 1.5s infinite;
+}
+
+@keyframes indeterminateProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+/* ============================================================================
+   ERROR STATES
+   ============================================================================ */
+
+.error-container {
+  background: rgba(var(--md-sys-color-error-rgb), 0.12);
+  border: 1px solid var(--md-sys-color-error);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.error-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-error);
+  flex-shrink: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-title {
+  font-weight: 600;
+  color: var(--md-sys-color-error);
+  margin-bottom: 4px;
+}
+
+.error-message {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface);
+}
+
+.error-action {
+  margin-top: var(--space-2);
+}
+
+/* ============================================================================
+   SUCCESS STATES
+   ============================================================================ */
+
+.success-container {
+  background: rgba(var(--md-sys-color-success-rgb), 0.12);
+  border: 1px solid var(--md-sys-color-success);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+  animation: slideInSuccess var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-decelerated);
+}
+
+@keyframes slideInSuccess {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-success);
+  flex-shrink: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-content {
+  flex: 1;
+}
+
+.success-title {
+  font-weight: 600;
+  color: var(--md-sys-color-success);
+  margin-bottom: 4px;
+}
+
+.success-message {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ============================================================================
+   WARNING STATES
+   ============================================================================ */
+
+.warning-container {
+  background: rgba(var(--md-sys-color-tertiary-rgb), 0.12);
+  border: 1px solid var(--md-sys-color-tertiary);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.warning-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-tertiary);
+  flex-shrink: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-title {
+  font-weight: 600;
+  color: var(--md-sys-color-tertiary);
+  margin-bottom: 4px;
+}
+
+.warning-message {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ============================================================================
+   INFO STATES
+   ============================================================================ */
+
+.info-container {
+  background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+  border: 1px solid var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.info-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-primary);
+  flex-shrink: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-title {
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+  margin-bottom: 4px;
+}
+
+.info-message {
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ============================================================================
+   INLINE VALIDATION (Real-time Feedback)
+   ============================================================================ */
+
+.inline-validation {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--md-sys-typescale-label-small-size);
+  margin-top: var(--space-1);
+  animation: fadeInExpressive var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.inline-validation.valid {
+  color: var(--md-sys-color-success);
+}
+
+.inline-validation.invalid {
+  color: var(--md-sys-color-error);
+}
+
+.inline-validation.pending {
+  color: var(--md-sys-color-tertiary);
+}
+
+.inline-validation-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+/* ============================================================================
+   BADGE INDICATORS (Status Tags)
+   ============================================================================ */
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge.primary {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.badge.secondary {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.badge.tertiary {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+.badge.error {
+  background: rgba(var(--md-sys-color-error-rgb), 0.2);
+  color: var(--md-sys-color-error);
+}
+
+.badge.success {
+  background: rgba(var(--md-sys-color-success-rgb), 0.2);
+  color: var(--md-sys-color-success);
+}
+
+/* ============================================================================
+   TOAST/SNACKBAR STATES
+   ============================================================================ */
+
+.toast-container {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-4);
+  box-shadow: var(--md-sys-elevation-level3);
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  pointer-events: auto;
+  animation: slideInUp var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-decelerated);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-message {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 4px;
+}
+
+.toast-action {
+  background: transparent;
+  border: none;
+  color: var(--md-sys-color-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toast.success .toast-icon { color: var(--md-sys-color-success); }
+.toast.error .toast-icon { color: var(--md-sys-color-error); }
+.toast.warning .toast-icon { color: var(--md-sys-color-tertiary); }
+.toast.info .toast-icon { color: var(--md-sys-color-primary); }
+
+/* ============================================================================
+   TRANSITION STATES (Entering/Exiting)
+   ============================================================================ */
+
+.fade-exit {
+  animation: fadeExit var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-accelerated) forwards;
+}
+
+@keyframes fadeExit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.slide-exit-left {
+  animation: slideExitLeft var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-accelerated) forwards;
+}
+
+@keyframes slideExitLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-100%); }
+}
+
