@@ -3584,3 +3584,400 @@ const motionPrefs = {
   }
 };
 
+
+/* ============================================================================
+   RESPONSIVE UTILITIES - PHASE 6
+   ============================================================================ */
+
+// Breakpoint detector
+const breakpoints = {
+  COMPACT: 'compact',
+  MEDIUM: 'medium',
+  EXPANDED: 'expanded'
+};
+
+class ResponsiveManager {
+  static getCurrentBreakpoint() {
+    const width = window.innerWidth;
+    if (width < 600) return breakpoints.COMPACT;
+    if (width < 840) return breakpoints.MEDIUM;
+    return breakpoints.EXPANDED;
+  }
+
+  static isCompact() {
+    return this.getCurrentBreakpoint() === breakpoints.COMPACT;
+  }
+
+  static isMedium() {
+    return this.getCurrentBreakpoint() === breakpoints.MEDIUM;
+  }
+
+  static isExpanded() {
+    return this.getCurrentBreakpoint() === breakpoints.EXPANDED;
+  }
+
+  static getColumns() {
+    const bp = this.getCurrentBreakpoint();
+    if (bp === breakpoints.COMPACT) return 1;
+    if (bp === breakpoints.MEDIUM) return 2;
+    return 3;
+  }
+
+  static getContainerPadding() {
+    const bp = this.getCurrentBreakpoint();
+    if (bp === breakpoints.COMPACT) return 16; // var(--space-4)
+    if (bp === breakpoints.MEDIUM) return 24;  // var(--space-6)
+    return 32;  // var(--space-8)
+  }
+
+  static onBreakpointChange(callback) {
+    let currentBp = this.getCurrentBreakpoint();
+    
+    const handleResize = () => {
+      const newBp = this.getCurrentBreakpoint();
+      if (newBp !== currentBp) {
+        currentBp = newBp;
+        callback(currentBp);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }
+
+  static isTouchDevice() {
+    return (('ontouchstart' in window) ||
+            (navigator.maxTouchPoints > 0) ||
+            (navigator.msMaxTouchPoints > 0));
+  }
+}
+
+// Adaptive navigation setup
+class AdaptiveNavigation {
+  static setup() {
+    const manager = ResponsiveManager;
+    
+    // Update navigation based on breakpoint
+    manager.onBreakpointChange((bp) => {
+      const navRail = document.querySelector('.navigation-rail');
+      const bottomNav = document.querySelector('.bottom-navigation');
+
+      if (bp === breakpoints.COMPACT) {
+        if (navRail) navRail.style.display = 'none';
+        if (bottomNav) bottomNav.style.display = 'flex';
+      } else if (bp === breakpoints.MEDIUM) {
+        if (navRail) navRail.style.display = 'none';
+        if (bottomNav) bottomNav.style.display = 'none';
+      } else {
+        if (navRail) navRail.style.display = 'flex';
+        if (bottomNav) bottomNav.style.display = 'none';
+      }
+    });
+  }
+}
+
+// Responsive grid helper
+class ResponsiveGrid {
+  static renderGrid(items, options = {}) {
+    const {
+      containerId = 'grid',
+      itemsPerRow = { compact: 1, medium: 2, expanded: 3 },
+      template = (item) => `<div>${item}</div>`
+    } = options;
+
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const bp = ResponsiveManager.getCurrentBreakpoint();
+    const itemWidth = 100 / itemsPerRow[bp];
+
+    let html = '';
+    items.forEach((item, idx) => {
+      html += template(item);
+    });
+
+    container.innerHTML = html;
+  }
+}
+
+// Responsive modal positioning
+class ResponsiveModal {
+  static centerModal(modalElement) {
+    const bp = ResponsiveManager.getCurrentBreakpoint();
+
+    if (bp === breakpoints.COMPACT) {
+      // Full height modal
+      modalElement.style.width = '100%';
+      modalElement.style.height = '100%';
+      modalElement.style.maxHeight = '100%';
+      modalElement.style.borderRadius = '0';
+    } else if (bp === breakpoints.MEDIUM) {
+      // 90% width, max 512px
+      modalElement.style.width = '90%';
+      modalElement.style.maxWidth = '512px';
+      modalElement.style.height = 'auto';
+      modalElement.style.maxHeight = '90vh';
+      modalElement.style.borderRadius = 'var(--md-sys-shape-corner-medium)';
+    } else {
+      // 80% width, max 560px
+      modalElement.style.width = '80%';
+      modalElement.style.maxWidth = '560px';
+      modalElement.style.height = 'auto';
+      modalElement.style.maxHeight = '90vh';
+      modalElement.style.borderRadius = 'var(--md-sys-shape-corner-medium)';
+    }
+  }
+}
+
+// Responsive sidebar detector
+class SidebarLayout {
+  static shouldShowSidebar() {
+    return ResponsiveManager.getCurrentBreakpoint() !== breakpoints.COMPACT;
+  }
+
+  static toggleSidebar(sidebarId) {
+    const sidebar = document.getElementById(sidebarId);
+    if (!sidebar) return;
+
+    if (ResponsiveManager.isCompact()) {
+      sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+}
+
+// Initialize all responsive behaviors
+function initializeResponsive() {
+  AdaptiveNavigation.setup();
+  
+  // Update on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      // Reflow expensive calculations
+    }, 250);
+  });
+}
+
+// Safe area helper
+function getSafeAreaInsets() {
+  const computedStyle = getComputedStyle(document.documentElement);
+  return {
+    top: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-top)')) || 0,
+    right: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-right)')) || 0,
+    bottom: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-bottom)')) || 0,
+    left: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-left)')) || 0
+  };
+}
+
+
+/* ============================================================================
+   RESPONSIVE LAYOUT TEMPLATES - PHASE 6
+   ============================================================================ */
+
+// Adaptive Layout Builder
+class AdaptiveLayoutBuilder {
+  constructor() {
+    this.elements = [];
+  }
+
+  addGridItem(content, span = 1) {
+    this.elements.push({
+      type: 'grid-item',
+      content,
+      span
+    });
+    return this;
+  }
+
+  addFullWidth(content) {
+    this.elements.push({
+      type: 'full-width',
+      content
+    });
+    return this;
+  }
+
+  addSidebar(main, aside) {
+    this.elements.push({
+      type: 'sidebar',
+      main,
+      aside
+    });
+    return this;
+  }
+
+  renderGrid() {
+    let html = '<div class="grid-container gap-responsive">';
+    this.elements.forEach(el => {
+      if (el.type === 'full-width') {
+        html += `<div class="full-width">${el.content}</div>`;
+      } else if (el.type === 'grid-item') {
+        const spanClass = el.span > 1 ? `span-${el.span}` : '';
+        html += `<div class="${spanClass}">${el.content}</div>`;
+      }
+    });
+    html += '</div>';
+    return html;
+  }
+
+  renderSidebar() {
+    const main = this.elements.find(e => e.type === 'sidebar')?.main || '';
+    const aside = this.elements.find(e => e.type === 'sidebar')?.aside || '';
+    
+    return `
+      <div class="sidebar-layout">
+        <div class="sidebar-layout-main">${main}</div>
+        <aside class="sidebar-layout-aside hide-compact">${aside}</aside>
+      </div>
+    `;
+  }
+
+  render() {
+    if (this.elements.some(e => e.type === 'sidebar')) {
+      return this.renderSidebar();
+    }
+    return this.renderGrid();
+  }
+}
+
+// Responsive dashboard template
+function renderResponsiveDashboard(options = {}) {
+  const {
+    title = 'Dashboard',
+    cards = [],
+    sidebar = null,
+    fullWidthTop = null
+  } = options;
+
+  let html = `
+    <div class="app-container">
+      ${renderTopAppBar({ title, variant: 'standard' })}
+      
+      <div class="app-content">
+        <div class="page-container">
+  `;
+
+  if (fullWidthTop) {
+    html += fullWidthTop;
+  }
+
+  if (sidebar) {
+    html += `
+      <div class="sidebar-layout">
+        <div class="sidebar-layout-main">
+          <div class="grid-container gap-responsive">
+    `;
+    cards.forEach((card, idx) => {
+      html += `<div class="card">${card}</div>`;
+    });
+    html += `
+          </div>
+        </div>
+        <aside class="sidebar-layout-aside hide-compact">
+          ${sidebar}
+        </aside>
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="grid-container gap-responsive">
+    `;
+    cards.forEach(card => {
+      html += `<div class="card">${card}</div>`;
+    });
+    html += `
+      </div>
+    `;
+  }
+
+  html += `
+        </div>
+      </div>
+    `;
+
+  html += renderBottomNavigation({
+    items: [
+      { icon: '📊', label: 'Dashboard' },
+      { icon: '👥', label: 'Members' },
+      { icon: '⚠️', label: 'Reports' },
+      { icon: '⚙️', label: 'Settings' }
+    ]
+  });
+
+  html += `
+    </div>
+  `;
+
+  return html;
+}
+
+// Responsive two-column layout
+function renderTwoColumnLayout(options = {}) {
+  const {
+    mainContent = '',
+    asideContent = '',
+    mainFirst = true
+  } = options;
+
+  return `
+    <div class="sidebar-layout">
+      <div class="sidebar-layout-main">${mainContent}</div>
+      <aside class="sidebar-layout-aside hide-compact">${asideContent}</aside>
+    </div>
+  `;
+}
+
+// Responsive card grid
+function renderResponsiveCardGrid(options = {}) {
+  const {
+    cards = [],
+    gap = 'gap-responsive',
+    className = 'grid-container'
+  } = options;
+
+  let html = `<div class="${className} ${gap}">`;
+  
+  cards.forEach((card, idx) => {
+    const spanClass = card.span ? `span-${card.span}` : '';
+    const fullWidthClass = card.fullWidth ? 'full-width' : '';
+    
+    html += `
+      <div class="${spanClass} ${fullWidthClass}">
+        <div class="card-high padding-responsive">
+          ${card.content}
+        </div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// Example: Staff Management Dashboard
+function renderStaffDashboardLayout() {
+  return renderResponsiveDashboard({
+    title: 'Staff Dashboard',
+    cards: [
+      renderStaffList(),
+      renderStaffTable(),
+      renderStaffFilters()
+    ],
+    sidebar: `
+      <div class="card-high padding-responsive">
+        <h3>Quick Stats</h3>
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div><strong>Total Staff:</strong> 15</div>
+          <div><strong>Online:</strong> 6</div>
+          <div><strong>Warnings Today:</strong> 3</div>
+        </div>
+      </div>
+    `,
+    fullWidthTop: renderSearchBar({
+      placeholder: 'Search staff...',
+      variant: 'filled'
+    })
+  });
+}
+

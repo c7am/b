@@ -4382,3 +4382,498 @@ table.dense td {
   }
 }
 
+
+/* ============================================================================
+   MATERIAL DESIGN 3 - WINDOW SIZE CLASSES (PHASE 6)
+   ============================================================================
+   Responsive Breakpoints: Compact (<600px), Medium (600-840px), Expanded (>840px)
+   Adaptive layouts, grid systems, navigation changes
+   ============================================================================ */
+
+/* ============================================================================
+   BREAKPOINT DEFINITIONS
+   ============================================================================ */
+
+/* Compact: Mobile devices, portrait tablets */
+@media (max-width: 599px) {
+  :root {
+    --breakpoint: compact;
+    --container-max-width: 100%;
+    --container-padding: var(--space-4);
+    --grid-columns: 1;
+  }
+}
+
+/* Medium: Landscape tablets, small desktops (iPad landscape) */
+@media (min-width: 600px) and (max-width: 839px) {
+  :root {
+    --breakpoint: medium;
+    --container-max-width: 840px;
+    --container-padding: var(--space-6);
+    --grid-columns: 2;
+  }
+}
+
+/* Expanded: Large desktops with navigation rail */
+@media (min-width: 840px) {
+  :root {
+    --breakpoint: expanded;
+    --container-max-width: 1200px;
+    --container-padding: var(--space-8);
+    --grid-columns: 3;
+  }
+}
+
+/* ============================================================================
+   LAYOUT CONTAINERS
+   ============================================================================ */
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+/* Navigation Rail only shows on expanded (840px+) */
+.app-container.with-rail {
+  flex-direction: row;
+}
+
+/* Main content area */
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+/* Page wrapper */
+.page-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--container-padding);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ---- GRID LAYOUTS ---- */
+.grid-container {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  width: 100%;
+}
+
+/* Compact: 1 column */
+@media (max-width: 599px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-container.two-col,
+  .grid-container.three-col,
+  .grid-container.four-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Medium: 2 columns */
+@media (min-width: 600px) and (max-width: 839px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-container.three-col,
+  .grid-container.four-col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Expanded: 3+ columns */
+@media (min-width: 840px) {
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-container.four-col {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid-container.two-col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---- SIDEBAR LAYOUT ---- */
+.sidebar-layout {
+  display: flex;
+  gap: var(--space-4);
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  .sidebar-layout {
+    flex-direction: row;
+  }
+}
+
+.sidebar-layout-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-layout-aside {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .sidebar-layout-aside {
+    width: 280px;
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 840px) {
+  .sidebar-layout-aside {
+    width: 320px;
+  }
+}
+
+/* ---- FULL-WIDTH SECTIONS ---- */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.span-2 {
+  grid-column: span 1;
+}
+
+@media (min-width: 600px) {
+  .span-2 {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 840px) {
+  .span-2 {
+    grid-column: span 2;
+  }
+
+  .span-3 {
+    grid-column: span 3;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================================================ */
+
+/* Display sizes scale on mobile */
+@media (max-width: 599px) {
+  .display-large {
+    font-size: 28px;
+    line-height: 1.3;
+  }
+
+  .display-medium {
+    font-size: 24px;
+    line-height: 1.4;
+  }
+
+  .headline-large {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  .headline-medium {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  .title-large {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE SPACING
+   ============================================================================ */
+
+.margin-responsive {
+  margin: var(--space-4);
+}
+
+@media (min-width: 600px) {
+  .margin-responsive {
+    margin: var(--space-6);
+  }
+}
+
+@media (min-width: 840px) {
+  .margin-responsive {
+    margin: var(--space-8);
+  }
+}
+
+.padding-responsive {
+  padding: var(--space-4);
+}
+
+@media (min-width: 600px) {
+  .padding-responsive {
+    padding: var(--space-6);
+  }
+}
+
+@media (min-width: 840px) {
+  .padding-responsive {
+    padding: var(--space-8);
+  }
+}
+
+.gap-responsive {
+  gap: var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .gap-responsive {
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 840px) {
+  .gap-responsive {
+    gap: var(--space-6);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE COMPONENTS
+   ============================================================================ */
+
+/* Bottom nav on compact, hidden on medium+ */
+@media (min-width: 600px) {
+  .bottom-navigation {
+    display: none;
+  }
+
+  body.has-bottom-nav {
+    padding-bottom: 0;
+  }
+}
+
+/* Navigation Rail on expanded only */
+@media (max-width: 839px) {
+  .navigation-rail {
+    display: none;
+  }
+
+  main.with-rail {
+    margin-left: 0;
+  }
+}
+
+/* Cards: Full width on compact, auto on medium+ */
+.card {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .card {
+    width: auto;
+  }
+}
+
+/* FAB positioning: Bottom-right on compact, adjusts on expanded */
+.fab-container {
+  position: fixed;
+  bottom: 88px;
+  right: var(--space-4);
+  z-index: 5;
+}
+
+@media (min-width: 600px) {
+  .fab-container {
+    bottom: var(--space-6);
+    right: var(--space-6);
+  }
+}
+
+@media (min-width: 840px) {
+  .fab-container {
+    bottom: var(--space-8);
+    right: var(--space-8);
+  }
+}
+
+/* Table: Horizontal scroll on compact */
+.table-container {
+  overflow-x: auto;
+}
+
+@media (min-width: 600px) {
+  .table-container {
+    overflow-x: visible;
+  }
+}
+
+/* Modal/Dialog: Full width on compact, fixed width on medium+ */
+.modal-dialog {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0;
+  margin: 0;
+}
+
+@media (min-width: 600px) {
+  .modal-dialog {
+    width: 90%;
+    max-width: 512px;
+    border-radius: var(--md-sys-shape-corner-medium);
+    margin: auto;
+  }
+}
+
+@media (min-width: 840px) {
+  .modal-dialog {
+    width: 80%;
+    max-width: 560px;
+  }
+}
+
+/* Bottom Sheet: Always bottom on compact, modal on medium+ */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  border-radius: var(--md-sys-shape-corner-large) var(--md-sys-shape-corner-large) 0 0;
+  max-height: 80vh;
+}
+
+@media (min-width: 600px) {
+  .bottom-sheet {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    right: auto;
+    width: 90%;
+    max-width: 560px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--md-sys-shape-corner-medium);
+    max-height: 90vh;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE UTILITIES
+   ============================================================================ */
+
+/* Hide/Show based on breakpoint */
+.show-compact {
+  display: block;
+}
+
+@media (min-width: 600px) {
+  .show-compact {
+    display: none;
+  }
+}
+
+.show-medium {
+  display: none;
+}
+
+@media (min-width: 600px) and (max-width: 839px) {
+  .show-medium {
+    display: block;
+  }
+}
+
+.show-expanded {
+  display: none;
+}
+
+@media (min-width: 840px) {
+  .show-expanded {
+    display: block;
+  }
+}
+
+.hide-compact {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .hide-compact {
+    display: block;
+  }
+}
+
+.hide-medium {
+  display: block;
+}
+
+@media (min-width: 600px) and (max-width: 839px) {
+  .hide-medium {
+    display: none;
+  }
+}
+
+.hide-expanded {
+  display: block;
+}
+
+@media (min-width: 840px) {
+  .hide-expanded {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE FLEX
+   ============================================================================ */
+
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 600px) {
+  .flex-responsive {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 840px) {
+  .flex-responsive {
+    gap: var(--space-6);
+  }
+}
+
+/* ============================================================================
+   SAFE AREAS & NOTCH SUPPORT
+   ============================================================================ */
+
+.safe-area {
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+}
+
+.safe-area-bottom {
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+}
+
+.safe-area-top {
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+}
+
