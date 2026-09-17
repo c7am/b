@@ -4215,3 +4215,118 @@ class Toast {
   }
 }
 
+
+/* ============================================================================
+   ADVANCED EMPTY STATES - PHASE 7 EXTENSION
+   ============================================================================ */
+
+// Advanced empty state renderer
+function renderAdvancedEmptyState(options = {}) {
+  const {
+    type = 'no-data', // 'no-data', 'no-results', 'error-state', 'success-state'
+    icon = '📭',
+    title = 'No data',
+    description = 'Nothing to display here.',
+    primaryAction = null,
+    secondaryAction = null,
+    size = 'normal' // 'normal', 'large', 'compact'
+  } = options;
+
+  const sizeClass = size === 'large' ? 'empty-state-large' : size === 'compact' ? 'empty-state-compact' : '';
+  
+  let actions = '';
+  if (primaryAction || secondaryAction) {
+    actions = `
+      <div class="empty-state-actions">
+        ${primaryAction ? `<button class="btn-filled" onclick="${primaryAction.onClick || ''}">${primaryAction.label}</button>` : ''}
+        ${secondaryAction ? `<button class="btn-outlined" onclick="${secondaryAction.onClick || ''}">${secondaryAction.label}</button>` : ''}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="empty-state ${type} ${sizeClass}">
+      <div class="empty-state-icon">${icon}</div>
+      <div class="empty-state-title">${title}</div>
+      <div class="empty-state-description">${description}</div>
+      ${actions}
+    </div>
+  `;
+}
+
+// Pre-built empty state templates
+const EmptyStates = {
+  noData: () => renderAdvancedEmptyState({
+    type: 'no-data',
+    icon: '📭',
+    title: 'No data available',
+    description: 'There\'s nothing here yet. Start by adding an item.',
+    primaryAction: { label: 'Add Item', onClick: 'addItem()' }
+  }),
+
+  noResults: (query = 'search term') => renderAdvancedEmptyState({
+    type: 'no-results',
+    icon: '🔍',
+    title: 'No results found',
+    description: `We couldn't find anything matching "${query}". Try a different search.`,
+    secondaryAction: { label: 'Clear Search', onClick: 'clearSearch()' }
+  }),
+
+  error: (errorCode = '500', message = 'Something went wrong') => renderAdvancedEmptyState({
+    type: 'error-state',
+    icon: '⚠️',
+    title: `Error ${errorCode}`,
+    description: message,
+    primaryAction: { label: 'Try Again', onClick: 'retry()' },
+    secondaryAction: { label: 'Contact Support', onClick: 'contactSupport()' }
+  }),
+
+  notFound: () => renderAdvancedEmptyState({
+    type: 'error-state',
+    icon: '🚫',
+    title: '404 - Page not found',
+    description: 'This page doesn\'t exist or has been moved.',
+    primaryAction: { label: 'Go Back', onClick: 'history.back()' }
+  }),
+
+  success: (message = 'All done!') => renderAdvancedEmptyState({
+    type: 'success-state',
+    icon: '✓',
+    title: 'Success',
+    description: message,
+    primaryAction: { label: 'Continue', onClick: 'continue()' }
+  }),
+
+  unauthorized: () => renderAdvancedEmptyState({
+    type: 'error-state',
+    icon: '🔒',
+    title: 'Access Denied',
+    description: 'You don\'t have permission to view this.',
+    primaryAction: { label: 'Log In', onClick: 'login()' }
+  }),
+
+  loading: () => renderAdvancedEmptyState({
+    type: 'loading-state',
+    icon: '⏳',
+    title: 'Loading...',
+    description: 'Please wait while we fetch your data.',
+    size: 'compact'
+  })
+};
+
+// Empty state with illustration (placeholder)
+function renderEmptyStateWithIllustration(options = {}) {
+  const {
+    illustration = null, // SVG or image URL
+    ...rest
+  } = options;
+
+  let html = '';
+  if (illustration) {
+    html += `<div class="empty-state-illustration">${illustration}</div>`;
+  }
+
+  html += renderAdvancedEmptyState(rest);
+  return html;
+}
+

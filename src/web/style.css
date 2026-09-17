@@ -5408,3 +5408,108 @@ table.dense td {
   to { opacity: 0; transform: translateX(-100%); }
 }
 
+
+/* ============================================================================
+   ADVANCED EMPTY STATES - PHASE 7 EXTENSION
+   ============================================================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  text-align: center;
+  min-height: 280px;
+  background: var(--md-sys-color-surface);
+  border-radius: var(--md-sys-shape-corner-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  animation: fadeInExpressive var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: var(--space-4);
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-description {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: var(--space-4);
+  max-width: 400px;
+}
+
+.empty-state-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Empty state variants */
+.empty-state.no-data {
+  background: linear-gradient(135deg, rgba(var(--md-sys-color-primary-rgb), 0.05) 0%, rgba(var(--md-sys-color-tertiary-rgb), 0.05) 100%);
+  border-color: var(--md-sys-color-primary-container);
+}
+
+.empty-state.no-results {
+  background: rgba(var(--md-sys-color-secondary-rgb), 0.05);
+  border-color: var(--md-sys-color-secondary-container);
+}
+
+.empty-state.error-state {
+  background: rgba(var(--md-sys-color-error-rgb), 0.05);
+  border-color: var(--md-sys-color-error-container);
+}
+
+.empty-state.success-state {
+  background: rgba(var(--md-sys-color-success-rgb), 0.05);
+  border-color: var(--md-sys-color-success);
+}
+
+.empty-state.loading-state {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Large empty state (full page) */
+.empty-state-large {
+  min-height: 60vh;
+  padding: var(--space-12);
+}
+
+.empty-state-large .empty-state-icon {
+  font-size: 120px;
+}
+
+.empty-state-large .empty-state-title {
+  font-size: var(--md-sys-typescale-display-small-size);
+}
+
+/* Compact empty state (inline) */
+.empty-state-compact {
+  min-height: 120px;
+  padding: var(--space-4);
+}
+
+.empty-state-compact .empty-state-icon {
+  font-size: 32px;
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-compact .empty-state-title {
+  font-size: var(--md-sys-typescale-title-medium-size);
+}
+
+.empty-state-compact .empty-state-description {
+  display: none;
+}
+
