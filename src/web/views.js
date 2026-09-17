@@ -3379,6 +3379,12 @@ function renderFilterPanel(options = {}) {
   `;
 }
 
+function highlightText(text, query) {
+  if (!query) return text;
+  const regex = new RegExp(`(${query})`, 'gi');
+  return text.replace(regex, '<span class="autocomplete-result-bold">$1</span>');
+}
+
 // Autocomplete Component
 function renderAutocomplete(options = {}) {
   const {
@@ -3389,12 +3395,15 @@ function renderAutocomplete(options = {}) {
     minChars = 2
   } = options;
 
-  let suggestionsHTML = suggestions.map((item, idx) => `
+  let suggestionsHTML = suggestions.map((item, idx) => {
+    const highlightedText = item.highlight ? highlightText(item.text, item.highlight) : item.text;
+    return `
     <div class="autocomplete-result" onclick="${onSelect ? onSelect + '(' + idx + ')' : ''}">
       ${item.icon ? `<span>${item.icon}</span>` : ''}
-      <span>${item.highlight ? item.text.replace(new RegExp(\`(\${item.highlight})\`, 'gi'), '<span class=\\\"autocomplete-result-bold\\\">$1</span>') : item.text}</span>
+      <span>${highlightedText}</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   return `
     <div class="autocomplete-container">
