@@ -105,6 +105,10 @@
   --md-sys-color-on-success-rgb: 0, 56, 34;
   --md-sys-color-success-container-rgb: 0, 82, 51;
   --md-sys-color-on-success-container-rgb: 144, 247, 190;
+  
+  /* Scrim for shadows and overlays (black/dark) */
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-scrim-rgb: 0, 0, 0;
 
   /* ---- Typography (--md-sys-typescale-*). Google Sans Flex per this
      project's own choice, loaded via the @import above. Roboto Flex is
@@ -276,14 +280,14 @@ header.topbar {
   background: var(--md-sys-color-surface-container);
   border-radius: var(--md-sys-shape-corner-medium);
   padding: var(--space-3);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(var(--md-sys-color-scrim-rgb), 0.3);
 }
 
 .card-high {
   background: var(--md-sys-color-surface-container-high);
   border-radius: var(--md-sys-shape-corner-medium);
   padding: var(--space-3);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(var(--md-sys-color-scrim-rgb), 0.3);
 }
 
 /* ---- Buttons ---- */
@@ -784,28 +788,28 @@ select {
 }
 
 .badge-active {
-  background: rgba(76, 175, 80, 0.15);
-  color: #4cb050;
+  background: var(--md-sys-color-success-container);
+  color: var(--md-sys-color-on-success-container);
 }
 
 .badge-inactive {
-  background: rgba(158, 158, 158, 0.15);
-  color: #bdbdbd;
+  background: var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
 }
 
 .badge-warning {
-  background: rgba(255, 152, 0, 0.15);
-  color: #ffb74d;
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
 }
 
 .badge-error {
-  background: rgba(244, 67, 54, 0.15);
-  color: #ef5350;
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
 }
 
 .badge-info {
-  background: rgba(33, 150, 243, 0.15);
-  color: #42a5f5;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
 }
 
 /* ---- Shift cards (specifically) ---- */
@@ -988,7 +992,7 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--md-sys-color-scrim-rgb), 0.3);
   transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
               box-shadow var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
               transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
@@ -997,7 +1001,7 @@ select {
 
 .fab:hover {
   background: var(--md-sys-color-inverse-primary);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(var(--md-sys-color-scrim-rgb), 0.4);
   transform: scale(1.05);
 }
 
@@ -1037,7 +1041,7 @@ select {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(var(--md-sys-color-scrim-rgb), 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1050,7 +1054,7 @@ select {
   padding: var(--space-6);
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 28px rgba(var(--md-sys-color-scrim-rgb), 0.45);
 }
 
 .modal-title {
@@ -1210,7 +1214,7 @@ select {
 
 .card:hover,
 .card-high:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(var(--md-sys-color-scrim-rgb), 0.15);
 }
 
 .badge {
@@ -1223,24 +1227,6 @@ select {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.badge-success {
-  background: var(--md-sys-color-surface-container);
-  color: var(--md-sys-color-primary);
-  border: 1px solid var(--md-sys-color-primary);
-}
-
-.badge-warning {
-  background: var(--md-sys-color-surface-container);
-  color: var(--md-sys-color-error);
-  border: 1px solid var(--md-sys-color-error);
-}
-
-.badge-info {
-  background: var(--md-sys-color-surface-container);
-  color: var(--md-sys-color-secondary);
-  border: 1px solid var(--md-sys-color-secondary);
 }
 
 .status-indicator {
@@ -1451,7 +1437,7 @@ select:focus-visible {
 }
 
 .card-high:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px rgba(var(--md-sys-color-scrim-rgb), 0.15);
   transform: translateY(-2px);
 }
 
@@ -1462,7 +1448,7 @@ select:focus-visible {
 }
 
 .shift-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(var(--md-sys-color-scrim-rgb), 0.15);
   transform: translateY(-1px);
   background: var(--md-sys-color-surface-container-high);
 }
@@ -1531,11 +1517,11 @@ button:active,
 :root {
   /* Elevation shadows (official M3 spec for web) */
   --md-sys-elevation-level0: none;
-  --md-sys-elevation-level1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  --md-sys-elevation-level2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  --md-sys-elevation-level3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  --md-sys-elevation-level4: 0 15px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05);
-  --md-sys-elevation-level5: 0 20px 40px rgba(0, 0, 0, 0.2);
+  --md-sys-elevation-level1: 0 1px 3px rgba(var(--md-sys-color-scrim-rgb), 0.12), 0 1px 2px rgba(var(--md-sys-color-scrim-rgb), 0.24);
+  --md-sys-elevation-level2: 0 3px 6px rgba(var(--md-sys-color-scrim-rgb), 0.16), 0 3px 6px rgba(var(--md-sys-color-scrim-rgb), 0.23);
+  --md-sys-elevation-level3: 0 10px 20px rgba(var(--md-sys-color-scrim-rgb), 0.19), 0 6px 6px rgba(var(--md-sys-color-scrim-rgb), 0.23);
+  --md-sys-elevation-level4: 0 15px 25px rgba(var(--md-sys-color-scrim-rgb), 0.15), 0 5px 10px rgba(var(--md-sys-color-scrim-rgb), 0.05);
+  --md-sys-elevation-level5: 0 20px 40px rgba(var(--md-sys-color-scrim-rgb), 0.2);
 }
 
 /* Apply elevation to card components */
@@ -1897,7 +1883,7 @@ tbody tr:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.32);
+  background: rgba(var(--md-sys-color-scrim-rgb), 0.32);
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard),

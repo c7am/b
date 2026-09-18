@@ -99,7 +99,7 @@ function loginPage() {
       ${featureRows}
     </div>
 
-    <a class="btn btn-filled btn-full-width" href="/auth/login" style="gap:8px;margin-top:var(--space-2)">
+    <a class="btn btn-filled btn-full-width" href="/auth/login" style="gap:var(--space-2);margin-top:var(--space-2)">
       ${icon('check')}
       <span>Login with Discord</span>
     </a>
@@ -114,7 +114,7 @@ function loginPage() {
 
 // ============= Documentation Page =============
 function docsPage({ guild = null, guildId = null } = {}) {
-  const backLink = guildId ? `<a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:4px">${icon('chevronLeft')} Back</a>` : '';
+  const backLink = guildId ? `<a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:var(--space-1)">${icon('chevronLeft')} Back</a>` : '';
   
   const body = `
 <style>
@@ -304,11 +304,11 @@ const sections = {
     <div class="card-high" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Getting Started</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">What is Axiom?</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">What is Axiom?</h3>
         <p>Axiom is a Discord bot designed to manage staff shifts and in-game moderation for ERLC (Emergency Response: Liberty County) roleplay communities. It provides tools for scheduling, tracking attendance, and moderating player behavior.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Key Features</h3>
-        <ul style="margin:8px 0;padding-left:20px">
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Key Features</h3>
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li>Shift management with SSU integration</li>
           <li>Roblox account verification</li>
           <li>In-game moderation logging</li>
@@ -317,7 +317,7 @@ const sections = {
           <li>Discord integration</li>
         </ul>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Quick Navigation</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Quick Navigation</h3>
         <p><strong>Dashboard Home:</strong> Click your server name to access the staff dashboard</p>
         <p><strong>Shifts:</strong> View and manage shifts from the Shifts tab</p>
         <p><strong>Account Setup:</strong> Use /erlc-link command in Discord to verify your Roblox account</p>
@@ -329,27 +329,27 @@ const sections = {
     <div class="card-high" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Shift Management</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">Joining a Shift</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">Joining a Shift</h3>
         <p>1. Go to the Shifts page from your dashboard</p>
         <p>2. Find the shift you want to join</p>
         <p>3. Click <strong>Join Shift</strong> (button will be disabled if server doesn't have 25+ players)</p>
         <p>4. You'll see the shift details page with controls</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Controlling Your Shift</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Controlling Your Shift</h3>
         <p>Once you've joined a shift, you'll see four control buttons:</p>
-        <ul style="margin:8px 0;padding-left:20px">
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li><strong>Start:</strong> Begin your shift (updates shift status to 'Started')</li>
           <li><strong>Pause:</strong> Temporarily pause your shift (status becomes 'Paused')</li>
           <li><strong>Resume:</strong> Resume from paused state (back to 'Started')</li>
           <li><strong>End:</strong> Complete your shift (status becomes 'Ended')</li>
         </ul>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Check-In / Check-Out</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Check-In / Check-Out</h3>
         <p>Click <strong>Check In / Out</strong> to toggle your attendance status during active shifts. This helps track who was actually present during each shift.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Viewing Shift Members</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Viewing Shift Members</h3>
         <p>The Members section shows all staff who joined the shift and their check-in status. Check-in status can be either:</p>
-        <ul style="margin:8px 0;padding-left:20px">
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li><strong>Checked in:</strong> Present during the shift</li>
           <li><strong>Not checked in:</strong> Joined but didn't check in</li>
         </ul>
@@ -361,23 +361,23 @@ const sections = {
     <div class="card-high" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Server Requirements (SSU Integration)</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">What is SSU?</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">What is SSU?</h3>
         <p>SSU (Server Startup Unit) is a requirement that ensures shifts can only be joined when the ERLC server has officially started and has at least 25 players in-game. This prevents ghost shifts and ensures proper staffing coordination.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Why 25 Players?</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Why 25 Players?</h3>
         <p>25 players is the minimum threshold to ensure the server is properly running with meaningful activity. This prevents premature shift joins when the server is still warming up.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Joining When SSU Isn't Ready</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Joining When SSU Isn't Ready</h3>
         <p>If you try to join a shift but see <strong>'Server Not Ready'</strong> message, it means:</p>
-        <ul style="margin:8px 0;padding-left:20px">
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li>The ERLC server hasn't started yet, OR</li>
           <li>There aren't enough players in-game (fewer than 25)</li>
         </ul>
         <p>Simply wait until the server reaches 25 players, then refresh the page to try again.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Server Status Display</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Server Status Display</h3>
         <p>Each shift detail page shows live server status including:</p>
-        <ul style="margin:8px 0;padding-left:20px">
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li>Current player count</li>
           <li>Server status (Started/Not Started)</li>
           <li>Reason why shifts can't be joined (if applicable)</li>
@@ -390,10 +390,10 @@ const sections = {
     <div class="card-high" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Roblox Account Verification</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">Why Verify?</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">Why Verify?</h3>
         <p>Verifying your Roblox account links your Discord identity with your in-game account. This enables in-game moderation logging and staff tracking.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Verification Steps</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Verification Steps</h3>
         <p><strong>Step 1:</strong> Run <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:var(--md-sys-shape-corner-extra-small)">/erlc-link</code> in Discord</p>
         <p><strong>Step 2:</strong> Bot sends you a 12-word verification phrase</p>
         <p><strong>Step 3:</strong> Add the phrase to your Roblox bio/description</p>
@@ -401,12 +401,12 @@ const sections = {
         <p><strong>Step 5:</strong> Enter your Roblox username when prompted</p>
         <p><strong>Step 6:</strong> Bot verifies the phrase is in your bio and confirms verification</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Regenerate Phrase</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Regenerate Phrase</h3>
         <p>If the phrase contains censored words or you want a new one, click <strong>Regenerate Words</strong> to get a different 12-word phrase.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">After Verification</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">After Verification</h3>
         <p>Once verified, your account is linked permanently. You can now:</p>
-        <ul style="margin:8px 0;padding-left:20px">
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li>Use in-game moderation commands</li>
           <li>Be tracked in moderation logs</li>
           <li>Receive mod permissions if you have Discord staff role</li>
@@ -419,22 +419,22 @@ const sections = {
     <div class="card-high" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Moderation</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">In-Game Moderation</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">In-Game Moderation</h3>
         <p>If you have verified your Roblox account and have Discord staff role, you can issue moderation commands in-game:</p>
         <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:8px 0">
           ?moderate PlayerName violation reason
         </p>
         <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:var(--md-sys-shape-corner-extra-small)">?moderate JohnDoe VDM Rammed officer</code></p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Discord Moderation</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Discord Moderation</h3>
         <p>Alternatively, issue moderation commands directly in Discord using the same format:</p>
         <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:8px 0">
           ?moderate PlayerName violation reason
         </p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Violation Types</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Violation Types</h3>
         <p>Common violations (case-insensitive, shorthand accepted):</p>
-        <ul style="margin:8px 0;padding-left:20px;columns:2">
+        <ul style="margin:8px 0;padding-left:var(--space-4);columns:2">
           <li>RDM - Random Death Match</li>
           <li>VDM - Vehicle Death Match</li>
           <li>FRP - Fail Roleplay</li>
@@ -447,9 +447,9 @@ const sections = {
           <li>NVL - No Value of Life</li>
         </ul>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Moderation Logging</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Moderation Logging</h3>
         <p>All moderation actions are logged to your server's moderation channel with:</p>
-        <ul style="margin:8px 0;padding-left:20px">
+        <ul style="margin:8px 0;padding-left:var(--space-4)">
           <li>Player avatar</li>
           <li>Staff member who issued the action</li>
           <li>Violation type</li>
@@ -464,17 +464,17 @@ const sections = {
     <div class="card-high" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Admin Settings</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:8px;font-weight:600">Accessing Settings</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">Accessing Settings</h3>
         <p>Only administrators can access the Settings page. Click the gear icon in the dashboard to configure Axiom.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">ERLC Configuration</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">ERLC Configuration</h3>
         <p>To enable Axiom features, you need to configure your ERLC Private Server API key:</p>
         <p><strong>1.</strong> Go to Settings</p>
         <p><strong>2.</strong> Find 'ERLC Server Configuration' section</p>
         <p><strong>3.</strong> Enter your ERLC API key</p>
         <p><strong>4.</strong> Click 'Save API Key' (bot validates connection)</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Shift Type Management</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Shift Type Management</h3>
         <p>Create custom shift types with duration limits:</p>
         <p><strong>1.</strong> Go to Settings</p>
         <p><strong>2.</strong> Find 'Shift Types' section</p>
@@ -483,14 +483,14 @@ const sections = {
         <p><strong>5.</strong> Click 'Add Shift Type'</p>
         <p>Admins can delete shift types with the delete button (must keep at least one)</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Custom Violations</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Custom Violations</h3>
         <p>Add custom violation types beyond the default 10 presets:</p>
         <p><strong>1.</strong> Go to Settings</p>
         <p><strong>2.</strong> Find 'Custom Violations' section</p>
         <p><strong>3.</strong> Enter violation name</p>
         <p><strong>4.</strong> Click 'Add Violation'</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Creating Shifts</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Creating Shifts</h3>
         <p>Click 'Create Shift' button to schedule new shifts:</p>
         <p><strong>1.</strong> Enter shift name (e.g., 'Morning Patrol')</p>
         <p><strong>2.</strong> Select shift type</p>
@@ -498,7 +498,7 @@ const sections = {
         <p><strong>4.</strong> Add optional description</p>
         <p><strong>5.</strong> Click 'Create Shift'</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:8px;font-weight:600">Audit Log</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Audit Log</h3>
         <p>View all staff actions including infractions, promotions, and shift joins. Filter by type, user, or date range. Export to CSV for reporting.</p>
       </div>
     </div>
@@ -541,7 +541,7 @@ function guildListPage({ guilds, username }) {
   <h1 class="title-large" style="margin:0">Axiom</h1>
   <div class="row">
     <span class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">${escapeHtml(username)}</span>
-    <a class="btn btn-text" href="/auth/logout" style="gap:4px" title="Log out">
+    <a class="btn btn-text" href="/auth/logout" style="gap:var(--space-1)" title="Log out">
       ${icon('logOut')}
     </a>
   </div>
@@ -624,7 +624,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
       <div class="card-high" style="padding:var(--space-3);display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="body-large" style="font-weight:600">${escapeHtml(s.name)}</div>
-          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">
+          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">
             ${startStr} to ${endStr}
           </div>
           <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:2px">
@@ -633,7 +633,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
         </div>
         <div style="display:flex;gap:var(--space-2);align-items:center">
           <span class="badge ${statusClass}">${status}</span>
-          <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text" style="gap:4px;padding:4px 8px">
+          <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text" style="gap:var(--space-1);padding:var(--space-1) var(--space-2)">
             ${icon('chevronRight')}
           </a>
         </div>
@@ -642,7 +642,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
 
   const toggleButton = trueAdmin ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/toggle-view-mode" style="display:inline">
-      <button type="submit" class="btn btn-text" title="Switch view mode" style="gap:4px">
+      <button type="submit" class="btn btn-text" title="Switch view mode" style="gap:var(--space-1)">
         ${viewingAsStaff ? icon('shield') : icon('users')}
       </button>
     </form>` : '';
@@ -653,9 +653,9 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
         ${icon('alertCircle')}
         <div>
           <div class="info-card-title">You're On Leave</div>
-          <div class="body-small" style="color:var(--md-sys-color-on-primary-container);margin-top:4px">
+          <div class="body-small" style="color:var(--md-sys-color-on-primary-container);margin-top:var(--space-1)">
             Until ${formatDate(activeLoa.ends_at)}
-            <div style="margin-top:8px"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text" style="gap:4px;font-weight:600">Manage Leave</a></div>
+            <div style="margin-top:var(--space-2)"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text" style="gap:var(--space-1);font-weight:600">Manage Leave</a></div>
           </div>
         </div>
       </div>
@@ -689,7 +689,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
           <div>
             <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Past</div>
             ${completedShifts.slice(0, 3).map(shiftCard).join('')}
-            ${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-text" style="gap:4px;font-size:12px;justify-content:center;margin-top:var(--space-2)">View all ${completedShifts.length}</a>` : ''}
+            ${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-text" style="gap:var(--space-1);font-size:12px;justify-content:center;margin-top:var(--space-2)">View all ${completedShifts.length}</a>` : ''}
           </div>
         ` : ''}
       </div>
@@ -704,11 +704,11 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
   </div>
   <div class="row">
     ${toggleButton}
-    <a class="btn btn-text" href="/dashboard" style="gap:4px">
+    <a class="btn btn-text" href="/dashboard" style="gap:var(--space-1)">
       ${icon('chevronLeft')}
       <span>Back</span>
     </a>
-    <a class="btn btn-text" href="/auth/logout" style="gap:4px">
+    <a class="btn btn-text" href="/auth/logout" style="gap:var(--space-1)">
       ${icon('logOut')}
     </a>
   </div>
@@ -798,10 +798,10 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 
   // SSU status display
   const ssuDisplay = ssuStatus ? (ssuStatus.ready ? 
-    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:12px;padding:4px 8px;border-radius:var(--md-sys-shape-corner-small)">
+    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:12px;padding:var(--space-1) var(--space-2);border-radius:var(--md-sys-shape-corner-small)">
       ${icon('checkCircle')} <strong>${ssuStatus.playerCount}</strong> players in-game
     </div>` :
-    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:12px;padding:4px 8px;border-radius:var(--md-sys-shape-corner-small)">
+    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:12px;padding:var(--space-1) var(--space-2);border-radius:var(--md-sys-shape-corner-small)">
       ${icon('alertCircle')} ${escapeHtml(ssuStatus.reason || 'Server not ready')}
     </div>`) : '';
 
@@ -810,14 +810,14 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   const joinLeaveAction = isJoined ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/leave" style="margin:0">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-      <button class="btn btn-tonal" type="submit" style="gap:8px;background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container)">
+      <button class="btn btn-tonal" type="submit" style="gap:var(--space-2);background:var(--md-sys-color-error-container);color:var(--md-sys-color-on-error-container)">
         ${icon('logOut')}
         <span>Leave Shift</span>
       </button>
     </form>` : `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/join" style="margin:0">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-      <button class="btn btn-filled" type="submit" ${joinDisabled ? 'disabled' : ''} style="gap:8px">
+      <button class="btn btn-filled" type="submit" ${joinDisabled ? 'disabled' : ''} style="gap:var(--space-2)">
         ${icon('plus')}
         <span>${joinDisabled ? 'Server Not Ready' : 'Join Shift'}</span>
       </button>
@@ -826,19 +826,19 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   // Shift state controls (start/pause/resume/end)
   const stateControls = isJoined ? `
     <div class="shift-controls-menu" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small)">
-      <button class="btn btn-tonal" onclick="updateShiftState('start')" style="gap:8px">
+      <button class="btn btn-tonal" onclick="updateShiftState('start')" style="gap:var(--space-2)">
         ${icon('play')}
         <span>Start</span>
       </button>
-      <button class="btn btn-tonal" onclick="updateShiftState('pause')" style="gap:8px">
+      <button class="btn btn-tonal" onclick="updateShiftState('pause')" style="gap:var(--space-2)">
         ${icon('pause')}
         <span>Pause</span>
       </button>
-      <button class="btn btn-tonal" onclick="updateShiftState('resume')" style="gap:8px">
+      <button class="btn btn-tonal" onclick="updateShiftState('resume')" style="gap:var(--space-2)">
         ${icon('play')}
         <span>Resume</span>
       </button>
-      <button class="btn btn-tonal" onclick="updateShiftState('end')" style="gap:8px">
+      <button class="btn btn-tonal" onclick="updateShiftState('end')" style="gap:var(--space-2)">
         ${icon('square')}
         <span>End</span>
       </button>
@@ -857,7 +857,7 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
     </div>`).join('');
 
   const checkInLink = (isJoined && isActive) ? `
-    <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" class="btn btn-tonal" style="gap:8px;width:100%">
+    <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" class="btn btn-tonal" style="gap:var(--space-2);width:100%">
       ${icon('clock')}
       <span>Check In / Out</span>
     </a>` : '';
@@ -865,13 +865,13 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   const body = `
 <header class="topbar">
   <div style="flex:1">
-    <h1 class="title-large" style="margin:0;margin-bottom:4px">${escapeHtml(shift.name)}</h1>
+    <h1 class="title-large" style="margin:0;margin-bottom:var(--space-1)">${escapeHtml(shift.name)}</h1>
     <div style="display:flex;gap:var(--space-2);align-items:center">
       <span class="badge ${statusBadgeClass}">${statusText}</span>
       ${isActive ? '<span class="badge badge-active">Active Now</span>' : ''}
     </div>
   </div>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -880,19 +880,19 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   <!-- Key Info Cards -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:var(--space-2)">
     <div class="card-high" style="padding:var(--space-2)">
-      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">Start Time</div>
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">Start Time</div>
       <div class="body-large" style="font-weight:500">${formatDate(shift.starts_at)}</div>
     </div>
     <div class="card-high" style="padding:var(--space-2)">
-      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">End Time</div>
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">End Time</div>
       <div class="body-large" style="font-weight:500">${formatDate(shift.ends_at)}</div>
     </div>
     <div class="card-high" style="padding:var(--space-2)">
-      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">Duration</div>
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">Duration</div>
       <div class="body-large" style="font-weight:500">${durationHours}h ${durationMins}m</div>
     </div>
     <div class="card-high" style="padding:var(--space-2)">
-      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:4px">Members</div>
+      <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">Members</div>
       <div class="body-large" style="font-weight:500">${members.length}</div>
     </div>
   </div>
@@ -900,14 +900,14 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   <!-- Description -->
   ${shift.description ? `
   <div class="card-high" style="padding:var(--space-3)">
-    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:8px;text-transform:uppercase;font-weight:600">Notes</div>
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-2);text-transform:uppercase;font-weight:600">Notes</div>
     <p class="body-medium">${escapeHtml(shift.description)}</p>
   </div>` : ''}
 
   <!-- SSU Status -->
   ${ssuDisplay ? `
   <div class="card-high" style="padding:var(--space-2)">
-    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:8px">Server Status</div>
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-2)">Server Status</div>
     ${ssuDisplay}
   </div>` : ''}
 
@@ -922,7 +922,7 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 
   <!-- Members List -->
   <div class="card-high" style="padding:var(--space-3)">
-    <div class="body-medium" style="font-weight:600;margin-bottom:var(--space-2);display:flex;gap:8px;align-items:center">
+    <div class="body-medium" style="font-weight:600;margin-bottom:var(--space-2);display:flex;gap:var(--space-2);align-items:center">
       ${icon('users')}
       Shift Members (${members.length})
     </div>
@@ -961,7 +961,7 @@ function createShiftPage({ guild, csrfToken, guildId }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Create New Shift</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/shifts" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/shifts" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -992,7 +992,7 @@ function createShiftPage({ guild, csrfToken, guildId }) {
         </div>
       </div>
 
-      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:var(--space-2)">
         ${icon('plus')}
         <span>Create Shift</span>
       </button>
@@ -1017,8 +1017,8 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
       <div class="shift-info">
         <div class="shift-name">${escapeHtml(s.name)}</div>
         <div class="shift-time">${icon('clock')} ${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-        ${s.description ? `<div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">${escapeHtml(s.description)}</div>` : ''}
-        <div class="badge badge-info" style="margin-top:8px">${status}</div>
+        ${s.description ? `<div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">${escapeHtml(s.description)}</div>` : ''}
+        <div class="badge badge-info" style="margin-top:var(--space-2)">${status}</div>
       </div>
       <div class="shift-actions">
         <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text">Details</a>
@@ -1037,7 +1037,7 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Manage Shifts</h1>
   <div class="row">
-    <a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:4px">
+    <a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:var(--space-1)">
       ${icon('chevronLeft')} Back
     </a>
   </div>
@@ -1045,7 +1045,7 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
 <div class="page stack">
   <div style="display:flex;gap:var(--space-2);align-items:center">
     <h2 class="headline-medium" style="margin:0;flex:1">Shifts</h2>
-    <a href="/dashboard/${escapeHtml(guildId)}/create-shift" class="btn btn-filled" style="gap:8px">
+    <a href="/dashboard/${escapeHtml(guildId)}/create-shift" class="btn btn-filled" style="gap:var(--space-2)">
       ${icon('plus')}
       <span>New Shift</span>
     </a>
@@ -1062,7 +1062,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Leave of Absence</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1085,7 +1085,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
 
   <form method="POST" action="/dashboard/${escapeHtml(guildId)}/end-loa" style="margin-top:var(--space-4)">
     <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-    <button class="btn btn-filled" type="submit" style="gap:8px">
+    <button class="btn btn-filled" type="submit" style="gap:var(--space-2)">
       ${icon('checkCircle')}
       <span>End Leave of Absence</span>
     </button>
@@ -1097,7 +1097,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Request Leave of Absence</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1117,7 +1117,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
         <input type="date" id="loa-end" name="endsAt" required>
       </div>
 
-      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:var(--space-2)">
         ${icon('check')}
         <span>Request Leave</span>
       </button>
@@ -1138,14 +1138,14 @@ function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) 
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
 <div class="page stack">
   <div class="info-card" style="border-left:4px solid var(--md-sys-color-error)">
     <div class="info-card-title">This shift is not active</div>
-    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:8px">
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-2)">
       Shifts can only have check-in active during the shift time window.
     </div>
   </div>
@@ -1160,7 +1160,7 @@ function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) 
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1205,7 +1205,7 @@ function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) 
       ${!checkedOutTime ? `
         <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-out" style="margin-top:var(--space-3)">
           <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-          <button class="btn btn-filled btn-danger" type="submit" style="gap:8px">
+          <button class="btn btn-filled btn-danger" type="submit" style="gap:var(--space-2)">
             ${icon('check')}
             <span>Check Out</span>
           </button>
@@ -1213,7 +1213,7 @@ function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) 
     ` : `
       <form method="POST" action="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(shiftId)}/check-in" style="margin:0">
         <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-        <button class="btn btn-filled" type="submit" style="gap:8px;width:100%">
+        <button class="btn btn-filled" type="submit" style="gap:var(--space-2);width:100%">
           ${icon('checkCircle')}
           <span>Check In Now</span>
         </button>
@@ -1258,7 +1258,7 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1343,7 +1343,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
     <div class="list-row">
       <span class="body-medium">
         <strong>${escapeHtml(r.name)}</strong>
-        <span class="chip" style="margin-left:8px">Level ${escapeHtml(r.level)}</span>
+        <span class="chip" style="margin-left:var(--space-2)">Level ${escapeHtml(r.level)}</span>
       </span>
       <form method="POST" action="/dashboard/${escapeHtml(guildId)}/remove-rank" style="margin:0">
         <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
@@ -1358,7 +1358,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
     <div class="list-row">
       <span class="body-medium">
         <strong>${escapeHtml(t.name)}</strong>
-        <span class="chip" style="margin-left:8px">${escapeHtml(t.points)} pts</span>
+        <span class="chip" style="margin-left:var(--space-2)">${escapeHtml(t.points)} pts</span>
       </span>
       <form method="POST" action="/dashboard/${escapeHtml(guildId)}/remove-infraction-type" style="margin:0">
         <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
@@ -1372,7 +1372,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)} Settings</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1384,7 +1384,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/roles" class="stack">
       <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
       ${scalarRoleFields}
-      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:var(--space-2)">
         ${icon('check')}
         <span>Save roles</span>
       </button>
@@ -1409,7 +1409,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
           ${ticketCategoryOptions}
         </select>
       </div>
-      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:var(--space-2)">
         ${icon('check')}
         <span>Save channels</span>
       </button>
@@ -1436,7 +1436,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
           <label for="rank-level">Level</label>
           <input type="text" id="rank-level" name="level" required placeholder="1" inputmode="numeric" pattern="[0-9]+">
         </div>
-        <button class="btn btn-filled" type="submit" style="gap:8px;height:48px">
+        <button class="btn btn-filled" type="submit" style="gap:var(--space-2);height:48px">
           ${icon('plus')}
           <span>Add</span>
         </button>
@@ -1458,7 +1458,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
           <label for="infraction-points">Points</label>
           <input type="text" id="infraction-points" name="points" required placeholder="1" inputmode="numeric" pattern="[0-9]+">
         </div>
-        <button class="btn btn-filled" type="submit" style="gap:8px;height:48px">
+        <button class="btn btn-filled" type="submit" style="gap:var(--space-2);height:48px">
           ${icon('plus')}
           <span>Add</span>
         </button>
@@ -1478,7 +1478,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
           ${textChannels.map(c => `<option value="${escapeHtml(c.id)}">#${escapeHtml(c.name)}</option>`).join('\n')}
         </select>
       </div>
-      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:var(--space-2)">
         ${icon('check')}
         <span>Post Ticket Panel</span>
       </button>
@@ -1531,7 +1531,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
           <label for="new-shift-max">Max (minutes)</label>
           <input id="new-shift-max" type="number" name="maxDuration" placeholder="120" min="1" required>
         </div>
-        <button class="btn btn-filled" type="submit" style="gap:8px;align-self:flex-start">
+        <button class="btn btn-filled" type="submit" style="gap:var(--space-2);align-self:flex-start">
           ${icon('plus')}
           <span>Add Type</span>
         </button>
@@ -1551,7 +1551,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
         <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Get your API key from the ERLC dashboard. Keep it secret.</p>
       </div>
       <div class="row" style="gap:var(--space-2);align-items:center">
-        <button class="btn btn-filled" type="submit" style="gap:8px;align-self:flex-start">
+        <button class="btn btn-filled" type="submit" style="gap:var(--space-2);align-self:flex-start">
           ${icon('check')}
           <span>Save API Key</span>
         </button>
@@ -1615,7 +1615,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
         <label for="violation-desc">Description</label>
         <input id="violation-desc" type="text" name="description" placeholder="What this violation is for" required>
       </div>
-      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:8px">
+      <button class="btn btn-filled" type="submit" style="align-self:flex-start;gap:var(--space-2)">
         ${icon('plus')}
         <span>Add Violation Type</span>
       </button>
@@ -1633,7 +1633,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1659,7 +1659,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1685,7 +1685,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
   const deniedNotice = status === 'denied' ? `
     <div class="info-card" style="border-left:4px solid var(--md-sys-color-error);margin-bottom:var(--space-3)">
       <div class="info-card-title">Previous Request Denied</div>
-      <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin-top:4px">
+      <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">
         Your last request, submitted ${formatDate(latestRequest.requested_at)}, was reviewed and denied. You can submit a new one below.
       </p>
     </div>` : '';
@@ -1693,7 +1693,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1711,7 +1711,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
           <label for="deletion-reason">Reason (optional)</label>
           <input type="text" id="deletion-reason" name="reason" placeholder="e.g. Leaving the server">
         </div>
-        <button class="btn btn-danger" type="submit" style="align-self:flex-start;gap:8px">
+        <button class="btn btn-danger" type="submit" style="align-self:flex-start;gap:var(--space-2)">
           ${icon('trash2')}
           <span>Request Deletion</span>
         </button>
@@ -1895,10 +1895,10 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
         '<label for="filter-user">User ID</label>' +
         '<input id="filter-user" type="text" name="userId" value="' + escapeHtml(filterUser) + '" placeholder="User ID">' +
       '</div>' +
-      '<button class="btn btn-filled" type="submit" style="gap:8px;align-self:flex-start">' +
+      '<button class="btn btn-filled" type="submit" style="gap:var(--space-2);align-self:flex-start">' +
         icon('search') + '<span>Filter</span>' +
       '</button>' +
-      '<button class="btn btn-outlined" type="button" onclick="downloadCSV()" style="gap:8px;align-self:flex-start">' +
+      '<button class="btn btn-outlined" type="button" onclick="downloadCSV()" style="gap:var(--space-2);align-self:flex-start">' +
         icon('download') + '<span>Export</span>' +
       '</button>' +
     '</form>' +
@@ -1950,7 +1950,7 @@ function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
       <div class="row" style="gap:var(--space-2);margin-top:var(--space-2)">
         <form method="POST" action="/dashboard/${escapeHtml(guildId)}/deletion-requests/${escapeHtml(r.id)}/complete" style="margin:0">
           <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
-          <button class="btn btn-filled" type="submit" style="gap:8px">
+          <button class="btn btn-filled" type="submit" style="gap:var(--space-2)">
             ${icon('trash2')}
             <span>Delete Data</span>
           </button>
@@ -1965,7 +1965,7 @@ function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Requests</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:4px">
+  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -2003,7 +2003,7 @@ function privacyPolicyPage() {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Privacy Policy</h1>
-  <a class="btn btn-text" href="/" style="gap:4px">
+  <a class="btn btn-text" href="/" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -2059,7 +2059,7 @@ function termsOfServicePage() {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Terms of Service</h1>
-  <a class="btn btn-text" href="/" style="gap:4px">
+  <a class="btn btn-text" href="/" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
