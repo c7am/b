@@ -7,7 +7,7 @@ const { startLoa, getActiveLoa, endLoa, getActiveLoas } = require('../db/databas
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('loa')
-    .setDescription('Manage staff leave of absence')
+    .setDescription('Manage staff leave of absence (use web dashboard instead)')
     .addSubcommand((sub) =>
       sub
         .setName('start')
@@ -32,6 +32,19 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    // Deprecation notice: suggest using the web dashboard
+    await interaction.deferReply({ ephemeral: true });
+    const deprecationCard = buildCard({
+      accentColor: COLORS.peach,
+      heading: `${icon('info')} This command is being phased out`,
+      lines: [
+        'Staff Leave of Absence management has been moved to the web dashboard for a better experience.',
+        `\n**Access it here:**\nhttps://isrp-staff-bot.onrender.com/dashboard/${interaction.guildId}/loa`,
+        '\nYou can still use this command, but the dashboard offers more features and a cleaner interface.',
+      ],
+    });
+    await interaction.followUp({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
+
     if (!(await canManageStaff(interaction.member, interaction.guildId))) {
       console.error(`[loa] ${interaction.user.tag} attempted LOA operation without permission`);
       const card = buildCard({

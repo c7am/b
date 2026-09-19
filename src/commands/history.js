@@ -7,10 +7,22 @@ const { getUserHistory, getInfractionPoints } = require('../db/database');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('history')
-    .setDescription('View promotion and infraction history for a staff member')
+    .setDescription('View promotion and infraction history for a staff member (use web dashboard instead)')
     .addUserOption((opt) => opt.setName('user').setDescription('Staff member').setRequired(true)),
 
   async execute(interaction) {
+    // Deprecation notice: suggest using the web dashboard
+    const deprecationCard = buildCard({
+      accentColor: COLORS.peach,
+      heading: `${icon('info')} This command is being phased out`,
+      lines: [
+        'Staff history viewing has moved to the web dashboard.',
+        `\n**Access it here:**\nhttps://isrp-staff-bot.onrender.com/dashboard/${interaction.guildId}/staff`,
+        '\nThe dashboard shows a more detailed history with better filtering and search capabilities.',
+      ],
+    });
+    await interaction.reply({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
+
     if (!(await canManageStaff(interaction.member, interaction.guildId))) {
       console.error(`[history] ${interaction.user.tag} attempted to view history without permission`);
       const card = buildCard({

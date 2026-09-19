@@ -8,7 +8,7 @@ const { addInfraction, getInfractionPoints } = require('../db/database');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('infract')
-    .setDescription('Issue an infraction to a staff member')
+    .setDescription('Issue an infraction to a staff member (use web dashboard instead)')
     .addUserOption((opt) => opt.setName('user').setDescription('Staff member to infract').setRequired(true))
     .addStringOption((opt) =>
       opt.setName('type').setDescription('Infraction type').setRequired(true).setAutocomplete(true)
@@ -23,6 +23,18 @@ module.exports = {
   },
 
   async execute(interaction) {
+    // Deprecation notice: suggest using the web dashboard
+    const deprecationCard = buildCard({
+      accentColor: COLORS.peach,
+      heading: `${icon('info')} This command is being phased out`,
+      lines: [
+        'Infraction management has moved to the web dashboard for better organization.',
+        `\n**Access it here:**\nhttps://isrp-staff-bot.onrender.com/dashboard/${interaction.guildId}/staff`,
+        '\nYou can continue using this command, but the dashboard offers a cleaner interface and history tracking.',
+      ],
+    });
+    await interaction.reply({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
+
     if (!(await canManageStaff(interaction.member, interaction.guildId))) {
       console.error(`[infract] ${interaction.user.tag} attempted to infract without permission`);
       const card = buildCard({
