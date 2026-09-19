@@ -1,7 +1,7 @@
 const { Events, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { startWebServer } = require('../web/server');
-const { startErlcEventListener } = require('../erlc/erlcEventListener');
+// const { startErlcEventListener } = require('../erlc/erlcEventListener');  // TODO: Re-add when file is committed
 
 module.exports = {
   name: Events.ClientReady,
@@ -33,6 +33,8 @@ module.exports = {
     startWebServer(client);
 
     // Start ERLC event listeners for all guilds
+    // TODO: Re-add when erlcEventListener.js is committed to git
+    /*
     for (const [guildId] of client.guilds.cache) {
       try {
         await startErlcEventListener(client, guildId);
@@ -40,5 +42,6 @@ module.exports = {
         console.warn(`[erlc-listen] Failed to start listener for guild ${guildId}: ${err.message}`);
       }
     }
+    */
   },
 };
