@@ -316,16 +316,16 @@ header.topbar {
 }
 
 .btn-filled {
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
   transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
 }
 .btn-filled:hover {
-  background: rgba(var(--md-sys-color-primary-rgb), 0.9);
+  background: rgba(var(--md-sys-color-secondary-container-rgb), 0.9);
   box-shadow: var(--md-sys-elevation-level2);
 }
 .btn-filled:active {
-  background: rgba(var(--md-sys-color-primary-rgb), 0.95);
+  background: rgba(var(--md-sys-color-secondary-container-rgb), 0.95);
 }
 
 .btn-tonal {
@@ -614,7 +614,7 @@ select {
   height: 48px;
   border-radius: var(--md-sys-shape-corner-full);
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   font-size: var(--md-sys-typescale-title-medium-size);
   font-weight: 600;
   flex-shrink: 0;
@@ -709,6 +709,23 @@ select {
 .surface-dim {
   background: var(--md-sys-color-surface-container-lowest);
 }
+
+/* Glassmorphism for dark surfaces */
+.card.card-elevated,
+.card.card-filled {
+  background: rgba(var(--md-sys-color-surface-rgb), 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--md-sys-color-outline-rgb), 0.1);
+}
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  background: rgba(var(--md-sys-color-surface-rgb), 0.6);
+  backdrop-filter: blur(8px);
+}
+
 
 .surface-low {
   background: var(--md-sys-color-surface-container-low);
@@ -878,7 +895,7 @@ select {
   height: 56px;
   border-radius: var(--md-sys-shape-corner-full);
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -987,7 +1004,7 @@ select {
   height: 56px;
   border-radius: var(--md-sys-shape-corner-full);
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   border: none;
   cursor: pointer;
   display: flex;
@@ -1773,12 +1790,12 @@ tbody tr:hover {
 /* Improved text selection color */
 ::selection {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 ::-moz-selection {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 /* ---- Material Design 3 Icon Button Refinement ---- */
@@ -1819,13 +1836,13 @@ tbody tr:hover {
 .icon-button.filled,
 .btn-icon.filled {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .icon-button.filled:hover,
 .btn-icon.filled:hover {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   box-shadow: var(--md-sys-elevation-level2);
 }
 
@@ -2097,7 +2114,7 @@ tbody tr:hover {
 
 .fab:hover {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   box-shadow: var(--md-sys-elevation-level5);
   transform: scale(1.1);
 }
@@ -2525,7 +2542,7 @@ input.filled.error {
 .checkbox input[type="checkbox"]:checked::after {
   content: '✓';
   position: absolute;
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   font-size: 12px;
   font-weight: 700;
 }
@@ -3730,7 +3747,7 @@ table.dense td {
 
 .pagination-item.active {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   border-color: var(--md-sys-color-primary);
 }
 
@@ -3961,7 +3978,7 @@ table.dense td {
 
 .filter-chip.active {
   background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .filter-chip.removable {
@@ -4144,7 +4161,7 @@ table.dense td {
 .filter-option input[type="checkbox"]:checked::after {
   content: '✓';
   position: absolute;
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-secondary-container);
   font-size: 12px;
   font-weight: 700;
 }
@@ -5681,6 +5698,15 @@ table.dense td {
 .card.card-filled {
   background: var(--md-sys-color-surface-container-lowest);
 }
+
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  background: rgba(var(--md-sys-color-surface-rgb), 0.6);
+  backdrop-filter: blur(8px);
+}
+
 
 /* Button Consistency */
 .btn.btn-standard {

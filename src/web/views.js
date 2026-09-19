@@ -424,7 +424,7 @@ const sections = {
         <p style="background:var(--md-sys-color-surface-dim);padding:var(--space-2);border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:var(--space-1) 0">
           ?moderate PlayerName violation reason
         </p>
-        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:var(--space-1) 6px;border-radius:var(--md-sys-shape-corner-extra-small)">?moderate JohnDoe VDM Rammed officer</code></p>
+        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:var(--space-1) 6px;border-radius:var(--md-sys-shape-corner-extra-small)">command [args]</code></p>
 
         <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Discord Moderation</h3>
         <p>Alternatively, issue moderation commands directly in Discord using the same format:</p>
@@ -973,12 +973,12 @@ function createShiftPage({ guild, csrfToken, guildId }) {
       
       <div class="field-group">
         <label for="shift-name">Shift Name</label>
-        <input type="text" id="shift-name" name="name" required placeholder="e.g. Morning Patrol">
+        <input type="text" id="shift-name" name="name" required placeholder="Enter shift name">
       </div>
       
       <div class="field-group">
         <label for="shift-desc">Description (optional)</label>
-        <textarea id="shift-desc" name="description" placeholder="e.g. Focus on downtown area" style="min-height:80px;border:1px solid var(--md-sys-color-outline);border-radius:var(--md-sys-shape-corner-small);padding:var(--space-2);background:var(--md-sys-color-surface-container);color:var(--md-sys-color-on-surface);font-family:inherit;font-size:inherit"></textarea>
+        <textarea id="shift-desc" name="description" placeholder="Enter shift details" style="min-height:80px;border:1px solid var(--md-sys-color-outline);border-radius:var(--md-sys-shape-corner-small);padding:var(--space-2);background:var(--md-sys-color-surface-container);color:var(--md-sys-color-on-surface);font-family:inherit;font-size:inherit"></textarea>
       </div>
 
       <div class="row" style="gap:var(--space-3)">
@@ -1109,7 +1109,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
       
       <div class="field-group">
         <label for="loa-reason">Reason</label>
-        <input type="text" id="loa-reason" name="reason" required placeholder="e.g. Personal leave, vacation, illness">
+        <input type="text" id="loa-reason" name="reason" required placeholder="Enter reason">
       </div>
 
       <div class="field-group">
@@ -1424,7 +1424,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       <div class="row" style="gap:var(--space-2);align-items:flex-end">
         <div class="field-group" style="flex:1;margin-bottom:0">
           <label for="rank-name">Name</label>
-          <input type="text" id="rank-name" name="name" required placeholder="e.g. Sergeant">
+          <input type="text" id="rank-name" name="name" required placeholder="Enter rank name">
         </div>
         <div class="field-group" style="flex:1;margin-bottom:0">
           <label for="rank-role">Role</label>
@@ -1452,7 +1452,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       <div class="row" style="gap:var(--space-2);align-items:flex-end">
         <div class="field-group" style="flex:1;margin-bottom:0">
           <label for="infraction-name">Name</label>
-          <input type="text" id="infraction-name" name="name" required placeholder="e.g. Minor RDM">
+          <input type="text" id="infraction-name" name="name" required placeholder="Enter violation type">
         </div>
         <div class="field-group" style="width:100px;margin-bottom:0">
           <label for="infraction-points">Points</label>
@@ -1521,7 +1521,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       <div class="row" style="gap:var(--space-2);align-items:flex-end">
         <div class="field-group" style="flex:1;min-width:150px">
           <label for="new-shift-name">Name</label>
-          <input id="new-shift-name" type="text" name="label" placeholder="e.g. Support" required>
+          <input id="new-shift-name" type="text" name="label" placeholder="Enter shift type" required>
         </div>
         <div class="field-group" style="min-width:100px">
           <label for="new-shift-min">Min (minutes)</label>
@@ -1605,11 +1605,11 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
       <h3 class="title-small">Add Custom Violation</h3>
       <div class="field-group">
         <label for="violation-label">Label</label>
-        <input id="violation-label" type="text" name="label" placeholder="e.g., Excessive Honking" required>
+        <input id="violation-label" type="text" name="label" placeholder="Enter violation name" required>
       </div>
       <div class="field-group">
         <label for="violation-codes">Short Codes (comma-separated)</label>
-        <input id="violation-codes" type="text" name="codes" placeholder="e.g., honk, honking, excessive-honk" required>
+        <input id="violation-codes" type="text" name="codes" placeholder="Enter keywords" required>
       </div>
       <div class="field-group">
         <label for="violation-desc">Description</label>
@@ -1709,7 +1709,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
         <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
         <div class="field-group">
           <label for="deletion-reason">Reason (optional)</label>
-          <input type="text" id="deletion-reason" name="reason" placeholder="e.g. Leaving the server">
+          <input type="text" id="deletion-reason" name="reason" placeholder="Enter reason">
         </div>
         <button class="btn btn-filled btn-danger" type="submit" style="align-self:flex-start;gap:var(--space-2)">
           ${icon('trash2')}
