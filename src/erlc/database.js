@@ -73,6 +73,20 @@ async function initERLCDatabase(db) {
     )
   `);
 
+  // Roblox-Discord account linking
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS roblox_discord_link (
+      id TEXT PRIMARY KEY,
+      guild_id TEXT NOT NULL,
+      discord_id TEXT NOT NULL,
+      discord_username TEXT,
+      roblox_id TEXT NOT NULL,
+      roblox_name TEXT,
+      linked_at INTEGER NOT NULL,
+      UNIQUE(guild_id, discord_id, roblox_id)
+    )
+  `);
+
   console.log('[db] ERLC feature tables initialized');
 }
 
@@ -148,6 +162,30 @@ async function getActiveShifts(db, guildId) {
   );
 }
 
+async function linkRobloxDiscord(db, guildId, discordId, discordUsername, robloxId, robloxName) {
+  const id = `link_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  await db.run(
+    `INSERT OR REPLACE INTO roblox_discord_link (id, guild_id, discord_id, discord_username, roblox_id, roblox_name, linked_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    id, guildId, discordId, discordUsername, robloxId, robloxName, Date.now()
+  );
+  return id;
+}
+
+async function findMemberByRobloxId(db, guildId, robloxId) {
+  return db.get(
+    'SELECT discord_id, discord_username FROM roblox_discord_link WHERE guild_id = ? AND roblox_id = ?',
+    guildId, robloxId
+  );
+}
+
+async function findRobloxByDiscordId(db, guildId, discordId) {
+  return db.get(
+    'SELECT roblox_id, roblox_name FROM roblox_discord_link WHERE guild_id = ? AND discord_id = ?',
+    guildId, discordId
+  );
+}
+
 module.exports = {
   initERLCDatabase,
   getInfractionCount,
@@ -158,4 +196,7 @@ module.exports = {
   startShift,
   endShift,
   getActiveShifts,
+  linkRobloxDiscord,
+  findMemberByRobloxId,
+  findRobloxByDiscordId,
 };
