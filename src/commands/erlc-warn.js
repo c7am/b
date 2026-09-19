@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const db = require('../db/database');
 const erlcDb = require('../erlc/database');
 const { ERLCClient } = require('../erlc/client');
@@ -10,7 +10,7 @@ module.exports = {
     .setDescription('Warn an in-game player (ERLC integration)')
     .addStringOption(opt => opt.setName('player').setDescription('Player name or ID').setRequired(true))
     .addStringOption(opt => opt.setName('reason').setDescription('Reason for warning').setRequired(false))
-    .setDefaultMemberPermissions('MANAGE_ROLES'),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
     const playerName = interaction.options.getString('player');

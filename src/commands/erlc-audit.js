@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const db = require('../db/database');
 const erlcDb = require('../erlc/database');
 const { icon } = require('../config');
@@ -23,7 +23,7 @@ module.exports = {
     .addIntegerOption(opt =>
       opt.setName('limit').setDescription('Number of entries to show (1-50, default 25)').setRequired(false).setMinValue(1).setMaxValue(50)
     )
-    .setDefaultMemberPermissions('MANAGE_ROLES'),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
     const guildConfig = await db.getGuildConfig(interaction.guildId);

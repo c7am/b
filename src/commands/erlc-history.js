@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const db = require('../db/database');
 const erlcDb = require('../erlc/database');
 const { ERLCClient } = require('../erlc/client');
@@ -9,7 +9,7 @@ module.exports = {
     .setName('infraction-history')
     .setDescription('Check player infraction history (ERLC)')
     .addStringOption(opt => opt.setName('player').setDescription('Player name or ID').setRequired(true))
-    .setDefaultMemberPermissions('MANAGE_ROLES'),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
     const playerName = interaction.options.getString('player');
