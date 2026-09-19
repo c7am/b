@@ -86,7 +86,7 @@ function loginPage() {
 
   const body = `
 <div class="center-page">
-  <div class="card stack shape-large" style="width:100%;max-width:420px;padding:var(--space-5)">
+  <div class="card card-filled stack shape-large" style="width:100%;max-width:420px;padding:var(--space-5)">
     <div style="text-align:center">
       <h1 class="headline-large">Axiom</h1>
       <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">Staff and ERLC management tool</p>
@@ -114,7 +114,7 @@ function loginPage() {
 
 // ============= Documentation Page =============
 function docsPage({ guild = null, guildId = null } = {}) {
-  const backLink = guildId ? `<a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:var(--space-1)">${icon('chevronLeft')} Back</a>` : '';
+  const backLink = guildId ? `<a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text btn-standard" style="gap:var(--space-1)">${icon('chevronLeft')} Back</a>` : '';
   
   const body = `
 <style>
@@ -178,7 +178,7 @@ function docsPage({ guild = null, guildId = null } = {}) {
   justify-content: center;
   background: var(--md-sys-color-primary-container);
   border-radius: var(--md-sys-shape-corner-small);
-  margin-bottom: 12px;
+  margin-bottom:var(--space-2);
   color: var(--md-sys-color-primary);
 }
 .docs-card-icon svg {
@@ -186,13 +186,13 @@ function docsPage({ guild = null, guildId = null } = {}) {
   height: 28px;
 }
 .docs-card-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size:var(--md-typescale-headline-large-size);
+  class="text-bold";
+  margin-bottom:var(--space-1);
   color: var(--md-sys-color-on-surface);
 }
 .docs-card-desc {
-  font-size: 14px;
+  font-size:var(--md-typescale-body-medium-size);
   color: var(--md-sys-color-on-surface-variant);
   margin: 0;
   line-height: 1.4;
@@ -215,13 +215,13 @@ function docsPage({ guild = null, guildId = null } = {}) {
   flex-wrap: wrap;
 }
 .docs-nav-btn {
-  padding: 8px 16px;
+  padding:var(--space-1) var(--space-3);
   border-radius: var(--md-sys-shape-corner-small);
   background: var(--md-sys-color-surface-variant);
   color: var(--md-sys-color-on-surface-variant);
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size:var(--md-typescale-body-medium-size);
   transition: all 0.2s ease;
 }
 .docs-nav-btn:hover, .docs-nav-btn.active {
@@ -233,7 +233,7 @@ function docsPage({ guild = null, guildId = null } = {}) {
 <header class="topbar">
   <div>
     <h1 class="title-large" style="margin:0">Documentation</h1>
-    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:8px 0 0 0">Everything you need to know about Axiom</p>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:var(--space-1) 0 0 0">Everything you need to know about Axiom</p>
   </div>
   ${backLink}
 </header>
@@ -241,43 +241,43 @@ function docsPage({ guild = null, guildId = null } = {}) {
 <div class="page stack">
   <!-- Hero Section -->
   <div class="docs-hero">
-    <h1 style="font-size:28px">Welcome to Axiom</h1>
+    <h1 style="font-size:var(--md-sys-typescale-display-large-size)">Welcome to Axiom</h1>
     <p>Your complete guide to staff management, shifts, and ERLC integration</p>
   </div>
 
   <!-- Section Cards -->
   <div class="docs-grid">
-    <div class="card-high docs-card" onclick="showSection('getting-started')">
+    <div class="card card-elevated docs-card" onclick="showSection('getting-started')">
       <div class="docs-card-icon">${icon('book')}</div>
       <div class="docs-card-title">Getting Started</div>
       <p class="docs-card-desc">Learn the basics and key features of Axiom</p>
     </div>
 
-    <div class="card-high docs-card" onclick="showSection('shifts')">
+    <div class="card card-elevated docs-card" onclick="showSection('shifts')">
       <div class="docs-card-icon">${icon('clock')}</div>
       <div class="docs-card-title">Shift Management</div>
       <p class="docs-card-desc">Join, control, and track shift attendance</p>
     </div>
 
-    <div class="card-high docs-card" onclick="showSection('ssu')">
+    <div class="card card-elevated docs-card" onclick="showSection('ssu')">
       <div class="docs-card-icon">${icon('server')}</div>
       <div class="docs-card-title">Server Requirements</div>
       <p class="docs-card-desc">Understanding SSU and player thresholds</p>
     </div>
 
-    <div class="card-high docs-card" onclick="showSection('verification')">
+    <div class="card card-elevated docs-card" onclick="showSection('verification')">
       <div class="docs-card-icon">${icon('checkCircle')}</div>
       <div class="docs-card-title">Account Verification</div>
       <p class="docs-card-desc">Link your Roblox account safely</p>
     </div>
 
-    <div class="card-high docs-card" onclick="showSection('moderation')">
+    <div class="card card-elevated docs-card" onclick="showSection('moderation')">
       <div class="docs-card-icon">${icon('shield')}</div>
       <div class="docs-card-title">Moderation</div>
       <p class="docs-card-desc">In-game and Discord moderation commands</p>
     </div>
 
-    <div class="card-high docs-card" onclick="showSection('admin')">
+    <div class="card card-elevated docs-card" onclick="showSection('admin')">
       <div class="docs-card-icon">${icon('settings')}</div>
       <div class="docs-card-title">Admin Settings</div>
       <p class="docs-card-desc">Configure Axiom for your server</p>
@@ -301,14 +301,14 @@ function docsPage({ guild = null, guildId = null } = {}) {
 <script>
 const sections = {
   'getting-started': \`
-    <div class="card-high" style="padding:var(--space-3)">
+    <div class="card card-elevated" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Getting Started</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">What is Axiom?</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);class="text-bold"">What is Axiom?</h3>
         <p>Axiom is a Discord bot designed to manage staff shifts and in-game moderation for ERLC (Emergency Response: Liberty County) roleplay communities. It provides tools for scheduling, tracking attendance, and moderating player behavior.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Key Features</h3>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Key Features</h3>
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li>Shift management with SSU integration</li>
           <li>Roblox account verification</li>
           <li>In-game moderation logging</li>
@@ -317,7 +317,7 @@ const sections = {
           <li>Discord integration</li>
         </ul>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Quick Navigation</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Quick Navigation</h3>
         <p><strong>Dashboard Home:</strong> Click your server name to access the staff dashboard</p>
         <p><strong>Shifts:</strong> View and manage shifts from the Shifts tab</p>
         <p><strong>Account Setup:</strong> Use /erlc-link command in Discord to verify your Roblox account</p>
@@ -326,30 +326,30 @@ const sections = {
   \`,
 
   'shifts': \`
-    <div class="card-high" style="padding:var(--space-3)">
+    <div class="card card-elevated" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Shift Management</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">Joining a Shift</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);class="text-bold"">Joining a Shift</h3>
         <p>1. Go to the Shifts page from your dashboard</p>
         <p>2. Find the shift you want to join</p>
         <p>3. Click <strong>Join Shift</strong> (button will be disabled if server doesn't have 25+ players)</p>
         <p>4. You'll see the shift details page with controls</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Controlling Your Shift</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Controlling Your Shift</h3>
         <p>Once you've joined a shift, you'll see four control buttons:</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li><strong>Start:</strong> Begin your shift (updates shift status to 'Started')</li>
           <li><strong>Pause:</strong> Temporarily pause your shift (status becomes 'Paused')</li>
           <li><strong>Resume:</strong> Resume from paused state (back to 'Started')</li>
           <li><strong>End:</strong> Complete your shift (status becomes 'Ended')</li>
         </ul>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Check-In / Check-Out</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Check-In / Check-Out</h3>
         <p>Click <strong>Check In / Out</strong> to toggle your attendance status during active shifts. This helps track who was actually present during each shift.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Viewing Shift Members</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Viewing Shift Members</h3>
         <p>The Members section shows all staff who joined the shift and their check-in status. Check-in status can be either:</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li><strong>Checked in:</strong> Present during the shift</li>
           <li><strong>Not checked in:</strong> Joined but didn't check in</li>
         </ul>
@@ -358,26 +358,26 @@ const sections = {
   \`,
 
   'ssu': \`
-    <div class="card-high" style="padding:var(--space-3)">
+    <div class="card card-elevated" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Server Requirements (SSU Integration)</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">What is SSU?</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);class="text-bold"">What is SSU?</h3>
         <p>SSU (Server Startup Unit) is a requirement that ensures shifts can only be joined when the ERLC server has officially started and has at least 25 players in-game. This prevents ghost shifts and ensures proper staffing coordination.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Why 25 Players?</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Why 25 Players?</h3>
         <p>25 players is the minimum threshold to ensure the server is properly running with meaningful activity. This prevents premature shift joins when the server is still warming up.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Joining When SSU Isn't Ready</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Joining When SSU Isn't Ready</h3>
         <p>If you try to join a shift but see <strong>'Server Not Ready'</strong> message, it means:</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li>The ERLC server hasn't started yet, OR</li>
           <li>There aren't enough players in-game (fewer than 25)</li>
         </ul>
         <p>Simply wait until the server reaches 25 players, then refresh the page to try again.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Server Status Display</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Server Status Display</h3>
         <p>Each shift detail page shows live server status including:</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li>Current player count</li>
           <li>Server status (Started/Not Started)</li>
           <li>Reason why shifts can't be joined (if applicable)</li>
@@ -387,26 +387,26 @@ const sections = {
   \`,
 
   'verification': \`
-    <div class="card-high" style="padding:var(--space-3)">
+    <div class="card card-elevated" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Roblox Account Verification</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">Why Verify?</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);class="text-bold"">Why Verify?</h3>
         <p>Verifying your Roblox account links your Discord identity with your in-game account. This enables in-game moderation logging and staff tracking.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Verification Steps</h3>
-        <p><strong>Step 1:</strong> Run <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:var(--md-sys-shape-corner-extra-small)">/erlc-link</code> in Discord</p>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Verification Steps</h3>
+        <p><strong>Step 1:</strong> Run <code style="background:var(--md-sys-color-surface-dim);padding:var(--space-1) 6px;border-radius:var(--md-sys-shape-corner-extra-small)">/erlc-link</code> in Discord</p>
         <p><strong>Step 2:</strong> Bot sends you a 12-word verification phrase</p>
         <p><strong>Step 3:</strong> Add the phrase to your Roblox bio/description</p>
         <p><strong>Step 4:</strong> Click <strong>Verify My Account</strong> button</p>
         <p><strong>Step 5:</strong> Enter your Roblox username when prompted</p>
         <p><strong>Step 6:</strong> Bot verifies the phrase is in your bio and confirms verification</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Regenerate Phrase</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Regenerate Phrase</h3>
         <p>If the phrase contains censored words or you want a new one, click <strong>Regenerate Words</strong> to get a different 12-word phrase.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">After Verification</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">After Verification</h3>
         <p>Once verified, your account is linked permanently. You can now:</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li>Use in-game moderation commands</li>
           <li>Be tracked in moderation logs</li>
           <li>Receive mod permissions if you have Discord staff role</li>
@@ -416,25 +416,25 @@ const sections = {
   \`,
 
   'moderation': \`
-    <div class="card-high" style="padding:var(--space-3)">
+    <div class="card card-elevated" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Moderation</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">In-Game Moderation</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);class="text-bold"">In-Game Moderation</h3>
         <p>If you have verified your Roblox account and have Discord staff role, you can issue moderation commands in-game:</p>
-        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:8px 0">
+        <p style="background:var(--md-sys-color-surface-dim);padding:var(--space-2);border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:var(--space-1) 0">
           ?moderate PlayerName violation reason
         </p>
-        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:2px 6px;border-radius:var(--md-sys-shape-corner-extra-small)">?moderate JohnDoe VDM Rammed officer</code></p>
+        <p><strong>Example:</strong> <code style="background:var(--md-sys-color-surface-dim);padding:var(--space-1) 6px;border-radius:var(--md-sys-shape-corner-extra-small)">?moderate JohnDoe VDM Rammed officer</code></p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Discord Moderation</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Discord Moderation</h3>
         <p>Alternatively, issue moderation commands directly in Discord using the same format:</p>
-        <p style="background:var(--md-sys-color-surface-dim);padding:12px;border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:8px 0">
+        <p style="background:var(--md-sys-color-surface-dim);padding:var(--space-2);border-radius:var(--md-sys-shape-corner-small);font-family:monospace;margin:var(--space-1) 0">
           ?moderate PlayerName violation reason
         </p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Violation Types</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Violation Types</h3>
         <p>Common violations (case-insensitive, shorthand accepted):</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4);columns:2">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4);columns:2">
           <li>RDM - Random Death Match</li>
           <li>VDM - Vehicle Death Match</li>
           <li>FRP - Fail Roleplay</li>
@@ -447,9 +447,9 @@ const sections = {
           <li>NVL - No Value of Life</li>
         </ul>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Moderation Logging</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Moderation Logging</h3>
         <p>All moderation actions are logged to your server's moderation channel with:</p>
-        <ul style="margin:8px 0;padding-left:var(--space-4)">
+        <ul style="margin:var(--space-1) 0;padding-left:var(--space-4)">
           <li>Player avatar</li>
           <li>Staff member who issued the action</li>
           <li>Violation type</li>
@@ -461,20 +461,20 @@ const sections = {
   \`,
 
   'admin': \`
-    <div class="card-high" style="padding:var(--space-3)">
+    <div class="card card-elevated" style="padding:var(--space-3)">
       <h2 class="headline-medium" style="margin-top:0">Admin Settings</h2>
       <div class="body-medium" style="line-height:1.6;color:var(--md-sys-color-on-surface)">
-        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);font-weight:600">Accessing Settings</h3>
+        <h3 style="margin-top:var(--space-2);margin-bottom:var(--space-2);class="text-bold"">Accessing Settings</h3>
         <p>Only administrators can access the Settings page. Click the gear icon in the dashboard to configure Axiom.</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">ERLC Configuration</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">ERLC Configuration</h3>
         <p>To enable Axiom features, you need to configure your ERLC Private Server API key:</p>
         <p><strong>1.</strong> Go to Settings</p>
         <p><strong>2.</strong> Find 'ERLC Server Configuration' section</p>
         <p><strong>3.</strong> Enter your ERLC API key</p>
         <p><strong>4.</strong> Click 'Save API Key' (bot validates connection)</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Shift Type Management</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Shift Type Management</h3>
         <p>Create custom shift types with duration limits:</p>
         <p><strong>1.</strong> Go to Settings</p>
         <p><strong>2.</strong> Find 'Shift Types' section</p>
@@ -483,14 +483,14 @@ const sections = {
         <p><strong>5.</strong> Click 'Add Shift Type'</p>
         <p>Admins can delete shift types with the delete button (must keep at least one)</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Custom Violations</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Custom Violations</h3>
         <p>Add custom violation types beyond the default 10 presets:</p>
         <p><strong>1.</strong> Go to Settings</p>
         <p><strong>2.</strong> Find 'Custom Violations' section</p>
         <p><strong>3.</strong> Enter violation name</p>
         <p><strong>4.</strong> Click 'Add Violation'</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Creating Shifts</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Creating Shifts</h3>
         <p>Click 'Create Shift' button to schedule new shifts:</p>
         <p><strong>1.</strong> Enter shift name (e.g., 'Morning Patrol')</p>
         <p><strong>2.</strong> Select shift type</p>
@@ -498,7 +498,7 @@ const sections = {
         <p><strong>4.</strong> Add optional description</p>
         <p><strong>5.</strong> Click 'Create Shift'</p>
 
-        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);font-weight:600">Audit Log</h3>
+        <h3 style="margin-top:var(--space-3);margin-bottom:var(--space-2);class="text-bold"">Audit Log</h3>
         <p>View all staff actions including infractions, promotions, and shift joins. Filter by type, user, or date range. Export to CSV for reporting.</p>
       </div>
     </div>
@@ -529,7 +529,7 @@ function guildListPage({ guilds, username }) {
     <a href="/dashboard/${escapeHtml(g.id)}/staff" class="guild-item">
       ${icon_elem}
       <div style="flex:1">
-        <div class="body-large" style="font-weight:600">${escapeHtml(g.name)}</div>
+        <div class="body-large" style="class="text-bold"">${escapeHtml(g.name)}</div>
         <div class="body-small" style="color:var(--md-sys-color-on-surface-variant)">View dashboard</div>
       </div>
       ${icon('chevronRight')}
@@ -541,7 +541,7 @@ function guildListPage({ guilds, username }) {
   <h1 class="title-large" style="margin:0">Axiom</h1>
   <div class="row">
     <span class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">${escapeHtml(username)}</span>
-    <a class="btn btn-text" href="/auth/logout" style="gap:var(--space-1)" title="Log out">
+    <a class="btn btn-text btn-standard" href="/auth/logout" style="gap:var(--space-1)" title="Log out">
       ${icon('logOut')}
     </a>
   </div>
@@ -574,21 +574,21 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
   const statsHtml = `
     <div class="dashboard-stats">
       <div class="stat-card">
-        <div class="stat-icon" style="color:#a6e3a1">${icon('checkCircle')}</div>
+        <div class="stat-icon stat-icon-success">${icon('checkCircle')}</div>
         <div class="stat-content">
           <div class="stat-label">Active</div>
           <div class="stat-number">${activeShifts.length}</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="color:#89dceb">${icon('clock')}</div>
+        <div class="stat-icon stat-icon-info">${icon('clock')}</div>
         <div class="stat-content">
           <div class="stat-label">Next</div>
           <div class="stat-number">${upcomingShifts.length}</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="color:#cba6f7">${icon('check')}</div>
+        <div class="stat-icon stat-icon-primary">${icon('check')}</div>
         <div class="stat-content">
           <div class="stat-label">Done</div>
           <div class="stat-number">${completedShifts.length}</div>
@@ -621,19 +621,19 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
     }
 
     return `
-      <div class="card-high" style="padding:var(--space-3);display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="card card-elevated" style="padding:var(--space-3);display:flex;justify-content:space-between;align-items:flex-start">
         <div>
-          <div class="body-large" style="font-weight:600">${escapeHtml(s.name)}</div>
+          <div class="body-large" style="class="text-bold"">${escapeHtml(s.name)}</div>
           <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">
             ${startStr} to ${endStr}
           </div>
-          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:2px">
+          <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-quarter)">
             ${durationHours}h ${durationMins}m
           </div>
         </div>
         <div style="display:flex;gap:var(--space-2);align-items:center">
           <span class="badge ${statusClass}">${status}</span>
-          <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text" style="gap:var(--space-1);padding:var(--space-1) var(--space-2)">
+          <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text btn-standard" style="gap:var(--space-1);padding:var(--space-1) var(--space-2)">
             ${icon('chevronRight')}
           </a>
         </div>
@@ -642,7 +642,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
 
   const toggleButton = trueAdmin ? `
     <form method="POST" action="/dashboard/${escapeHtml(guildId)}/toggle-view-mode" style="display:inline">
-      <button type="submit" class="btn btn-text" title="Switch view mode" style="gap:var(--space-1)">
+      <button type="submit" class="btn btn-text btn-standard" title="Switch view mode" style="gap:var(--space-1)">
         ${viewingAsStaff ? icon('shield') : icon('users')}
       </button>
     </form>` : '';
@@ -655,7 +655,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
           <div class="info-card-title">You're On Leave</div>
           <div class="body-small" style="color:var(--md-sys-color-on-primary-container);margin-top:var(--space-1)">
             Until ${formatDate(activeLoa.ends_at)}
-            <div style="margin-top:var(--space-2)"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text" style="gap:var(--space-1);font-weight:600">Manage Leave</a></div>
+            <div style="margin-top:var(--space-2)"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text btn-standard" style="gap:var(--space-1);class="text-bold"">Manage Leave</a></div>
           </div>
         </div>
       </div>
@@ -675,21 +675,21 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
       <div style="display:grid;gap:var(--space-2)">
         ${activeShifts.length > 0 ? `
           <div>
-            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Active</div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);class="text-bold"">Active</div>
             ${activeShifts.map(shiftCard).join('')}
           </div>
         ` : ''}
         ${upcomingShifts.length > 0 ? `
           <div>
-            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Upcoming</div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);class="text-bold"">Upcoming</div>
             ${upcomingShifts.map(shiftCard).join('')}
           </div>
         ` : ''}
         ${completedShifts.length > 0 ? `
           <div>
-            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:600">Past</div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);class="text-bold"">Past</div>
             ${completedShifts.slice(0, 3).map(shiftCard).join('')}
-            ${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-text" style="gap:var(--space-1);font-size:12px;justify-content:center;margin-top:var(--space-2)">View all ${completedShifts.length}</a>` : ''}
+            ${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-text btn-standard" style="gap:var(--space-1);font-size:var(--md-sys-typescale-body-small-size);justify-content:center;margin-top:var(--space-2)">View all ${completedShifts.length}</a>` : ''}
           </div>
         ` : ''}
       </div>
@@ -700,15 +700,15 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
 <header class="topbar">
   <div>
     <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
-    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:8px 0 0 0">Dashboard</p>
+    <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:var(--space-1) 0 0 0">Dashboard</p>
   </div>
   <div class="row">
     ${toggleButton}
-    <a class="btn btn-text" href="/dashboard" style="gap:var(--space-1)">
+    <a class="btn btn-text btn-standard" href="/dashboard" style="gap:var(--space-1)">
       ${icon('chevronLeft')}
       <span>Back</span>
     </a>
-    <a class="btn btn-text" href="/auth/logout" style="gap:var(--space-1)">
+    <a class="btn btn-text btn-standard" href="/auth/logout" style="gap:var(--space-1)">
       ${icon('logOut')}
     </a>
   </div>
@@ -718,24 +718,24 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
   ${loaSection}
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2);margin-bottom:var(--space-4)">
-    <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
+    <div class="card card-elevated" style="display:flex;gap:var(--space-2);align-items:center">
       <div style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('checkCircle')}</div>
       <div>
-        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Active</div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;class="text-bold"">Active</div>
         <div class="headline-medium">${activeShifts.length}</div>
       </div>
     </div>
-    <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
+    <div class="card card-elevated" style="display:flex;gap:var(--space-2);align-items:center">
       <div style="background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-secondary);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('clock')}</div>
       <div>
-        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Upcoming</div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;class="text-bold"">Upcoming</div>
         <div class="headline-medium">${upcomingShifts.length}</div>
       </div>
     </div>
-    <div class="card-high" style="display:flex;gap:var(--space-2);align-items:center">
+    <div class="card card-elevated" style="display:flex;gap:var(--space-2);align-items:center">
       <div style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-primary);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('check')}</div>
       <div>
-        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;font-weight:600">Completed</div>
+        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;class="text-bold"">Completed</div>
         <div class="headline-medium">${completedShifts.length}</div>
       </div>
     </div>
@@ -798,10 +798,10 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 
   // SSU status display
   const ssuDisplay = ssuStatus ? (ssuStatus.ready ? 
-    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:12px;padding:var(--space-1) var(--space-2);border-radius:var(--md-sys-shape-corner-small)">
+    `<div class="status-chip" style="background:var(--md-sys-color-on-background);color:var(--md-sys-color-background);font-size:var(--md-sys-typescale-body-small-size);padding:var(--space-1) var(--space-2);border-radius:var(--md-sys-shape-corner-small)">
       ${icon('checkCircle')} <strong>${ssuStatus.playerCount}</strong> players in-game
     </div>` :
-    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:12px;padding:var(--space-1) var(--space-2);border-radius:var(--md-sys-shape-corner-small)">
+    `<div class="status-chip" style="background:var(--md-sys-color-error);color:var(--md-sys-color-on-error);font-size:var(--md-sys-typescale-body-small-size);padding:var(--space-1) var(--space-2);border-radius:var(--md-sys-shape-corner-small)">
       ${icon('alertCircle')} ${escapeHtml(ssuStatus.reason || 'Server not ready')}
     </div>`) : '';
 
@@ -848,7 +848,7 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   const memberItems = members.map(m => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2);background:var(--md-sys-color-surface);border-radius:var(--md-sys-shape-corner-small);border:1px solid var(--md-sys-color-outline)">
       <div>
-        <div class="body-medium" style="font-weight:500">User ${escapeHtml(m.user_id)}</div>
+        <div class="body-medium" style="class="text-medium"">User ${escapeHtml(m.user_id)}</div>
         <div class="body-small" style="color:var(--md-sys-color-on-surface-variant)">Joined ${formatDate(m.joined_at)}</div>
       </div>
       <span class="badge ${m.checked_in ? 'badge-success' : 'badge-warning'}" style="white-space:nowrap">
@@ -871,7 +871,7 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
       ${isActive ? '<span class="badge badge-active">Active Now</span>' : ''}
     </div>
   </div>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -879,34 +879,34 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
 <div class="page stack">
   <!-- Key Info Cards -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:var(--space-2)">
-    <div class="card-high" style="padding:var(--space-2)">
+    <div class="card card-elevated" style="padding:var(--space-2)">
       <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">Start Time</div>
-      <div class="body-large" style="font-weight:500">${formatDate(shift.starts_at)}</div>
+      <div class="body-large" style="class="text-medium"">${formatDate(shift.starts_at)}</div>
     </div>
-    <div class="card-high" style="padding:var(--space-2)">
+    <div class="card card-elevated" style="padding:var(--space-2)">
       <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">End Time</div>
-      <div class="body-large" style="font-weight:500">${formatDate(shift.ends_at)}</div>
+      <div class="body-large" style="class="text-medium"">${formatDate(shift.ends_at)}</div>
     </div>
-    <div class="card-high" style="padding:var(--space-2)">
+    <div class="card card-elevated" style="padding:var(--space-2)">
       <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">Duration</div>
-      <div class="body-large" style="font-weight:500">${durationHours}h ${durationMins}m</div>
+      <div class="body-large" style="class="text-medium"">${durationHours}h ${durationMins}m</div>
     </div>
-    <div class="card-high" style="padding:var(--space-2)">
+    <div class="card card-elevated" style="padding:var(--space-2)">
       <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-1)">Members</div>
-      <div class="body-large" style="font-weight:500">${members.length}</div>
+      <div class="body-large" style="class="text-medium"">${members.length}</div>
     </div>
   </div>
 
   <!-- Description -->
   ${shift.description ? `
-  <div class="card-high" style="padding:var(--space-3)">
-    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-2);text-transform:uppercase;font-weight:600">Notes</div>
+  <div class="card card-elevated" style="padding:var(--space-3)">
+    <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-2);text-transform:uppercase;class="text-bold"">Notes</div>
     <p class="body-medium">${escapeHtml(shift.description)}</p>
   </div>` : ''}
 
   <!-- SSU Status -->
   ${ssuDisplay ? `
-  <div class="card-high" style="padding:var(--space-2)">
+  <div class="card card-elevated" style="padding:var(--space-2)">
     <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-bottom:var(--space-2)">Server Status</div>
     ${ssuDisplay}
   </div>` : ''}
@@ -921,8 +921,8 @@ function shiftDetailsPage({ guild, shift, members, isJoined, csrfToken, guildId,
   ${stateControls}
 
   <!-- Members List -->
-  <div class="card-high" style="padding:var(--space-3)">
-    <div class="body-medium" style="font-weight:600;margin-bottom:var(--space-2);display:flex;gap:var(--space-2);align-items:center">
+  <div class="card card-elevated" style="padding:var(--space-3)">
+    <div class="body-medium" style="class="text-bold";margin-bottom:var(--space-2);display:flex;gap:var(--space-2);align-items:center">
       ${icon('users')}
       Shift Members (${members.length})
     </div>
@@ -961,7 +961,7 @@ function createShiftPage({ guild, csrfToken, guildId }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Create New Shift</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/shifts" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/shifts" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1021,7 +1021,7 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
         <div class="badge badge-info" style="margin-top:var(--space-2)">${status}</div>
       </div>
       <div class="shift-actions">
-        <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text">Details</a>
+        <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text btn-standard">Details</a>
         <form method="POST" action="/dashboard/${escapeHtml(guildId)}/delete-shift" style="margin:0">
           <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
           <input type="hidden" name="shiftId" value="${escapeHtml(s.id)}">
@@ -1037,7 +1037,7 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Manage Shifts</h1>
   <div class="row">
-    <a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text" style="gap:var(--space-1)">
+    <a href="/dashboard/${escapeHtml(guildId)}/staff" class="btn btn-text btn-standard" style="gap:var(--space-1)">
       ${icon('chevronLeft')} Back
     </a>
   </div>
@@ -1062,7 +1062,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Leave of Absence</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1097,7 +1097,7 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Request Leave of Absence</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1138,7 +1138,7 @@ function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) 
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1160,7 +1160,7 @@ function checkInPage({ guild, shift, userMember, csrfToken, guildId, shiftId }) 
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(shift.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1258,7 +1258,7 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1372,7 +1372,7 @@ function settingsPage({ guild, roles, textChannels, categoryChannels, scalars, r
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)} Settings</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1633,7 +1633,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1659,7 +1659,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
     const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1676,7 +1676,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
         </p>
       </div>
     </div>
-    <a href="/dashboard/${escapeHtml(guildId)}/data-deletion?new=1" class="btn btn-text" style="margin-top:var(--space-3)">Submit another request</a>
+    <a href="/dashboard/${escapeHtml(guildId)}/data-deletion?new=1" class="btn btn-text btn-standard" style="margin-top:var(--space-3)">Submit another request</a>
   </div>
 </div>`;
     return layout({ title: 'Data Deletion', body });
@@ -1693,7 +1693,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Request</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -1711,7 +1711,7 @@ function dataDeletionPage({ guild, guildId, latestRequest, csrfToken }) {
           <label for="deletion-reason">Reason (optional)</label>
           <input type="text" id="deletion-reason" name="reason" placeholder="e.g. Leaving the server">
         </div>
-        <button class="btn btn-danger" type="submit" style="align-self:flex-start;gap:var(--space-2)">
+        <button class="btn btn-filled btn-danger" type="submit" style="align-self:flex-start;gap:var(--space-2)">
           ${icon('trash2')}
           <span>Request Deletion</span>
         </button>
@@ -1733,7 +1733,7 @@ function inGameModerationPage({ guild, guildId, moderations, presets, searchPlay
   <div class="stack" style="gap:var(--space-4)">
     <h1 class="title-large">${icon('shield')} In-Game Moderations</h1>
     
-    <div class="card-high">
+    <div class="card card-elevated">
       <div class="field-group">
         <label>Search Player</label>
         <input type="text" placeholder="Player ID or name..." onkeyup="location.href = '/dashboard/${escapeHtml(guildId)}/moderations?search=' + this.value" style="width:100%">
@@ -1866,7 +1866,7 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-1)">' +
           '<div>' +
             '<span class="badge badge-info">' + escapeHtml(formatType(e.type)) + '</span>' +
-            '<span style="margin-left:var(--space-1);color:var(--md-sys-color-on-surface-variant);font-size:12px">' + formatDate(e.timestamp) + '</span>' +
+            '<span style="margin-left:var(--space-1);color:var(--md-sys-color-on-surface-variant);font-size:var(--md-sys-typescale-body-small-size)">' + formatDate(e.timestamp) + '</span>' +
           '</div>' +
           '<span class="body-small" style="color:var(--md-sys-color-on-surface-variant)">User: ' + escapeHtml(e.user) + '</span>' +
         '</div>' +
@@ -1925,7 +1925,7 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
       '}' +
     '</script>';
 
-  return content + '<div style="text-align:center;margin-top:var(--space-4)"><a href="/dashboard/' + escapeHtml(guildId) + '/staff" class="btn btn-text">Back to Dashboard</a></div>';
+  return content + '<div style="text-align:center;margin-top:var(--space-4)"><a href="/dashboard/' + escapeHtml(guildId) + '/staff" class="btn btn-text btn-standard">Back to Dashboard</a></div>';
 }
 
 // ============= Data Deletion Requests Queue (Admin) =============
@@ -1965,7 +1965,7 @@ function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Data Deletion Requests</h1>
-  <a class="btn btn-text" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/dashboard/${escapeHtml(guildId)}/staff" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -2003,7 +2003,7 @@ function privacyPolicyPage() {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Privacy Policy</h1>
-  <a class="btn btn-text" href="/" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
@@ -2059,7 +2059,7 @@ function termsOfServicePage() {
   const body = `
 <header class="topbar">
   <h1 class="title-large" style="margin:0">Terms of Service</h1>
-  <a class="btn btn-text" href="/" style="gap:var(--space-1)">
+  <a class="btn btn-text btn-standard" href="/" style="gap:var(--space-1)">
     ${icon('chevronLeft')} Back
   </a>
 </header>
