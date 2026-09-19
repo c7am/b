@@ -1,4 +1,4 @@
-const { ErlcClient } = require('../erlc/erlcClient');
+const { ERLCClient } = require('../erlc/client');
 const { getScalar, setScalar } = require('../utils/guildConfig');
 const { getSetting, setSetting } = require('../db/database');
 
@@ -10,14 +10,14 @@ const { getSetting, setSetting } = require('../db/database');
  * Get or initialize ERLC client for a guild
  * Returns null if no API key is configured
  */
-async function getErlcClient(guildId) {
+async function getERLCClient(guildId) {
   try {
     // Fetch API key from database (stored securely in settings)
     const apiKey = await getSetting(guildId, 'erlc_api_key');
     if (!apiKey) {
       return null;
     }
-    return new ErlcClient(apiKey);
+    return new ERLCClient(apiKey);
   } catch (err) {
     console.error(`[erlc] Failed to initialize client for guild ${guildId}: ${err.message}`);
     return null;
@@ -29,7 +29,7 @@ async function getErlcClient(guildId) {
  */
 async function verifyApiKey(guildId, apiKey) {
   try {
-    const client = new ErlcClient(apiKey);
+    const client = new ERLCClient(apiKey);
     await client.getServerStatus();
     return { valid: true };
   } catch (err) {
@@ -42,7 +42,7 @@ async function verifyApiKey(guildId, apiKey) {
  */
 async function checkSsuStatus(guildId, minPlayers = 25) {
   try {
-    const client = await getErlcClient(guildId);
+    const client = await getERLCClient(guildId);
     if (!client) {
       return { ready: false, reason: 'No ERLC API configured' };
     }
@@ -98,7 +98,7 @@ async function getRobloxUsername(guildId, discordUserId) {
  * When user starts a shift in Discord, assign them to team in ERLC
  */
 async function syncShiftToErlc(guildId, discordUserId, shiftType) {
-  const client = await getErlcClient(guildId);
+  const client = await getERLCClient(guildId);
   if (!client) {
     console.warn(`[erlc] No ERLC client for guild ${guildId}, skipping shift sync`);
     return null;
@@ -139,7 +139,7 @@ async function syncShiftToErlc(guildId, discordUserId, shiftType) {
  * Get list of current ERLC players for display
  */
 async function getCurrentPlayers(guildId) {
-  const client = await getErlcClient(guildId);
+  const client = await getERLCClient(guildId);
   if (!client) {
     return { error: 'ERLC not configured' };
   }
@@ -156,7 +156,7 @@ async function getCurrentPlayers(guildId) {
  * Get ERLC server status and stats
  */
 async function getServerInfo(guildId) {
-  const client = await getErlcClient(guildId);
+  const client = await getERLCClient(guildId);
   if (!client) {
     return { error: 'ERLC not configured' };
   }
@@ -284,7 +284,7 @@ async function handleErlcVerifyUsernameModal(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
   try {
-    const client = await getErlcClient(interaction.guildId);
+    const client = await getERLCClient(interaction.guildId);
     if (!client) {
       return interaction.editReply({
         content: 'ERLC is not configured for this server. Contact an admin.',
@@ -357,7 +357,7 @@ async function handleErlcLinkModal(interaction) {
 
   try {
     // Verify the username exists in ERLC by querying player details
-    const client = await getErlcClient(interaction.guildId);
+    const client = await getERLCClient(interaction.guildId);
     if (!client) {
       return interaction.reply({
         content: 'ERLC is not configured for this server. Contact an admin.',
@@ -402,7 +402,7 @@ async function handleErlcLinkModal(interaction) {
 }
 
 module.exports = {
-  getErlcClient,
+  getERLCClient,
   verifyApiKey,
   checkSsuStatus,
   setErlcApiKey,

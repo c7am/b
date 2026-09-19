@@ -99,12 +99,12 @@ async function logInGameModeration(client, guildId, robloxModName, discordModId,
     }
 
     // Fetch Roblox avatar for the moderated player
-    const { getErlcClient } = require('./erlcHandler');
+    const { getERLCClient } = require('./erlcHandler');
     let playerAvatar = null;
     let playerId = null;
     
     try {
-      const erlcClient = await getErlcClient(guildId);
+      const erlcClient = await getERLCClient(guildId);
       if (erlcClient) {
         const profile = await erlcClient.getRobloxProfile(playerName);
         playerId = profile.id;
