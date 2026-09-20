@@ -33,9 +33,10 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    // Deprecation notice: suggest using the web dashboard
-    await interaction.deferReply({ ephemeral: true });
-    const deprecationCard = buildCard({
+    try {
+          // Deprecation notice: suggest using the web dashboard
+          await interaction.deferReply({ ephemeral: true });
+          const deprecationCard = buildCard({
       accentColor: COLORS.peach,
       heading: `${icon('info')} This command is being phased out`,
       lines: [
@@ -43,10 +44,10 @@ module.exports = {
         `\n**Access it here:**\nhttps://isrp-staff-bot.onrender.com/dashboard/${interaction.guildId}/loa`,
         '\nYou can still use this command, but the dashboard offers more features and a cleaner interface.',
       ],
-    });
-    await interaction.followUp({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
+          });
+          await interaction.followUp({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
 
-    if (!(await canManageStaff(interaction.member, interaction.guildId))) {
+          if (!(await canManageStaff(interaction.member, interaction.guildId))) {
       console.error(`[loa] ${interaction.user.tag} attempted LOA operation without permission`);
       const card = buildCard({
         accentColor: COLORS.red,
@@ -54,12 +55,12 @@ module.exports = {
         lines: ["You don't have permission to manage staff leave. This requires the **Staff Manage** role or the **Manage Roles** permission."],
       });
       return interaction.reply({ components: [card], ...V2, flags: V2.flags | MessageFlags.Ephemeral });
-    }
+          }
 
-    const subcommand = interaction.options.getSubcommand();
-    const guildId = interaction.guildId;
+          const subcommand = interaction.options.getSubcommand();
+          const guildId = interaction.guildId;
 
-    if (subcommand === 'start') {
+          if (subcommand === 'start') {
       const user = interaction.options.getUser('user', true);
       const reason = interaction.options.getString('reason', true);
       const until = interaction.options.getString('until', true);
@@ -142,7 +143,7 @@ module.exports = {
 
       await interaction.reply({ components: [card], ...V2 });
       console.log(`[loa] ${interaction.user.tag} started LOA for ${user.tag} until ${until}`);
-    } else if (subcommand === 'end') {
+          } else if (subcommand === 'end') {
       const user = interaction.options.getUser('user', true);
 
       const existing = await getActiveLoa(guildId, user.id);
@@ -181,7 +182,7 @@ module.exports = {
 
       await interaction.reply({ components: [card], ...V2 });
       console.log(`[loa] ${interaction.user.tag} ended LOA for ${user.tag}`);
-    } else if (subcommand === 'list') {
+          } else if (subcommand === 'list') {
       const allLoas = await getActiveLoas(guildId);
 
       if (!allLoas.length) {
@@ -208,6 +209,15 @@ module.exports = {
 
       await interaction.reply({ components: [card], ...V2, flags: V2.flags | MessageFlags.Ephemeral });
       console.log(`[loa] ${interaction.user.tag} listed ${allLoas.length} active LOAs`);
+          }
+    } catch (err) {
+      const error = createError(ErrorCodes.CMD_EXECUTION_FAILED, 'Failed to process loa', err);
+      await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'loa', guild_id: interaction.guildId }, interaction.client);
+      const reply = interaction.replied || interaction.deferred ? 'editReply' : 'reply';
+      await interaction[reply]({
+        content: `${icon('error')} ${error.message}`,
+        flags: MessageFlags.Ephemeral,
+      }).catch(() => {});
     }
   },
 };

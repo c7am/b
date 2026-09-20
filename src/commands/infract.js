@@ -24,8 +24,9 @@ module.exports = {
   },
 
   async execute(interaction) {
-    // Deprecation notice: suggest using the web dashboard
-    const deprecationCard = buildCard({
+    try {
+          // Deprecation notice: suggest using the web dashboard
+          const deprecationCard = buildCard({
       accentColor: COLORS.peach,
       heading: `${icon('info')} This command is being phased out`,
       lines: [
@@ -33,10 +34,10 @@ module.exports = {
         `\n**Access it here:**\nhttps://isrp-staff-bot.onrender.com/dashboard/${interaction.guildId}/staff`,
         '\nYou can continue using this command, but the dashboard offers a cleaner interface and history tracking.',
       ],
-    });
-    await interaction.reply({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
+          });
+          await interaction.reply({ components: [deprecationCard], ...V2, flags: MessageFlags.Ephemeral });
 
-    if (!(await canManageStaff(interaction.member, interaction.guildId))) {
+          if (!(await canManageStaff(interaction.member, interaction.guildId))) {
       console.error(`[infract] ${interaction.user.tag} attempted to infract without permission`);
       const card = buildCard({
         accentColor: COLORS.red,
@@ -44,10 +45,10 @@ module.exports = {
         lines: ["You don't have permission to issue infractions. This requires the **Staff Manage** role or the **Manage Roles** permission."],
       });
       return interaction.reply({ components: [card], ...V2, flags: V2.flags | MessageFlags.Ephemeral });
-    }
+          }
 
-    const types = await getInfractionTypes(interaction.guildId);
-    if (!types.length) {
+          const types = await getInfractionTypes(interaction.guildId);
+          if (!types.length) {
       console.error(`[infract] No infraction types configured in guild ${interaction.guildId}`);
       const card = buildCard({
         accentColor: COLORS.red,
@@ -55,11 +56,11 @@ module.exports = {
         lines: ["This server doesn't have any infraction types set up yet. Add one through **/config** before using this command."],
       });
       return interaction.reply({ components: [card], ...V2, flags: V2.flags | MessageFlags.Ephemeral });
-    }
+          }
 
-    const typeName = interaction.options.getString('type', true);
-    const type = types.find((t) => t.name.toLowerCase() === typeName.toLowerCase());
-    if (!type) {
+          const typeName = interaction.options.getString('type', true);
+          const type = types.find((t) => t.name.toLowerCase() === typeName.toLowerCase());
+          if (!type) {
       console.error(`[infract] Unknown type requested: "${typeName}"`);
       const card = buildCard({
         accentColor: COLORS.red,
@@ -67,17 +68,17 @@ module.exports = {
         lines: [`**"${typeName}"** isn't a configured infraction type.`, `\nAvailable types: ${types.map((t) => `**${t.name}**`).join(', ')}.`],
       });
       return interaction.reply({ components: [card], ...V2, flags: V2.flags | MessageFlags.Ephemeral });
-    }
+          }
 
-    const targetUser = interaction.options.getUser('user', true);
-    const reason = interaction.options.getString('reason', true);
+          const targetUser = interaction.options.getUser('user', true);
+          const reason = interaction.options.getString('reason', true);
 
-    const member = await interaction.guild.members.fetch(targetUser.id).catch((err) => {
+          const member = await interaction.guild.members.fetch(targetUser.id).catch((err) => {
       console.error(`[infract] Failed to fetch member ${targetUser.id}: ${err.message}`);
       return null;
-    });
+          });
 
-    if (!member) {
+          if (!member) {
       console.error(`[infract] Member not found in guild: ${targetUser.id}`);
       const card = buildCard({
         accentColor: COLORS.red,
@@ -85,21 +86,21 @@ module.exports = {
         lines: ["That user isn't a member of this server."],
       });
       return interaction.reply({ components: [card], ...V2, flags: V2.flags | MessageFlags.Ephemeral });
-    }
+          }
 
-    // Order matters: must await the insert before reading the sum back,
-    // or the SELECT can race the INSERT over the network and undercount.
-    await addInfraction({
+          // Order matters: must await the insert before reading the sum back,
+          // or the SELECT can race the INSERT over the network and undercount.
+          await addInfraction({
       guildId: interaction.guildId,
       userId: member.id,
       type: type.name,
       points: type.points,
       issuedBy: interaction.user.id,
       reason,
-    });
-    const totalPoints = await getInfractionPoints(interaction.guildId, member.id);
+          });
+          const totalPoints = await getInfractionPoints(interaction.guildId, member.id);
 
-    const card = buildCard({
+          const card = buildCard({
       accentColor: COLORS.red,
       heading: `${icon('infract')} Infraction Issued`,
       lines: [
@@ -109,21 +110,21 @@ module.exports = {
         `\nIssued by ${interaction.user}. This is logged and will show up in **/history**.`,
       ],
       thumbnailUrl: member.displayAvatarURL({ size: 256 }),
-    });
+          });
 
-    await interaction.reply({ components: [card], ...V2 });
-    console.log(`[infract] ${interaction.user.tag} issued ${type.name} to ${member.user.tag}, total now ${totalPoints}pts`);
+          await interaction.reply({ components: [card], ...V2 });
+          console.log(`[infract] ${interaction.user.tag} issued ${type.name} to ${member.user.tag}, total now ${totalPoints}pts`);
 
-    const logChannelId = await getScalar(interaction.guildId, 'logChannelId');
-    if (logChannelId && logChannelId !== interaction.channelId) {
+          const logChannelId = await getScalar(interaction.guildId, 'logChannelId');
+          if (logChannelId && logChannelId !== interaction.channelId) {
       const logChannel = await interaction.guild.channels.fetch(logChannelId).catch((err) => {
         console.error(`[infract] Failed to fetch log channel ${logChannelId}: ${err.message}`);
         return null;
       });
       if (logChannel?.isTextBased()) logChannel.send({ components: [card], ...V2 }).catch(() => {});
-    }
+          }
 
-    const dmCard = buildCard({
+          const dmCard = buildCard({
       accentColor: COLORS.red,
       heading: `${icon('infract')} You've Received an Infraction`,
       lines: [
@@ -132,14 +133,23 @@ module.exports = {
         `\n**Your total active points:** ${totalPoints}`,
         `\nIf you think this was issued in error, reach out to a member of staff to discuss it.`,
       ],
-    });
-    const dmed = await member.send({ components: [dmCard], ...V2 }).catch(() => null);
+          });
+          const dmed = await member.send({ components: [dmCard], ...V2 }).catch(() => null);
 
-    if (!dmed) {
+          if (!dmed) {
       await interaction.followUp({
         content: `${icon('warning')} Couldn't send a DM to **${member.user.username}**. Their DMs may be closed, so make sure they hear about this some other way.`,
         flags: MessageFlags.Ephemeral,
       });
+          }
+    } catch (err) {
+      const error = createError(ErrorCodes.CMD_EXECUTION_FAILED, 'Failed to process infract', err);
+      await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'infract', guild_id: interaction.guildId }, interaction.client);
+      const reply = interaction.replied || interaction.deferred ? 'editReply' : 'reply';
+      await interaction[reply]({
+        content: `${icon('error')} ${error.message}`,
+        flags: MessageFlags.Ephemeral,
+      }).catch(() => {});
     }
   },
 };
