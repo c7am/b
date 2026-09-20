@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionFlagsBits } =
 const db = require('../db/database');
 const erlcDb = require('../erlc/database');
 const { icon } = require('../config');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,22 +27,24 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
-    const guildConfig = await db.getGuildConfig(interaction.guildId);
-    const serverKey = guildConfig?.erlc_api_key;
-
-    if (!serverKey) {
-      return interaction.reply({
-        content: `${icon('error')} ERLC API key not configured.`,
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-
-    const actionFilter = interaction.options.getString('action');
-    const limit = interaction.options.getInteger('limit') || 25;
-
-    await interaction.deferReply();
-
     try {
+      const guildConfig = await db.getGuildConfig(interaction.guildId);
+      const serverKey = guildConfig?.erlc_api_key;
+
+      if (!serverKey) {
+        const error = createError(ErrorCodes.ERLC_CLIENT_INIT_FAILED, 'ERLC API key not set');
+        await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'audit-log', guild_id: interaction.guildId }, interaction.client);
+        return interaction.reply({
+          content: `${icon('error')} ${error.message} Set it in Dashboard > Settings > ERLC Configuration`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      const actionFilter = interaction.options.getString('action');
+      const limit = interaction.options.getInteger('limit') || 25;
+
+      await interaction.deferReply();
+
       const logs = await erlcDb.getAuditLog(interaction.guildId, actionFilter, limit);
 
       if (!logs.length) {
@@ -68,10 +71,17 @@ module.exports = {
 
       interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      console.error('[audit-log] error:', err);
-      interaction.editReply({
-        content: `${icon('error')} Failed to fetch audit log: ${err.message}`,
-      });
+      const error = createError(ErrorCodes.AUDIT_LOG_READ_FAILED, `Filter: ${interaction.options.getString('action') || 'none'}, Limit: ${interaction.options.getInteger('limit') || 25}`, err);
+      await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'audit-log', guild_id: interaction.guildId }, interaction.client);
+      
+      const isDeferred = interaction.deferred;
+      const reply = { content: `${icon('error')} ${error.message}`, flags: MessageFlags.Ephemeral };
+      
+      if (isDeferred) {
+        await interaction.editReply(reply);
+      } else {
+        await interaction.reply(reply);
+      }
     }
   },
 };

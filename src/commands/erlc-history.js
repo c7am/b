@@ -3,6 +3,7 @@ const db = require('../db/database');
 const erlcDb = require('../erlc/database');
 const { ERLCClient } = require('../erlc/client');
 const { icon } = require('../config');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -12,28 +13,41 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
-    const playerName = interaction.options.getString('player');
-
-    const guildConfig = await db.getGuildConfig(interaction.guildId);
-    const serverKey = guildConfig?.erlc_api_key;
-
-    if (!serverKey) {
-      return interaction.reply({
-        content: `${icon('error')} ERLC API key not configured.`,
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-
-    await interaction.deferReply();
-
     try {
+      const playerName = interaction.options.getString('player');
+
+      if (!playerName || playerName.trim().length === 0) {
+        const error = createError(ErrorCodes.CMD_INVALID_ARGS, 'Player name is required');
+        await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'infraction-history', guild_id: interaction.guildId }, interaction.client);
+        return interaction.reply({
+          content: `${icon('error')} ${error.message}`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      const guildConfig = await db.getGuildConfig(interaction.guildId);
+      const serverKey = guildConfig?.erlc_api_key;
+
+      if (!serverKey) {
+        const error = createError(ErrorCodes.ERLC_CLIENT_INIT_FAILED, 'ERLC API key not set');
+        await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'infraction-history', guild_id: interaction.guildId }, interaction.client);
+        return interaction.reply({
+          content: `${icon('error')} ${error.message} Set it in Dashboard > Settings > ERLC Configuration`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      await interaction.deferReply();
+
       const client = new ERLCClient(serverKey);
       const players = await client.getPlayers();
       const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase() || p.id.toString() === playerName);
 
       if (!player) {
+        const error = createError(ErrorCodes.ERLC_PLAYER_NOT_FOUND, `Player: ${playerName}`);
+        await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'infraction-history', guild_id: interaction.guildId }, interaction.client);
         return interaction.editReply({
-          content: `${icon('error')} Player "${playerName}" not found.`,
+          content: `${icon('error')} ${error.message}`,
         });
       }
 
@@ -61,10 +75,17 @@ module.exports = {
 
       interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      console.error('[infraction-history] error:', err);
-      interaction.editReply({
-        content: `${icon('error')} Failed to fetch infractions: ${err.message}`,
-      });
+      const error = createError(ErrorCodes.INFRACT_HISTORY_EMPTY, `Player: ${interaction.options.getString('player')}`, err);
+      await logErrorToDiscord(error, { user_id: interaction.user.id, command: 'infraction-history', guild_id: interaction.guildId }, interaction.client);
+      
+      const isDeferred = interaction.deferred;
+      const reply = { content: `${icon('error')} ${error.message}`, flags: MessageFlags.Ephemeral };
+      
+      if (isDeferred) {
+        await interaction.editReply(reply);
+      } else {
+        await interaction.reply(reply);
+      }
     }
   },
 };
