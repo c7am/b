@@ -215,12 +215,27 @@ function formatStackTrace(stack) {
  * @param {Error} error - Error object with code property
  * @param {Object} context - { guild_id?, user_id?, command?, endpoint? }
  * @param {Object} client - Discord client for sending message
+ * @param {Object} guildConfig - Guild config object (optional, will try to fetch if missing)
  */
-async function logErrorToDiscord(error, context = {}, client) {
+async function logErrorToDiscord(error, context = {}, client, guildConfig) {
   const { guild_id, user_id, command, endpoint } = context;
 
-  const logChannel = process.env.DISCORD_LOG_CHANNEL_ID;
-  if (!logChannel || !client) {
+  // Fallback: if no guildConfig provided but we have a guild_id, try to fetch it
+  if (!guildConfig && guild_id && client) {
+    try {
+      const { getScalar } = require('./guildConfig');
+      const logChannelId = await getScalar(guild_id, 'logChannelId');
+      if (logChannelId) {
+        guildConfig = { logChannelId };
+      }
+    } catch (err) {
+      // Silently fail, will log to console instead
+    }
+  }
+
+  const logChannelId = guildConfig?.logChannelId || process.env.DISCORD_LOG_CHANNEL_ID;
+
+  if (!logChannelId || !client) {
     console.error(`[ERROR ${error.code}]`, {
       message: error.message,
       details: error.details,
@@ -231,7 +246,7 @@ async function logErrorToDiscord(error, context = {}, client) {
   }
 
   try {
-    const channel = await client.channels.fetch(logChannel);
+    const channel = await client.channels.fetch(logChannelId);
     if (!channel) return;
 
     const icon = getErrorIcon(error.code);
