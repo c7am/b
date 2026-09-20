@@ -216,6 +216,23 @@
   --space-6: 48px;
 }
 
+/* ---- Geometric Shapes (M3 Expressive). CSS-rendered shapes ---- */
+.shape-circle {
+  border-radius: 50%;
+}
+
+.shape-pill {
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+.shape-square {
+  border-radius: var(--md-sys-shape-corner-none);
+}
+
+.shape-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -602,7 +619,7 @@ select {
 .guild-icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--md-sys-shape-corner-full);
+  border-radius: 50%; /* M3 Expressive: shape-circle */
   flex-shrink: 0;
 }
 
@@ -800,7 +817,7 @@ select {
   align-items: center;
   gap: 4px;
   padding: 4px 12px;
-  border-radius: var(--md-sys-shape-corner-full);
+  border-radius: var(--md-sys-shape-corner-full); /* M3 Expressive: shape-pill */
   font-size: var(--md-sys-typescale-label-small-size);
   font-weight: 500;
 }
@@ -893,7 +910,7 @@ select {
 .user-avatar {
   width: 56px;
   height: 56px;
-  border-radius: var(--md-sys-shape-corner-full);
+  border-radius: 50%; /* M3 Expressive: shape-circle */
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-secondary-container);
   display: flex;
@@ -3564,7 +3581,7 @@ main.with-rail {
 .list-item-avatar {
   width: 40px;
   height: 40px;
-  border-radius: var(--md-sys-shape-corner-full);
+  border-radius: 50%; /* M3 Expressive: shape-circle */
   object-fit: cover;
   margin-right: var(--space-3);
   flex-shrink: 0;
@@ -3600,7 +3617,7 @@ main.with-rail {
 .list-item-trailing-badge {
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
-  border-radius: var(--md-sys-shape-corner-full);
+  border-radius: var(--md-sys-shape-corner-full); /* M3 Expressive: shape-pill */
   padding: 2px 8px;
   font-size: 12px;
   font-weight: 600;
