@@ -4,6 +4,7 @@ const { getInfractionTypes, getScalar } = require('../utils/guildConfig');
 const { canManageStaff } = require('../utils/permissions');
 const { buildCard, V2 } = require('../utils/components');
 const { addInfraction, getInfractionPoints } = require('../db/database');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
 
 module.exports = {
   data: new SlashCommandBuilder()

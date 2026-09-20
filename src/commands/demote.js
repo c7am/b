@@ -4,6 +4,7 @@ const { getRanks, getScalar } = require('../utils/guildConfig');
 const { canManageStaff } = require('../utils/permissions');
 const { buildCard, V2 } = require('../utils/components');
 const { addPromotion } = require('../db/database');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
 
 function currentRank(member, ranks) {
   if (!ranks.length) return null;

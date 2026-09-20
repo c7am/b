@@ -11,6 +11,7 @@ const {
 const { COLORS, icon, iconEmoji } = require('../config');
 const { buildCard, V2 } = require('../utils/components');
 const { getScalar } = require('../utils/guildConfig');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
 
 const activeVotes = new Map();
 
