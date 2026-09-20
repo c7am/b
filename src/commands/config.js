@@ -3,6 +3,8 @@ const {
   PermissionFlagsBits,
   MessageFlags,
 } = require('discord.js');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
+const { icon } = require('../config');
 
 module.exports = {
   data: new SlashCommandBuilder()

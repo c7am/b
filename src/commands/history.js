@@ -3,6 +3,7 @@ const { COLORS, icon } = require('../config');
 const { canManageStaff } = require('../utils/permissions');
 const { buildCard, V2 } = require('../utils/components');
 const { getUserHistory, getInfractionPoints } = require('../db/database');
+const { createError, logErrorToDiscord, ErrorCodes } = require('../utils/errorCodes');
 
 module.exports = {
   data: new SlashCommandBuilder()

@@ -172,7 +172,46 @@ function createError(code, details, originalError) {
 }
 
 /**
- * Log error to Discord audit channel + console
+ * Get icon emoji for error category
+ */
+function getErrorIcon(code) {
+  if (code.startsWith('AUTH_')) return '🔐';
+  if (code.startsWith('ERLC_')) return '🎮';
+  if (code.startsWith('DB_')) return '💾';
+  if (code.startsWith('CMD_')) return '⚡';
+  if (code.startsWith('LINK_')) return '🔗';
+  if (code.startsWith('INFRACT_')) return '⚠️';
+  if (code.startsWith('SHIFT_')) return '⏱️';
+  if (code.startsWith('API_')) return '🌐';
+  if (code.startsWith('UI_')) return '🎨';
+  if (code.startsWith('MOD_')) return '🛡️';
+  if (code.startsWith('SYNC_')) return '🔄';
+  if (code.startsWith('AUDIT_')) return '📋';
+  return '❌';
+}
+
+/**
+ * Get color for error severity
+ */
+function getErrorColor(code) {
+  if (code.includes('FAILED') || code.includes('TIMEOUT')) return 0xFF6B6B; // Red
+  if (code.includes('INVALID') || code.includes('MISSING')) return 0xFFD93D; // Yellow
+  if (code.includes('DENIED') || code.includes('UNAUTHORIZED')) return 0xEE5A6F; // Dark Red
+  if (code.includes('RATE_LIMIT')) return 0xFF9800; // Orange
+  return 0xFF6B6B; // Default Red
+}
+
+/**
+ * Format stack trace for Discord embed
+ */
+function formatStackTrace(stack) {
+  if (!stack) return null;
+  const lines = stack.split('\n').slice(0, 5);
+  return `\`\`\`js\n${lines.join('\n')}\`\`\``;
+}
+
+/**
+ * Log error to Discord audit channel + console with enhanced formatting
  * @param {Error} error - Error object with code property
  * @param {Object} context - { guild_id?, user_id?, command?, endpoint? }
  * @param {Object} client - Discord client for sending message
@@ -195,27 +234,51 @@ async function logErrorToDiscord(error, context = {}, client) {
     const channel = await client.channels.fetch(logChannel);
     if (!channel) return;
 
+    const icon = getErrorIcon(error.code);
+    const color = getErrorColor(error.code);
+    const [module, category] = error.code.split('_').slice(0, 2);
+
+    // Build description with markdown
+    let description = `\`${error.code}\`\n\n`;
+    description += `**${error.message}**`;
+    if (error.details) {
+      description += `\n\n> ${error.details}`;
+    }
+
     const embed = {
-      color: 0xFF6B6B, // Red
-      title: `Error: ${error.code}`,
-      description: error.message,
+      color,
+      title: `${icon} ${module} › ${category}`,
+      description,
       fields: [],
       timestamp: error.timestamp,
-      footer: { text: 'Axiom Error Logger' },
+      footer: { text: 'Axiom Error Monitor' },
     };
 
-    if (user_id) embed.fields.push({ name: 'User ID', value: user_id, inline: true });
-    if (guild_id) embed.fields.push({ name: 'Guild ID', value: guild_id, inline: true });
-    if (command) embed.fields.push({ name: 'Command', value: command, inline: true });
-    if (endpoint) embed.fields.push({ name: 'Endpoint', value: endpoint, inline: true });
-    if (error.details) embed.fields.push({ name: 'Details', value: error.details.slice(0, 1024), inline: false });
+    // Context fields
+    const contextFields = [];
+    if (command) contextFields.push(`**Cmd:** \`${command}\``);
+    if (user_id) contextFields.push(`**User:** \`${user_id}\``);
+    if (guild_id) contextFields.push(`**Guild:** \`${guild_id}\``);
+    if (endpoint) contextFields.push(`**API:** \`${endpoint}\``);
 
-    if (error.originalError?.stack) {
+    if (contextFields.length > 0) {
       embed.fields.push({
-        name: 'Stack Trace',
-        value: `\`\`\`${error.originalError.stack.slice(0, 500)}...\`\`\``,
+        name: '📍 Context',
+        value: contextFields.join(' • '),
         inline: false,
       });
+    }
+
+    // Stack trace if available
+    if (error.originalError?.stack) {
+      const stackStr = formatStackTrace(error.originalError.stack);
+      if (stackStr) {
+        embed.fields.push({
+          name: '⚙️ Stack Trace',
+          value: stackStr,
+          inline: false,
+        });
+      }
     }
 
     await channel.send({ embeds: [embed] });
