@@ -385,6 +385,117 @@ window.SHAPES = {
       L 50 50 Z
     `,
     viewBox: '0 0 100 100'
+  },
+
+  // M3 Expressive expansion pack
+  blob: {
+    name: 'Blob (Organic)',
+    path: `
+      M 50 10
+      Q 70 5 80 20
+      Q 90 35 85 50
+      Q 95 65 75 80
+      Q 55 95 40 90
+      Q 20 85 15 70
+      Q 5 50 20 35
+      Q 10 20 30 15
+      Q 40 5 50 10 Z
+    `,
+    viewBox: '0 0 100 100'
+  },
+
+  teardrop: {
+    name: 'Teardrop',
+    path: `
+      M 50 15
+      Q 70 15 80 30
+      Q 85 45 75 65
+      Q 50 90 50 90
+      Q 50 90 25 65
+      Q 15 45 20 30
+      Q 30 15 50 15 Z
+    `,
+    viewBox: '0 0 100 100'
+  },
+
+  starFive: {
+    name: 'Star (5-pointed)',
+    path: `
+      M 50 10
+      L 61 40
+      L 95 40
+      L 68 60
+      L 79 90
+      L 50 70
+      L 21 90
+      L 32 60
+      L 5 40
+      L 39 40
+      Z
+    `,
+    viewBox: '0 0 100 100'
+  },
+
+  roundedRect: {
+    name: 'Rounded Rectangle',
+    path: `
+      M 25 20
+      L 75 20
+      Q 85 20 85 30
+      L 85 70
+      Q 85 80 75 80
+      L 25 80
+      Q 15 80 15 70
+      L 15 30
+      Q 15 20 25 20 Z
+    `,
+    viewBox: '0 0 100 100'
+  },
+
+  oval: {
+    name: 'Oval (Ellipse)',
+    path: `
+      M 50 15
+      Q 75 15 80 50
+      Q 75 85 50 85
+      Q 25 85 20 50
+      Q 25 15 50 15 Z
+    `,
+    viewBox: '0 0 100 100'
+  },
+
+  wave: {
+    name: 'Wave',
+    path: `
+      M 20 50
+      Q 30 35 40 50
+      Q 50 65 60 50
+      Q 70 35 80 50
+      L 80 85
+      Q 80 90 75 90
+      L 25 90
+      Q 20 90 20 85
+      Z
+    `,
+    viewBox: '0 0 100 100'
+  },
+
+  zigzag: {
+    name: 'Zigzag (Angular)',
+    path: `
+      M 20 20
+      L 40 40
+      L 20 60
+      L 40 80
+      L 60 60
+      L 80 80
+      L 80 20
+      L 60 40
+      L 80 60
+      L 60 20
+      Z
+    `,
+    viewBox: '0 0 100 100'
   }
 };
 
