@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Events } = require('discord.js');
 const { initDatabase } = require('./db/database');
 
 const TOKEN = process.env.DISCORD_TOKEN;
@@ -56,24 +56,25 @@ for (const file of eventFiles) {
   }
 }
 
-// Schema must exist before login: the ready event fires almost immediately
-// after a successful gateway handshake, and command execution or the web
-// dashboard could plausibly touch the database before a fire-and-forget
-// initDatabase() call would have finished.
+// Schema must exist before login
 async function main() {
   await initDatabase();
   
-  // Start web server BEFORE bot login so port is bound immediately
-  // This way Render's health check doesn't timeout waiting for port
+  // Set up ready listener BEFORE login
   const { startWebServer } = require('./web/server');
-  const webServer = startWebServer(client);
+  let webServer = null;
   
-  if (!webServer) {
-    console.warn('[web] Dashboard disabled (missing env vars), but bot will still run');
-  }
+  client.once(Events.ClientReady, () => {
+    // Now that bot is connected, guild cache is populated
+    // Start web server on first ready event
+    if (!webServer) {
+      webServer = startWebServer(client);
+      if (webServer) {
+        console.log('[boot] web server started after bot ready');
+      }
+    }
+  });
   
-  // Command registration with Discord happens in src/events/ready.js,
-  // alongside every other startup-time event handler, not here.
   await client.login(TOKEN);
 }
 
