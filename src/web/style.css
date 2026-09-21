@@ -5979,7 +5979,14 @@ pre code {
   align-items: center;
   justify-content: center;
   color: var(--md-sys-color-primary);
-  opacity: 0.12;
+  opacity: 0.25;
+  filter: drop-shadow(0 0 8px rgba(216, 186, 250, 0.4));
+  animation: shape-glow 4s ease-in-out infinite;
+}
+
+.shape-header-accent svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* ---- Glassmorphism Base ---- */
