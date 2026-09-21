@@ -1,12 +1,11 @@
 /**
  * Material Design 3 Expressive Geometric Shapes
- * SVG path definitions and morphing utilities
+ * SVG path definitions for dashboard visualization
  * Reference: m3.material.io/styles/shape/overview-expressive
  */
 
-// SVG path definitions for M3 Expressive shapes
-// All paths are normalized to a 100x100 viewBox for consistent morphing
-const SHAPES = {
+// SVG path definitions for M3 Expressive shapes (100x100 viewBox)
+window.SHAPES = {
   // Basic geometric shapes
   circle: {
     name: 'Circle',
@@ -395,8 +394,8 @@ const SHAPES = {
  * @param {object} options - { size, className, id, style }
  * @returns {string} SVG HTML string
  */
-function generateShapeSVG(shapeKey, options = {}) {
-  const shape = SHAPES[shapeKey];
+window.generateShapeSVG = function(shapeKey, options = {}) {
+  const shape = window.SHAPES[shapeKey];
   if (!shape) return '';
 
   const {
@@ -427,16 +426,16 @@ function generateShapeSVG(shapeKey, options = {}) {
       />
     </svg>
   `;
-}
+};
 
 /**
- * Create a morphing shape element (for GSAP integration)
+ * Create a morphing shape element
  * @param {string} fromShape - Starting shape key
  * @param {string} toShape - Ending shape key
  * @param {object} options - { duration, ease, repeat, yoyo }
- * @returns {object} { svg, morph, fromPath, toPath }
+ * @returns {object} Animation config
  */
-function createMorphingShape(fromShape, toShape, options = {}) {
+window.createMorphingShape = function(fromShape, toShape, options = {}) {
   const {
     duration = 1,
     ease = 'power1.inOut',
@@ -445,52 +444,31 @@ function createMorphingShape(fromShape, toShape, options = {}) {
     size = 100
   } = options;
 
-  const fromShapeObj = SHAPES[fromShape];
-  const toShapeObj = SHAPES[toShape];
+  const fromShapeObj = window.SHAPES[fromShape];
+  const toShapeObj = window.SHAPES[toShape];
 
   if (!fromShapeObj || !toShapeObj) {
-    console.warn('Invalid shape keys for morphing:', fromShape, toShape);
+    console.warn('Invalid shape keys:', fromShape, toShape);
     return null;
   }
 
-  const svg = generateShapeSVG(fromShape, { size });
-  const pathElement = null; // Will be queried after DOM insertion
-
   return {
-    svg,
     fromPath: fromShapeObj.path,
     toPath: toShapeObj.path,
     duration,
     ease,
     repeat,
-    yoyo,
-    animate: function(container) {
-      // For use with GSAP after DOM insertion
-      const path = container.querySelector('path');
-      if (!path) return null;
-
-      // Note: GSAP morphing requires gsap/Draggable or svg-morph plugin
-      // For now, return animation config for manual implementation
-      return {
-        target: path,
-        from: this.fromPath,
-        to: this.toPath,
-        duration: this.duration,
-        ease: this.ease
-      };
-    }
+    yoyo
   };
-}
+};
 
 /**
- * Get all available shapes
- * @returns {array} List of shape keys and names
+ * List available shapes
+ * @returns {array} Shape list
  */
-function listShapes() {
-  return Object.entries(SHAPES).map(([key, shape]) => ({
+window.listShapes = function() {
+  return Object.entries(window.SHAPES).map(([key, shape]) => ({
     key,
     name: shape.name
   }));
-}
-
-export { SHAPES, generateShapeSVG, createMorphingShape, listShapes };
+};

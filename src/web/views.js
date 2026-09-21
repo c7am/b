@@ -52,6 +52,7 @@ function layout({ title, body, showNav = true }) {
   <title>${escapeHtml(title)} - Axiom</title>
   <link rel="stylesheet" href="/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="/shapes.js"></script>
 </head>
 <body>
   <div class="page-wrapper">
@@ -67,33 +68,32 @@ function layout({ title, body, showNav = true }) {
       <div class="site-footer-copy">Axiom</div>
     </footer>
   </div>
-  <script type="module">
-    import { SHAPES, generateShapeSVG } from './shapes.js';
-    
-    // Auto-initialize dashboard shape morphing
-    const shapeElement = document.getElementById('dashboard-shape');
-    if (shapeElement) {
-      const morphPair = shapeElement.dataset.morph || 'circle,flower';
-      const [fromShape, toShape] = morphPair.split(',').map(s => s.trim());
-      
-      const svgHtml = generateShapeSVG(fromShape, {
-        size: 64,
-        className: 'shape-morph',
-        id: 'dashboard-shape-svg'
-      });
-      shapeElement.innerHTML = svgHtml;
-      
-      const path = shapeElement.querySelector('path');
-      if (path && typeof gsap !== 'undefined' && SHAPES[toShape]) {
-        gsap.to(path, {
-          attr: { d: SHAPES[toShape].path },
-          duration: 3,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true
+  <script>
+    // Initialize shape morphing on dashboard
+    window.addEventListener('DOMContentLoaded', function() {
+      const shapeElement = document.getElementById('dashboard-shape');
+      if (shapeElement && window.SHAPES && window.generateShapeSVG && typeof gsap !== 'undefined') {
+        const morphPair = shapeElement.dataset.morph || 'circle,flower';
+        const [fromShape, toShape] = morphPair.split(',').map(s => s.trim());
+        
+        const svgHtml = window.generateShapeSVG(fromShape, {
+          size: 64,
+          className: 'shape-morph'
         });
+        shapeElement.innerHTML = svgHtml;
+        
+        const path = shapeElement.querySelector('path');
+        if (path && window.SHAPES[toShape]) {
+          gsap.to(path, {
+            attr: { d: window.SHAPES[toShape].path },
+            duration: 3,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true
+          });
+        }
       }
-    }
+    });
   </script>
 </body>
 </html>`;
@@ -749,27 +749,46 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
 <div class="page stack">
   ${loaSection}
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2);margin-bottom:var(--space-4)">
-    <div class="card card-elevated" style="display:flex;gap:var(--space-2);align-items:center">
-      <div style="background:var(--md-sys-color-success-container);color:var(--md-sys-color-success);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('checkCircle')}</div>
-      <div>
-        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;class="text-bold"">Active</div>
-        <div class="headline-medium">${activeShifts.length}</div>
+<div class="glass-grid">
+    <div class="stat-glass-card">
+      <div class="stat-glass-shape">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z" fill="currentColor" />
+        </svg>
       </div>
+      <div class="stat-glass-label">Active</div>
+      <div class="stat-glass-value">${activeShifts.length}</div>
+      <div class="stat-glass-unit">shifts</div>
     </div>
-    <div class="card card-elevated" style="display:flex;gap:var(--space-2);align-items:center">
-      <div style="background:var(--md-sys-color-secondary-container);color:var(--md-sys-color-secondary);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('clock')}</div>
-      <div>
-        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;class="text-bold"">Upcoming</div>
-        <div class="headline-medium">${upcomingShifts.length}</div>
+    <div class="stat-glass-card">
+      <div class="stat-glass-shape">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 50 15 Q 60 20 65 10 Q 75 25 75 35 Q 80 45 90 45 Q 75 50 75 65 Q 75 75 65 90 Q 60 80 50 85 Q 40 80 35 90 Q 25 75 25 65 Q 20 50 10 45 Q 25 45 25 35 Q 25 25 35 10 Q 40 20 50 15 Z" fill="currentColor" />
+        </svg>
       </div>
+      <div class="stat-glass-label">Upcoming</div>
+      <div class="stat-glass-value">${upcomingShifts.length}</div>
+      <div class="stat-glass-unit">shifts</div>
     </div>
-    <div class="card card-elevated" style="display:flex;gap:var(--space-2);align-items:center">
-      <div style="background:var(--md-sys-color-primary-container);color:var(--md-sys-color-primary);width:48px;height:48px;border-radius:var(--md-sys-shape-corner-medium);display:flex;align-items:center;justify-content:center;flex-shrink:0">${icon('check')}</div>
-      <div>
-        <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;class="text-bold"">Completed</div>
-        <div class="headline-medium">${completedShifts.length}</div>
+    <div class="stat-glass-card">
+      <div class="stat-glass-shape">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 50 10 L 57 40 L 90 10 L 60 50 L 90 90 L 57 60 L 50 90 L 43 60 L 10 90 L 40 50 L 10 10 L 43 40 Z" fill="currentColor" />
+        </svg>
       </div>
+      <div class="stat-glass-label">Completed</div>
+      <div class="stat-glass-value">${completedShifts.length}</div>
+      <div class="stat-glass-unit">shifts</div>
+    </div>
+    <div class="stat-glass-card">
+      <div class="stat-glass-shape">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 50 85 L 20 60 Q 10 50 10 40 Q 10 25 25 25 Q 35 25 50 40 Q 65 25 75 25 Q 90 25 90 40 Q 90 50 80 60 L 50 85 Z" fill="currentColor" />
+        </svg>
+      </div>
+      <div class="stat-glass-label">Moderations</div>
+      <div class="stat-glass-value">--</div>
+      <div class="stat-glass-unit">actions</div>
     </div>
   </div>
 

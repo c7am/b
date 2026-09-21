@@ -5916,3 +5916,104 @@ pre code {
   color: var(--md-sys-color-primary);
   opacity: 0.12;
 }
+
+/* ---- Glassmorphism Base ---- */
+.glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* ---- Gradient Background ---- */
+body {
+  background: linear-gradient(135deg, var(--md-sys-color-surface-dim) 0%, var(--md-sys-color-surface) 50%, var(--md-sys-color-surface-bright) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* ---- Stat Card with Glass + Shape ---- */
+.stat-glass-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  min-height: 140px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: all 200ms ease-out;
+}
+
+.stat-glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+}
+
+.stat-glass-shape {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-glass-shape svg {
+  width: 100%;
+  height: 100%;
+  color: var(--md-sys-color-primary);
+  opacity: 0.8;
+}
+
+.stat-glass-label {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.stat-glass-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  line-height: 1;
+}
+
+.stat-glass-unit {
+  font-size: var(--md-sys-typescale-label-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ---- Glass Container Grid ---- */
+.glass-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .glass-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---- Section with Glass Accent ---- */
+.section.glass-section {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: var(--space-4);
+}
