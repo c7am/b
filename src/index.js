@@ -63,14 +63,23 @@ async function main() {
   // Set up ready listener BEFORE login
   const { startWebServer } = require('./web/server');
   let webServer = null;
+  let webServerError = null;
   
   client.once(Events.ClientReady, () => {
     // Now that bot is connected, guild cache is populated
     // Start web server on first ready event
     if (!webServer) {
-      webServer = startWebServer(client);
-      if (webServer) {
-        console.log('[boot] web server started after bot ready');
+      try {
+        webServer = startWebServer(client);
+        if (webServer) {
+          console.log('[boot] web server started after bot ready');
+        } else {
+          console.warn('[boot] web server returned null - missing env vars?');
+        }
+      } catch (err) {
+        webServerError = err;
+        console.error('[boot] web server startup failed:', err.message);
+        console.warn('[boot] bot continuing without dashboard');
       }
     }
   });
