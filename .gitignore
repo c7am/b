@@ -3,3 +3,7 @@ data/
 .env
 *.log
 .DS_Store
+src/generated/icons.json
+assets/icons-raw/
+assets/icons-png/
+
