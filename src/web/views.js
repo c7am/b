@@ -676,19 +676,26 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
       </button>
     </form>` : '';
 
-  const loaSection = activeLoa ? `
-    <div class="info-card" style="border-left:4px solid var(--md-sys-color-primary);background:var(--md-sys-color-primary-container);opacity:0.95">
+  const loaSection = activeLoa ? (() => {
+    const loaEnd = new Date(activeLoa.ends_at);
+    const daysRemaining = Math.ceil((loaEnd - now) / (1000 * 60 * 60 * 24));
+    return `
+    <div class="info-card" style="border-left:4px solid var(--md-sys-color-error);background:var(--md-sys-color-error-container);opacity:0.95">
       <div style="display:flex;gap:var(--space-2);align-items:flex-start">
         ${icon('alertCircle')}
-        <div>
-          <div class="info-card-title">You're On Leave</div>
-          <div class="body-small" style="color:var(--md-sys-color-on-primary-container);margin-top:var(--space-1)">
-            Until ${formatDate(activeLoa.ends_at)}
-            <div style="margin-top:var(--space-2)"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text btn-standard" style="gap:var(--space-1);class="text-bold"">Manage Leave</a></div>
+        <div style="flex:1">
+          <div class="info-card-title">On Leave of Absence</div>
+          <div class="body-medium" style="color:var(--md-sys-color-on-error-container);margin-top:var(--space-2);font-weight:600">
+            ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining
+          </div>
+          <div class="body-small" style="color:var(--md-sys-color-on-error-container);margin-top:var(--space-1)">
+            Returns: ${formatDate(activeLoa.ends_at)}
+            <div style="margin-top:var(--space-2)"><a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-text" style="gap:var(--space-1)">Manage Leave</a></div>
           </div>
         </div>
       </div>
-    </div>` : '';
+    </div>`;
+  })() : '';
 
   const shiftsHtml = shifts.length === 0 ? `
     <div style="text-align:center;padding:var(--space-5);color:var(--md-sys-color-on-surface-variant)">
