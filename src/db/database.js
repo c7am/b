@@ -441,6 +441,28 @@ async function getUserShifts(userId, guildId) {
   return res.rows;
 }
 
+// Calculate total shift hours for this week (Mon-Sun UTC)
+async function getUserWeeklyHours(userId, guildId) {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setUTCDate(now.getUTCDate() - now.getUTCDay()); // Monday
+  startOfWeek.setUTCHours(0, 0, 0, 0);
+  
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 7);
+  
+  const res = await pool.query(
+    `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (s.ends_at - s.starts_at))/3600), 0) AS total_hours
+     FROM shifts s
+     INNER JOIN shift_members sm ON s.id = sm.shift_id
+     WHERE sm.user_id = $1 AND s.guild_id = $2 AND s.active = true
+     AND s.starts_at >= $3 AND s.starts_at < $4`,
+    [userId, guildId, startOfWeek.toISOString(), endOfWeek.toISOString()]
+  );
+  
+  return parseFloat(res.rows[0].total_hours) || 0;
+}
+
 async function checkInShift(shiftId, userId) {
   const res = await pool.query(
     `UPDATE shift_members SET checked_in = true, checked_in_at = now() 
@@ -802,6 +824,7 @@ module.exports = {
   getInfractionPoints,
   getInfractionCount,
   getUserHistory,
+  getUserWeeklyHours,
   getSetting,
   setSetting,
   deleteSetting,

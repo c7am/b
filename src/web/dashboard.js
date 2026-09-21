@@ -60,6 +60,7 @@ const {
   addCustomViolation,
   matchViolation,
   getInfractionCount,
+  getUserWeeklyHours,
 } = require('../db/database');
 const { canManageStaff } = require('../utils/permissions');
 
@@ -189,10 +190,11 @@ function buildDashboardRouter(client) {
     const guild = req.guild;
     const userId = req.session.user.id;
     
-    const [shifts, activeLoa, moderationCount] = await Promise.all([
+    const [shifts, activeLoa, moderationCount, weeklyHours] = await Promise.all([
       getUserShifts(userId, guild.id),
       getActiveLoa(guild.id, userId),
       getInfractionCount(guild.id, userId),
+      getUserWeeklyHours(userId, guild.id),
     ]);
 
     res.send(staffDashboard({
@@ -201,6 +203,7 @@ function buildDashboardRouter(client) {
       shifts,
       activeLoa,
       moderationCount,
+      weeklyHours,
       isAdmin: req.isAdmin,
       trueAdmin: req.trueAdmin,
       viewingAsStaff: req.viewingAsStaff,

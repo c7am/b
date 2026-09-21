@@ -585,7 +585,7 @@ function guildListPage({ guilds, username }) {
 }
 
 // ============= Staff Dashboard (Main Page) =============
-function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, isAdmin, trueAdmin, viewingAsStaff, guildId }) {
+function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weeklyHours, isAdmin, trueAdmin, viewingAsStaff, guildId }) {
   const now = new Date();
   const activeShifts = shifts.filter(s => new Date(s.starts_at) <= now && new Date(s.ends_at) > now);
   const upcomingShifts = shifts.filter(s => new Date(s.starts_at) > now);
@@ -789,6 +789,16 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, isAdm
       <div class="stat-glass-label">Moderations</div>
       <div class="stat-glass-value">${moderationCount || 0}</div>
       <div class="stat-glass-unit">actions</div>
+    </div>
+    <div class="stat-glass-card">
+      <div class="stat-glass-shape">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 50 20 L 80 80 L 20 80 Z" fill="currentColor" />
+        </svg>
+      </div>
+      <div class="stat-glass-label">This Week</div>
+      <div class="stat-glass-value">${(weeklyHours || 0).toFixed(1)}</div>
+      <div class="stat-glass-unit">hours</div>
     </div>
   </div>
 
