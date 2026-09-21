@@ -641,18 +641,22 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
 
     let status = 'Completed';
     let statusClass = 'badge-secondary';
+    let statusShape = 'semicircle';
     if (isActive) {
       status = 'Active';
       statusClass = 'badge-success';
+      statusShape = 'circle';
     } else if (start > now) {
       status = 'Upcoming';
       statusClass = 'badge-info';
+      statusShape = 'pill';
     }
 
     return `
-      <div class="card card-elevated" style="padding:var(--space-3);display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div class="body-large" style="class="text-bold"">${escapeHtml(s.name)}</div>
+      <div class="card card-elevated" style="padding:var(--space-3);display:flex;justify-content:space-between;align-items:flex-start;position:relative;border-left:3px solid var(--md-sys-color-primary);overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;opacity:0.08;width:80px;height:80px;pointer-events:none" class="shift-card-shape" data-shape="${statusShape}"></div>
+        <div style="position:relative;z-index:1">
+          <div class="body-large" style="font-weight:500">${escapeHtml(s.name)}</div>
           <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">
             ${startStr} to ${endStr}
           </div>
@@ -660,7 +664,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
             ${durationHours}h ${durationMins}m
           </div>
         </div>
-        <div style="display:flex;gap:var(--space-2);align-items:center">
+        <div style="display:flex;gap:var(--space-2);align-items:center;position:relative;z-index:1">
           <span class="badge ${statusClass}">${status}</span>
           <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text btn-standard" style="gap:var(--space-1);padding:var(--space-1) var(--space-2)">
             ${icon('chevronRight')}
@@ -699,10 +703,20 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
 
   const shiftsHtml = shifts.length === 0 ? `
     <div style="text-align:center;padding:var(--space-5);color:var(--md-sys-color-on-surface-variant)">
-      <div style="width:48px;height:48px;margin:0 auto var(--space-2);opacity:0.5">${icon('clock')}</div>
+      <div style="width:80px;height:80px;margin:0 auto var(--space-3);opacity:0.25;display:flex;align-items:center;justify-content:center" id="empty-shifts-shape"></div>
       <div class="headline-small">No Shifts Assigned</div>
       <div class="body-small">Contact your administrator to get assigned to a shift.</div>
     </div>
+    <script>
+    (function() {
+      if (window.generateShapeSVG && window.SHAPES) {
+        const emptyShape = document.getElementById('empty-shifts-shape');
+        if (emptyShape) {
+          emptyShape.innerHTML = window.generateShapeSVG('wave', { size: 80 });
+        }
+      }
+    })();
+    </script>
   ` : `
     <div class="section">
       <div class="section-header">
@@ -711,25 +725,37 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
       <div style="display:grid;gap:var(--space-2)">
         ${activeShifts.length > 0 ? `
           <div>
-            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);class="text-bold"">Active</div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:500">Active</div>
             ${activeShifts.map(shiftCard).join('')}
           </div>
         ` : ''}
         ${upcomingShifts.length > 0 ? `
           <div>
-            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);class="text-bold"">Upcoming</div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:500">Upcoming</div>
             ${upcomingShifts.map(shiftCard).join('')}
           </div>
         ` : ''}
         ${completedShifts.length > 0 ? `
           <div>
-            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);class="text-bold"">Past</div>
+            <div class="body-small" style="color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;margin-bottom:var(--space-1);font-weight:500">Past</div>
             ${completedShifts.slice(0, 3).map(shiftCard).join('')}
             ${completedShifts.length > 3 ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-text btn-standard" style="gap:var(--space-1);font-size:var(--md-sys-typescale-body-small-size);justify-content:center;margin-top:var(--space-2)">View all ${completedShifts.length}</a>` : ''}
           </div>
         ` : ''}
       </div>
     </div>
+    <script>
+    (function() {
+      if (!window.SHAPES || !window.generateShapeSVG) return;
+      const shapeCards = document.querySelectorAll('.shift-card-shape');
+      shapeCards.forEach(card => {
+        const shapeKey = card.getAttribute('data-shape');
+        if (window.SHAPES[shapeKey]) {
+          card.innerHTML = window.generateShapeSVG(shapeKey, { size: 80, className: 'shape-card-bg' });
+        }
+      });
+    })();
+    </script>
   `;
 
   const body = `
@@ -757,57 +783,82 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
   ${loaSection}
 
 <div class="glass-grid">
-    <div class="stat-glass-card">
-      <div class="stat-glass-shape">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z" fill="currentColor" />
-        </svg>
-      </div>
+    <div class="stat-glass-card" data-shape="circle">
+      <div class="stat-glass-shape" id="shape-active"></div>
       <div class="stat-glass-label">Active</div>
       <div class="stat-glass-value">${activeShifts.length}</div>
       <div class="stat-glass-unit">shifts</div>
     </div>
-    <div class="stat-glass-card">
-      <div class="stat-glass-shape">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 50 15 Q 60 20 65 10 Q 75 25 75 35 Q 80 45 90 45 Q 75 50 75 65 Q 75 75 65 90 Q 60 80 50 85 Q 40 80 35 90 Q 25 75 25 65 Q 20 50 10 45 Q 25 45 25 35 Q 25 25 35 10 Q 40 20 50 15 Z" fill="currentColor" />
-        </svg>
-      </div>
+    <div class="stat-glass-card" data-shape="flower">
+      <div class="stat-glass-shape" id="shape-upcoming"></div>
       <div class="stat-glass-label">Upcoming</div>
       <div class="stat-glass-value">${upcomingShifts.length}</div>
       <div class="stat-glass-unit">shifts</div>
     </div>
-    <div class="stat-glass-card">
-      <div class="stat-glass-shape">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 50 10 L 57 40 L 90 10 L 60 50 L 90 90 L 57 60 L 50 90 L 43 60 L 10 90 L 40 50 L 10 10 L 43 40 Z" fill="currentColor" />
-        </svg>
-      </div>
+    <div class="stat-glass-card" data-shape="boom">
+      <div class="stat-glass-shape" id="shape-completed"></div>
       <div class="stat-glass-label">Completed</div>
       <div class="stat-glass-value">${completedShifts.length}</div>
       <div class="stat-glass-unit">shifts</div>
     </div>
-    <div class="stat-glass-card">
-      <div class="stat-glass-shape">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 50 85 L 20 60 Q 10 50 10 40 Q 10 25 25 25 Q 35 25 50 40 Q 65 25 75 25 Q 90 25 90 40 Q 90 50 80 60 L 50 85 Z" fill="currentColor" />
-        </svg>
-      </div>
+    <div class="stat-glass-card" data-shape="heart">
+      <div class="stat-glass-shape" id="shape-moderations"></div>
       <div class="stat-glass-label">Moderations</div>
       <div class="stat-glass-value">${moderationCount || 0}</div>
       <div class="stat-glass-unit">actions</div>
     </div>
-    <div class="stat-glass-card">
-      <div class="stat-glass-shape">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 50 20 L 80 80 L 20 80 Z" fill="currentColor" />
-        </svg>
-      </div>
+    <div class="stat-glass-card" data-shape="starFive">
+      <div class="stat-glass-shape" id="shape-hours"></div>
       <div class="stat-glass-label">This Week</div>
       <div class="stat-glass-value">${(weeklyHours || 0).toFixed(1)}</div>
       <div class="stat-glass-unit">hours</div>
     </div>
   </div>
+
+<script>
+(function() {
+  if (!window.SHAPES || !window.generateShapeSVG) return;
+  
+  const cards = document.querySelectorAll('.stat-glass-card');
+  cards.forEach(card => {
+    const shapeKey = card.getAttribute('data-shape');
+    const shapeDiv = card.querySelector('.stat-glass-shape');
+    if (shapeDiv && window.SHAPES[shapeKey]) {
+      shapeDiv.innerHTML = window.generateShapeSVG(shapeKey, {
+        size: 80,
+        className: 'shape-stat-icon'
+      });
+    }
+  });
+  
+  // Add hover animation to stat cards
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      const shapeDiv = this.querySelector('.stat-glass-shape');
+      if (shapeDiv && typeof gsap !== 'undefined') {
+        gsap.to(shapeDiv, {
+          duration: 0.4,
+          scale: 1.15,
+          rotation: 5,
+          ease: 'elastic.out(1, 0.5)'
+        });
+      }
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      const shapeDiv = this.querySelector('.stat-glass-shape');
+      if (shapeDiv && typeof gsap !== 'undefined') {
+        gsap.to(shapeDiv, {
+          duration: 0.3,
+          scale: 1,
+          rotation: 0,
+          ease: 'power2.out'
+        });
+      }
+    });
+  });
+})();
+</script>
 
   <div class="section-divider"></div>
 
