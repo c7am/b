@@ -867,30 +867,45 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
   <div class="section-divider"></div>
 
   <div class="section">
-    <div class="section-header">
+    <div class="section-header" style="position:relative">
       <h3 class="headline-small">Quick Actions</h3>
+      <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0.15;width:40px;height:40px;pointer-events:none" id="quick-actions-shape"></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
-      ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-tonal">Request Leave</a>` : ''}
-      <a href="/dashboard/${escapeHtml(guildId)}/user/${escapeHtml(user.id)}" class="btn btn-tonal">My History</a>
-      <a href="/dashboard/${escapeHtml(guildId)}/audit" class="btn btn-tonal">Activity</a>
-      <a href="/dashboard/${escapeHtml(guildId)}/docs" class="btn btn-tonal">Docs</a>
-      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guildId)}" class="btn btn-tonal">Settings</a>` : ''}
-      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-tonal">Shift Manager</a>` : ''}
+      ${!activeLoa ? `<a href="/dashboard/${escapeHtml(guildId)}/loa" class="btn btn-tonal" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Request Leave</span></a>` : ''}
+      <a href="/dashboard/${escapeHtml(guildId)}/user/${escapeHtml(user.id)}" class="btn btn-tonal" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">My History</span></a>
+      <a href="/dashboard/${escapeHtml(guildId)}/audit" class="btn btn-tonal" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Activity</span></a>
+      <a href="/dashboard/${escapeHtml(guildId)}/docs" class="btn btn-tonal" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Docs</span></a>
+      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guildId)}" class="btn btn-tonal" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Settings</span></a>` : ''}
+      ${isAdmin ? `<a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-tonal" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Shift Manager</span></a>` : ''}
     </div>
   </div>
 
   ${isAdmin ? `
   <div class="section-divider"></div>
   <div class="section">
-    <div class="section-header">
+    <div class="section-header" style="position:relative">
       <h3 class="headline-small" style="color:var(--md-sys-color-on-primary-container)">Admin Tools</h3>
+      <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0.2;width:40px;height:40px;pointer-events:none" id="admin-tools-shape"></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:var(--space-2)">
-      <a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-filled">Create Shift</a>
-      <a href="/dashboard/${escapeHtml(guildId)}/deletion-requests" class="btn btn-filled">Deletion Queue</a>
+      <a href="/dashboard/${escapeHtml(guildId)}/shifts" class="btn btn-filled" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Create Shift</span></a>
+      <a href="/dashboard/${escapeHtml(guildId)}/deletion-requests" class="btn btn-filled" style="position:relative;overflow:hidden"><span style="position:relative;z-index:1">Deletion Queue</span></a>
     </div>
-  </div>` : ''}
+  </div>
+  <script>
+  (function() {
+    if (!window.SHAPES || !window.generateShapeSVG) return;
+    const quickActionsShape = document.getElementById('quick-actions-shape');
+    const adminToolsShape = document.getElementById('admin-tools-shape');
+    if (quickActionsShape && window.SHAPES['oval']) {
+      quickActionsShape.innerHTML = window.generateShapeSVG('oval', { size: 40, className: 'shape-section-accent' });
+    }
+    if (adminToolsShape && window.SHAPES['teardrop']) {
+      adminToolsShape.innerHTML = window.generateShapeSVG('teardrop', { size: 40, className: 'shape-section-accent' });
+    }
+  })();
+  </script>` : ''}
 </div>
 `;
 
@@ -1393,7 +1408,10 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 
     ${activeLoa ? `
       <div class="user-section">
-        <div class="user-section-title" style="color:var(--md-sys-color-error)">On Leave of Absence</div>
+        <div class="user-section-title" style="color:var(--md-sys-color-error);position:relative;padding-right:40px">
+          On Leave of Absence
+          <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0.25;width:32px;height:32px;pointer-events:none" class="user-section-shape-loa"></div>
+        </div>
         <div class="user-item">
           <div class="user-item-main">
             <div class="user-item-label">Ends: ${formatDate(activeLoa.ends_at)}</div>
@@ -1404,7 +1422,10 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 
     ${promotions.length > 0 ? `
       <div class="user-section">
-        <div class="user-section-title">Promotions (${promotions.length})</div>
+        <div class="user-section-title" style="position:relative;padding-right:40px">
+          Promotions (${promotions.length})
+          <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0.2;width:32px;height:32px;pointer-events:none" class="user-section-shape-promo"></div>
+        </div>
         <div class="user-section-list">
           ${promotionItems}
         </div>
@@ -1412,7 +1433,10 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 
     ${infractions.length > 0 ? `
       <div class="user-section">
-        <div class="user-section-title">Infractions (${infractions.length})</div>
+        <div class="user-section-title" style="position:relative;padding-right:40px">
+          Infractions (${infractions.length})
+          <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0.2;width:32px;height:32px;pointer-events:none" class="user-section-shape-infract"></div>
+        </div>
         <div class="user-section-list">
           ${infractionItems}
         </div>
@@ -1420,11 +1444,34 @@ function userProfilePage({ guild, userInfo, username, csrfToken, guildId, isAdmi
 
     ${currentShifts.length > 0 ? `
       <div class="user-section">
-        <div class="user-section-title">Assigned Shifts (${currentShifts.length})</div>
+        <div class="user-section-title" style="position:relative;padding-right:40px">
+          Assigned Shifts (${currentShifts.length})
+          <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:0.2;width:32px;height:32px;pointer-events:none" class="user-section-shape-shift"></div>
+        </div>
         <div class="user-section-list">
           ${shiftItems}
         </div>
       </div>` : ''}
+
+  <script>
+  (function() {
+    if (!window.SHAPES || !window.generateShapeSVG) return;
+    const shapes = {
+      'user-section-shape-loa': 'wave',
+      'user-section-shape-promo': 'starFive',
+      'user-section-shape-infract': 'boom',
+      'user-section-shape-shift': 'circle'
+    };
+    Object.entries(shapes).forEach(([className, shapeKey]) => {
+      const els = document.querySelectorAll('.' + className);
+      if (window.SHAPES[shapeKey]) {
+        els.forEach(el => {
+          el.innerHTML = window.generateShapeSVG(shapeKey, { size: 32, className: 'shape-user-section' });
+        });
+      }
+    });
+  })();
+  </script>
   </div>
 </div>`;
   return layout({ title: 'User Profile', body });

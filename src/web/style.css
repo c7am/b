@@ -5724,6 +5724,18 @@ table.dense td {
   filter: blur(0.5px);
 }
 
+.shape-section-accent {
+  color: inherit;
+  opacity: 0.2;
+  animation: shape-float 4s ease-in-out infinite;
+}
+
+.shape-user-section {
+  color: inherit;
+  opacity: 0.2;
+  animation: shape-pulse 3s ease-in-out infinite;
+}
+
 .card.card-filled {
   background: var(--md-sys-color-surface-container-lowest);
 }
