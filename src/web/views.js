@@ -51,6 +51,7 @@ function layout({ title, body, showNav = true }) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} - Axiom</title>
   <link rel="stylesheet" href="/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
   <div class="page-wrapper">
@@ -66,6 +67,34 @@ function layout({ title, body, showNav = true }) {
       <div class="site-footer-copy">Axiom</div>
     </footer>
   </div>
+  <script type="module">
+    import { SHAPES, generateShapeSVG } from './shapes.js';
+    
+    // Auto-initialize dashboard shape morphing
+    const shapeElement = document.getElementById('dashboard-shape');
+    if (shapeElement) {
+      const morphPair = shapeElement.dataset.morph || 'circle,flower';
+      const [fromShape, toShape] = morphPair.split(',').map(s => s.trim());
+      
+      const svgHtml = generateShapeSVG(fromShape, {
+        size: 64,
+        className: 'shape-morph',
+        id: 'dashboard-shape-svg'
+      });
+      shapeElement.innerHTML = svgHtml;
+      
+      const path = shapeElement.querySelector('path');
+      if (path && typeof gsap !== 'undefined' && SHAPES[toShape]) {
+        gsap.to(path, {
+          attr: { d: SHAPES[toShape].path },
+          duration: 3,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true
+        });
+      }
+    }
+  </script>
 </body>
 </html>`;
 }
@@ -701,6 +730,9 @@ function staffDashboard({ guild, user, shifts, activeLoa, isAdmin, trueAdmin, vi
   <div>
     <h1 class="title-large" style="margin:0">${escapeHtml(guild.name)}</h1>
     <p class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin:var(--space-1) 0 0 0">Dashboard</p>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center">
+    <div id="dashboard-shape" class="shape-header-accent" data-morph="flower,boom"></div>
   </div>
   <div class="row">
     ${toggleButton}
