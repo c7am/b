@@ -205,6 +205,15 @@ async function getInfractionPoints(guildId, userId) {
   return parseInt(res.rows[0].total, 10); // SUM() comes back as a string from pg, same reasoning as SERIAL above
 }
 
+// Get count of infractions (moderations) for a user in a guild
+async function getInfractionCount(guildId, userId) {
+  const res = await pool.query(
+    `SELECT COUNT(*) AS count FROM infractions WHERE guild_id = $1 AND user_id = $2`,
+    [guildId, userId]
+  );
+  return parseInt(res.rows[0].count, 10);
+}
+
 // Combined, time-sorted history for /history. Scoped to one guild, since a
 // staff member's record in one server has nothing to do with another.
 async function getUserHistory(guildId, userId) {
@@ -791,6 +800,7 @@ module.exports = {
   addPromotion,
   addInfraction,
   getInfractionPoints,
+  getInfractionCount,
   getUserHistory,
   getSetting,
   setSetting,
