@@ -1,6 +1,5 @@
 const { Events, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { startWebServer } = require('../web/server');
 const { startErlcEventListener } = require('../erlc/erlcEventListener');
 
 module.exports = {
@@ -26,11 +25,8 @@ module.exports = {
       console.error('Failed to register commands:', err);
     }
 
-    // Started here, not in index.js, because the dashboard's guild list
-    // reads from client.guilds.cache, which Discord.js populates during the
-    // gateway READY dispatch before this event fires. Starting it any
-    // earlier would risk an empty cache on the first request after boot.
-    startWebServer(client);
+    // Web server now starts in src/index.js main() before bot login,
+    // so it binds a port immediately for Render's health check.
 
     // Start ERLC event listeners for all guilds
     for (const [guildId] of client.guilds.cache) {

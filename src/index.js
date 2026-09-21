@@ -62,6 +62,16 @@ for (const file of eventFiles) {
 // initDatabase() call would have finished.
 async function main() {
   await initDatabase();
+  
+  // Start web server BEFORE bot login so port is bound immediately
+  // This way Render's health check doesn't timeout waiting for port
+  const { startWebServer } = require('./web/server');
+  const webServer = startWebServer(client);
+  
+  if (!webServer) {
+    console.warn('[web] Dashboard disabled (missing env vars), but bot will still run');
+  }
+  
   // Command registration with Discord happens in src/events/ready.js,
   // alongside every other startup-time event handler, not here.
   await client.login(TOKEN);
