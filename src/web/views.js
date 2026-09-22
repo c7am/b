@@ -1952,15 +1952,23 @@ function inGameModerationPage({ guild, guildId, moderations, presets, searchPlay
     ${filtered.length === 0 
       ? '<p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">No moderation records found.</p>'
       : `<div class="stack" style="gap:var(--space-2)">
-        ${filtered.slice(0, 50).map(mod => {
+        ${filtered.slice(0, 50).map((mod, idx) => {
           const preset = presets.find(p => p.id === mod.preset_id);
+          let severityColor = 'var(--md-sys-color-outline)';
+          let severityShape = 'circle';
+          if (mod.severity === 'severe') {
+            severityColor = 'var(--md-sys-color-error)';
+            severityShape = 'boom';
+          } else if (mod.severity === 'medium') {
+            severityColor = 'var(--md-sys-color-tertiary)';
+            severityShape = 'heart';
+          } else {
+            severityShape = 'pill';
+          }
           return `
-        <div style="padding:var(--space-3);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid ${
-          mod.severity === 'severe' ? 'var(--md-sys-color-error)' :
-          mod.severity === 'medium' ? 'var(--md-sys-color-tertiary)' :
-          'var(--md-sys-color-outline)'
-        }">
-          <div class="row" style="gap:var(--space-2);align-items:flex-start;justify-content:space-between">
+        <div style="padding:var(--space-3);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid ${severityColor};position:relative;overflow:hidden">
+          <div style="position:absolute;right:-24px;bottom:-24px;opacity:0.08;width:90px;height:90px;pointer-events:none" class="mod-severity-shape" data-shape="${severityShape}"></div>
+          <div class="row" style="gap:var(--space-2);align-items:flex-start;justify-content:space-between;position:relative;z-index:1">
             <div style="flex:1">
               <p class="label-large"><strong>${escapeHtml(mod.player_name)}</strong> (${escapeHtml(mod.player_id)})</p>
               <p class="body-medium" style="margin-top:var(--space-1)"><strong>${preset?.label || mod.preset_id}</strong> • ${mod.severity}</p>
@@ -1968,9 +1976,21 @@ function inGameModerationPage({ guild, guildId, moderations, presets, searchPlay
               <p class="body-small" style="margin-top:var(--space-1);color:var(--md-sys-color-on-surface-variant)">${new Date(mod.logged_at).toLocaleString()}</p>
             </div>
           </div>
-        </div>
-          `;
+        </div>`;
         }).join('')}
+      </div>
+      <script>
+      (function() {
+        if (!window.SHAPES || !window.generateShapeSVG) return;
+        const shapeCards = document.querySelectorAll('.mod-severity-shape');
+        shapeCards.forEach(card => {
+          const shapeKey = card.getAttribute('data-shape');
+          if (window.SHAPES[shapeKey]) {
+            card.innerHTML = window.generateShapeSVG(shapeKey, { size: 90, className: 'shape-moderation-bg' });
+          }
+        });
+      })();
+      </script>
       </div>`
     }
   </div>
@@ -2155,13 +2175,14 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
 
 // ============= Data Deletion Requests Queue (Admin) =============
 function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
-  const rows = requests.map(r => `
-    <div class="info-card">
-      <div class="info-card-header">
+  const rows = requests.map((r, idx) => `
+    <div class="info-card" style="position:relative;border-left:4px solid var(--md-sys-color-tertiary);overflow:hidden">
+      <div style="position:absolute;right:-28px;bottom:-28px;opacity:0.1;width:100px;height:100px;pointer-events:none" class="deletion-req-shape" data-idx="${idx}"></div>
+      <div class="info-card-header" style="position:relative;z-index:1">
         <div class="info-card-title">User ${escapeHtml(r.user_id)}</div>
         <span class="badge badge-warning">Pending</span>
       </div>
-      <div class="info-card-body">
+      <div class="info-card-body" style="position:relative;z-index:1">
         <div class="info-card-row">
           <span class="info-card-label">Requested</span>
           <span class="info-card-value">${formatDate(r.requested_at)}</span>
@@ -2172,7 +2193,7 @@ function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
           <span class="info-card-value">${escapeHtml(r.reason)}</span>
         </div>` : ''}
       </div>
-      <div class="row" style="gap:var(--space-2);margin-top:var(--space-2)">
+      <div class="row" style="gap:var(--space-2);margin-top:var(--space-2);position:relative;z-index:1">
         <form method="POST" action="/dashboard/${escapeHtml(guildId)}/deletion-requests/${escapeHtml(r.id)}/complete" style="margin:0">
           <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
           <button class="btn btn-filled" type="submit" style="gap:var(--space-2)">
@@ -2198,7 +2219,28 @@ function deletionRequestsListPage({ guild, guildId, requests, csrfToken }) {
   <p class="body-medium" style="color:var(--md-sys-color-on-surface-variant)">
     Completing a request permanently deletes that user's shift history and leave of absence records. Infractions and promotions are never affected.
   </p>
-  ${requests.length > 0 ? rows : '<div class="empty-state"><div class="empty-state-text">No pending requests</div></div>'}
+  ${requests.length > 0 ? rows : `<div class="empty-state"><div style="width:80px;height:80px;margin:0 auto var(--space-2);opacity:0.15;display:flex;align-items:center;justify-content:center" id="empty-deletion-shape"></div><div class="empty-state-text">No pending requests</div></div>`}
+
+  <script>
+  (function() {
+    if (!window.SHAPES || !window.generateShapeSVG) return;
+    
+    // Deletion request shapes (alternating between blob and zigzag)
+    const shapes = document.querySelectorAll('.deletion-req-shape');
+    shapes.forEach((el, idx) => {
+      const shapeKey = idx % 2 === 0 ? 'blob' : 'zigzag';
+      if (window.SHAPES[shapeKey]) {
+        el.innerHTML = window.generateShapeSVG(shapeKey, { size: 100, className: 'shape-deletion-bg' });
+      }
+    });
+    
+    // Empty state
+    const emptyShape = document.getElementById('empty-deletion-shape');
+    if (emptyShape && window.SHAPES['blob']) {
+      emptyShape.innerHTML = window.generateShapeSVG('blob', { size: 80, className: 'shape-empty-state' });
+    }
+  })();
+  </script>
 </div>`;
   return layout({ title: 'Data Deletion Requests', body });
 }

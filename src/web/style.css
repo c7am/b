@@ -5759,6 +5759,18 @@ table.dense td {
   filter: blur(0.5px);
 }
 
+.shape-deletion-bg {
+  color: var(--md-sys-color-tertiary);
+  opacity: 0.12;
+  filter: blur(0.5px);
+}
+
+.shape-moderation-bg {
+  color: inherit;
+  opacity: 0.1;
+  filter: blur(0.5px);
+}
+
 .card.card-filled {
   background: var(--md-sys-color-surface-container-lowest);
 }
