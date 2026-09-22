@@ -783,101 +783,58 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
   ${loaSection}
 
 <div class="glass-grid">
-    <div class="stat-m3-card" data-shape="circle">
-      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <circle cx="50" cy="50" r="45" fill="currentColor"/>
+    <div class="stat-m3-card" data-shape="active">
+      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="40" fill="currentColor"/>
       </svg>
-      <div class="m3-card-text">
+      <div class="m3-card-content">
         <div class="m3-value">${activeShifts.length}</div>
         <div class="m3-label">Active</div>
       </div>
     </div>
 
-    <div class="stat-m3-card" data-shape="blob">
-      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <path d="M50 10C70 10 80 25 85 40C88 50 85 65 75 75C65 85 50 90 35 88C20 85 10 75 8 60C5 45 15 25 30 15C40 8 50 8 50 10Z" fill="currentColor"/>
+    <div class="stat-m3-card" data-shape="upcoming">
+      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 50C20 32.33 32.33 20 50 20C67.67 20 80 32.33 80 50C80 67.67 67.67 80 50 80C32.33 80 20 67.67 20 50Z" fill="currentColor"/>
       </svg>
-      <div class="m3-card-text">
+      <div class="m3-card-content">
         <div class="m3-value">${upcomingShifts.length}</div>
         <div class="m3-label">Upcoming</div>
       </div>
     </div>
 
-    <div class="stat-m3-card" data-shape="starburst">
-      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <path d="M50 5L61 35L92 40L68 60L76 92L50 68L24 92L32 60L8 40L39 35Z" fill="currentColor"/>
+    <div class="stat-m3-card" data-shape="completed">
+      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 15L61 39L88 44L70 60L76 88L50 72L24 88L30 60L12 44L39 39Z" fill="currentColor"/>
       </svg>
-      <div class="m3-card-text">
+      <div class="m3-card-content">
         <div class="m3-value">${completedShifts.length}</div>
         <div class="m3-label">Completed</div>
       </div>
     </div>
 
-    <div class="stat-m3-card" data-shape="diamond">
-      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <path d="M50 10L85 50L50 90L15 50Z" fill="currentColor"/>
+    <div class="stat-m3-card" data-shape="moderations">
+      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 15C68.225 15 83 29.775 83 48V85C83 87.21 81.21 89 79 89H21C18.79 89 17 87.21 17 85V48C17 29.775 31.775 15 50 15Z" fill="currentColor"/>
       </svg>
-      <div class="m3-card-text">
+      <div class="m3-card-content">
         <div class="m3-value">${moderationCount || 0}</div>
         <div class="m3-label">Moderations</div>
       </div>
     </div>
 
-    <div class="stat-m3-card" data-shape="star">
-      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <path d="M50 10L61 35L88 35L67 55L76 80L50 60L24 80L33 55L12 35L39 35Z" fill="currentColor"/>
+    <div class="stat-m3-card" data-shape="weekly">
+      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 20C65.464 20 78 32.536 78 48C78 63.464 65.464 76 50 76C34.536 76 22 63.464 22 48C22 32.536 34.536 20 50 20Z" fill="currentColor"/>
       </svg>
-      <div class="m3-card-text">
+      <div class="m3-card-content">
         <div class="m3-value">${(weeklyHours || 0).toFixed(1)}</div>
         <div class="m3-label">This Week</div>
       </div>
     </div>
   </div>
 
-<script>
-(function() {
-  if (typeof gsap === 'undefined') return;
-  
-  const cards = document.querySelectorAll('.stat-m3-card');
-  
-  cards.forEach(card => {
-    const svg = card.querySelector('.m3-shape-fill');
-    const text = card.querySelector('.m3-card-text');
-    
-    if (!svg) return;
-    
-    card.addEventListener('mouseenter', function() {
-      gsap.to(svg, {
-        duration: 0.5,
-        scale: 0.45,
-        filter: 'drop-shadow(0 12px 28px rgba(216, 186, 250, 0.7))',
-        ease: 'back.out(1.2)'
-      });
-      
-      gsap.to(text, {
-        duration: 0.4,
-        scale: 1.05,
-        ease: 'back.out(1)'
-      });
-    });
-    
-    card.addEventListener('mouseleave', function() {
-      gsap.to(svg, {
-        duration: 0.4,
-        scale: 0.4,
-        filter: 'drop-shadow(0 6px 16px rgba(216, 186, 250, 0.4))',
-        ease: 'back.out(1)'
-      });
-      
-      gsap.to(text, {
-        duration: 0.3,
-        scale: 1,
-        ease: 'back.out(1)'
-      });
-    });
-  });
-})();
-</script>
+
 
   <div class="section-divider"></div>
 

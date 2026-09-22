@@ -6032,49 +6032,52 @@ body {
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100;300;400;500;600;700;800;900&display=swap');
 
 .stat-m3-card {
-  position: relative;
-  width: 140px;
-  height: 140px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--shape-corner-medium);
+  background: linear-gradient(135deg, rgba(208, 188, 255, 0.08) 0%, rgba(79, 39, 131, 0.04) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(208, 188, 255, 0.12);
   cursor: pointer;
   user-select: none;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 
-.m3-shape-fill {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  color: var(--md-sys-color-primary);
-  filter: drop-shadow(0 6px 16px rgba(216, 186, 250, 0.4));
-  transition: filter 240ms ease-out, transform 240ms ease-out;
-  z-index: 1;
-  transform: scale(0.4);
-  transform-origin: center;
+.stat-m3-card:hover {
+  background: linear-gradient(135deg, rgba(208, 188, 255, 0.12) 0%, rgba(79, 39, 131, 0.08) 100%);
+  border-color: rgba(208, 188, 255, 0.2);
+  transform: translateY(-2px);
 }
 
-.m3-card-text {
-  position: absolute;
-  inset: 0;
+.m3-shape-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  color: var(--md-sys-color-primary);
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), filter 200ms ease-out;
+}
+
+.stat-m3-card:hover .m3-shape-icon {
+  transform: scale(1.1) rotate(2deg);
+  filter: drop-shadow(0 2px 8px rgba(216, 186, 250, 0.3));
+}
+
+.m3-card-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 4px;
-  z-index: 2;
-  transition: transform 240ms ease-out;
 }
 
 .m3-value {
   font-family: 'Google Sans Flex', system-ui, -apple-system;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
   font-variation-settings: 'wght' 800;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--md-sys-color-primary);
   margin: 0;
 }
@@ -6088,13 +6091,23 @@ body {
   letter-spacing: 0.12em;
   color: var(--md-sys-color-on-surface);
   margin: 0;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
-/* Responsive text sizes */
+/* Responsive */
 @media (max-width: 768px) {
+  .stat-m3-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .m3-shape-icon {
+    width: 40px;
+    height: 40px;
+  }
+
   .m3-value {
-    font-size: 32px;
+    font-size: 24px;
   }
 
   .m3-label {
@@ -6102,35 +6115,48 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .stat-m3-card {
+    padding: 12px;
+    gap: 8px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .m3-shape-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .m3-value {
+    font-size: 20px;
+  }
+
+  .m3-label {
+    font-size: 9px;
+  }
+}
+
 /* ---- Glass Container Grid ---- */
 .glass-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
   margin-bottom: var(--space-4);
   padding: 0;
 }
 
 @media (max-width: 768px) {
   .glass-grid {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
   }
 }
 
 @media (max-width: 640px) {
   .glass-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 20px;
-  }
-
-  .stat-m3-card {
-    width: 120px;
-    height: 120px;
-  }
-
-  .m3-value {
-    font-size: 28px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .m3-label {
