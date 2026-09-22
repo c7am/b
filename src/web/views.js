@@ -784,34 +784,44 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
 
 <div class="glass-grid">
     <div class="stat-glass-card" data-shape="circle">
-      <div class="stat-glass-shape" id="shape-active"></div>
-      <div class="stat-glass-label">Active</div>
-      <div class="stat-glass-value">${activeShifts.length}</div>
-      <div class="stat-glass-unit">shifts</div>
+      <div class="stat-shape-container">
+        <div class="stat-shape" id="shape-active"></div>
+      </div>
+      <div class="stat-value">${activeShifts.length}</div>
+      <div class="stat-label">Active</div>
+      <div class="stat-unit">shifts</div>
     </div>
     <div class="stat-glass-card" data-shape="flower">
-      <div class="stat-glass-shape" id="shape-upcoming"></div>
-      <div class="stat-glass-label">Upcoming</div>
-      <div class="stat-glass-value">${upcomingShifts.length}</div>
-      <div class="stat-glass-unit">shifts</div>
+      <div class="stat-shape-container">
+        <div class="stat-shape" id="shape-upcoming"></div>
+      </div>
+      <div class="stat-value">${upcomingShifts.length}</div>
+      <div class="stat-label">Upcoming</div>
+      <div class="stat-unit">shifts</div>
     </div>
     <div class="stat-glass-card" data-shape="boom">
-      <div class="stat-glass-shape" id="shape-completed"></div>
-      <div class="stat-glass-label">Completed</div>
-      <div class="stat-glass-value">${completedShifts.length}</div>
-      <div class="stat-glass-unit">shifts</div>
+      <div class="stat-shape-container">
+        <div class="stat-shape" id="shape-completed"></div>
+      </div>
+      <div class="stat-value">${completedShifts.length}</div>
+      <div class="stat-label">Completed</div>
+      <div class="stat-unit">shifts</div>
     </div>
     <div class="stat-glass-card" data-shape="heart">
-      <div class="stat-glass-shape" id="shape-moderations"></div>
-      <div class="stat-glass-label">Moderations</div>
-      <div class="stat-glass-value">${moderationCount || 0}</div>
-      <div class="stat-glass-unit">actions</div>
+      <div class="stat-shape-container">
+        <div class="stat-shape" id="shape-moderations"></div>
+      </div>
+      <div class="stat-value">${moderationCount || 0}</div>
+      <div class="stat-label">Moderations</div>
+      <div class="stat-unit">actions</div>
     </div>
     <div class="stat-glass-card" data-shape="starFive">
-      <div class="stat-glass-shape" id="shape-hours"></div>
-      <div class="stat-glass-label">This Week</div>
-      <div class="stat-glass-value">${(weeklyHours || 0).toFixed(1)}</div>
-      <div class="stat-glass-unit">hours</div>
+      <div class="stat-shape-container">
+        <div class="stat-shape" id="shape-hours"></div>
+      </div>
+      <div class="stat-value">${(weeklyHours || 0).toFixed(1)}</div>
+      <div class="stat-label">This Week</div>
+      <div class="stat-unit">hours</div>
     </div>
   </div>
 
@@ -822,36 +832,38 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
   const cards = document.querySelectorAll('.stat-glass-card');
   cards.forEach(card => {
     const shapeKey = card.getAttribute('data-shape');
-    const shapeDiv = card.querySelector('.stat-glass-shape');
+    const shapeDiv = card.querySelector('.stat-shape');
     if (shapeDiv && window.SHAPES[shapeKey]) {
-      shapeDiv.innerHTML = window.generateShapeSVG(shapeKey, {
-        size: 80,
-        className: 'shape-stat-icon'
+      const svg = window.generateShapeSVG(shapeKey, {
+        size: 100,
+        className: 'shape-stat-glyph',
+        style: 'color: var(--md-sys-color-primary); filter: drop-shadow(0 4px 12px rgba(216, 186, 250, 0.25))'
       });
+      shapeDiv.innerHTML = svg;
     }
   });
   
-  // Add hover animation to stat cards
+  // Hover animation
   cards.forEach(card => {
     card.addEventListener('mouseenter', function() {
-      const shapeDiv = this.querySelector('.stat-glass-shape');
-      if (shapeDiv && typeof gsap !== 'undefined') {
-        gsap.to(shapeDiv, {
+      const svg = this.querySelector('svg');
+      if (svg && typeof gsap !== 'undefined') {
+        gsap.to(svg, {
           duration: 0.4,
-          scale: 1.15,
-          rotation: 5,
-          ease: 'elastic.out(1, 0.5)'
+          scale: 1.2,
+          filter: 'drop-shadow(0 8px 20px rgba(216, 186, 250, 0.5))',
+          ease: 'elastic.out(1, 0.6)'
         });
       }
     });
     
     card.addEventListener('mouseleave', function() {
-      const shapeDiv = this.querySelector('.stat-glass-shape');
-      if (shapeDiv && typeof gsap !== 'undefined') {
-        gsap.to(shapeDiv, {
+      const svg = this.querySelector('svg');
+      if (svg && typeof gsap !== 'undefined') {
+        gsap.to(svg, {
           duration: 0.3,
           scale: 1,
-          rotation: 0,
+          filter: 'drop-shadow(0 4px 12px rgba(216, 186, 250, 0.25))',
           ease: 'power2.out'
         });
       }
