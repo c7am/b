@@ -5736,6 +5736,29 @@ table.dense td {
   animation: shape-pulse 3s ease-in-out infinite;
 }
 
+.shape-shift-list-bg {
+  color: inherit;
+  opacity: 0.15;
+  filter: blur(0.5px);
+}
+
+.shape-audit-bg {
+  color: inherit;
+  opacity: 0.12;
+  filter: blur(0.5px);
+}
+
+.shape-empty-state {
+  color: inherit;
+  opacity: 0.25;
+}
+
+.shape-loa-badge {
+  color: var(--md-sys-color-error);
+  opacity: 0.15;
+  filter: blur(0.5px);
+}
+
 .card.card-filled {
   background: var(--md-sys-color-surface-container-lowest);
 }

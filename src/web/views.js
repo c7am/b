@@ -1143,18 +1143,29 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
     const end = new Date(s.ends_at);
     const now = new Date();
     let status = 'Upcoming';
-    if (start <= now && end > now) status = 'Active';
-    if (end < now) status = 'Completed';
+    let statusShape = 'pill';
+    let statusColor = 'var(--md-sys-color-primary)';
+    if (start <= now && end > now) {
+      status = 'Active';
+      statusShape = 'circle';
+      statusColor = 'var(--md-sys-color-tertiary)';
+    }
+    if (end < now) {
+      status = 'Completed';
+      statusShape = 'semicircle';
+      statusColor = 'var(--md-sys-color-on-surface-variant)';
+    }
 
     return `
-    <div class="shift-card">
-      <div class="shift-info">
+    <div class="shift-card" style="position:relative;border-left:4px solid ${statusColor};overflow:hidden">
+      <div style="position:absolute;right:-24px;bottom:-24px;opacity:0.08;width:100px;height:100px;pointer-events:none" class="shift-list-shape" data-shape="${statusShape}"></div>
+      <div class="shift-info" style="position:relative;z-index:1">
         <div class="shift-name">${escapeHtml(s.name)}</div>
         <div class="shift-time">${icon('clock')} ${start.toLocaleDateString()} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
         ${s.description ? `<div class="body-small" style="color:var(--md-sys-color-on-surface-variant);margin-top:var(--space-1)">${escapeHtml(s.description)}</div>` : ''}
         <div class="badge badge-info" style="margin-top:var(--space-2)">${status}</div>
       </div>
-      <div class="shift-actions">
+      <div class="shift-actions" style="position:relative;z-index:1">
         <a href="/dashboard/${escapeHtml(guildId)}/shift/${escapeHtml(s.id)}" class="btn btn-text btn-standard">Details</a>
         <form method="POST" action="/dashboard/${escapeHtml(guildId)}/delete-shift" style="margin:0">
           <input type="hidden" name="_csrf" value="${escapeHtml(csrfToken)}">
@@ -1185,7 +1196,28 @@ function shiftsListPage({ guild, shifts, csrfToken, guildId }) {
     </a>
   </div>
 
-  ${shifts.length > 0 ? `<div style="display:flex;flex-direction:column;gap:var(--space-2)">${shiftItems}</div>` : '<div class="empty-state"><div class="empty-state-text">No shifts yet. Create one to get started.</div></div>'}
+  ${shifts.length > 0 ? `<div style="display:flex;flex-direction:column;gap:var(--space-2)">${shiftItems}</div>` : `<div class="empty-state"><div style="width:100px;height:100px;margin:0 auto var(--space-3);opacity:0.2;display:flex;align-items:center;justify-content:center" id="empty-shifts-list-shape"></div><div class="empty-state-text">No shifts yet. Create one to get started.</div></div>`}
+
+  <script>
+  (function() {
+    if (!window.SHAPES || !window.generateShapeSVG) return;
+    
+    // Shift list card shapes
+    const shapeCards = document.querySelectorAll('.shift-list-shape');
+    shapeCards.forEach(card => {
+      const shapeKey = card.getAttribute('data-shape');
+      if (window.SHAPES[shapeKey]) {
+        card.innerHTML = window.generateShapeSVG(shapeKey, { size: 100, className: 'shape-shift-list-bg' });
+      }
+    });
+    
+    // Empty state shape
+    const emptyShape = document.getElementById('empty-shifts-list-shape');
+    if (emptyShape && window.SHAPES['teardrop']) {
+      emptyShape.innerHTML = window.generateShapeSVG('teardrop', { size: 100, className: 'shape-empty-state' });
+    }
+  })();
+  </script>
 </div>`;
   return layout({ title: 'Manage Shifts', body });
 }
@@ -1201,11 +1233,12 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
   </a>
 </header>
 <div class="page stack">
-  <div class="info-card" style="border-left:4px solid var(--md-sys-color-error)">
-    <div class="info-card-header">
+  <div class="info-card" style="border-left:4px solid var(--md-sys-color-error);position:relative;overflow:hidden">
+    <div style="position:absolute;right:-32px;bottom:-32px;opacity:0.1;width:120px;height:120px;pointer-events:none" id="loa-active-shape"></div>
+    <div class="info-card-header" style="position:relative;z-index:1">
       <div class="info-card-title">Currently on Leave</div>
     </div>
-    <div class="info-card-body">
+    <div class="info-card-body" style="position:relative;z-index:1">
       <div class="info-card-row">
         <span class="info-card-label">Reason</span>
         <span class="info-card-value">${escapeHtml(currentLoa.reason)}</span>
@@ -1224,6 +1257,16 @@ function loaRequestPage({ guild, currentLoa, csrfToken, guildId, userId }) {
       <span>End Leave of Absence</span>
     </button>
   </form>
+
+  <script>
+  (function() {
+    if (!window.SHAPES || !window.generateShapeSVG) return;
+    const loaShape = document.getElementById('loa-active-shape');
+    if (loaShape && window.SHAPES['wave']) {
+      loaShape.innerHTML = window.generateShapeSVG('wave', { size: 120, className: 'shape-loa-badge' });
+    }
+  })();
+  </script>
 </div>`;
     return layout({ title: 'Leave', body });
   }
@@ -2026,17 +2069,23 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
 
   const eventRows = filtered.length === 0 
     ? '<p class="body-medium">No events found.</p>'
-    : filtered.map(e => {
+    : filtered.map((e, idx) => {
       const staffLine = e.staff ? '<p class="body-small" style="color:var(--md-sys-color-on-surface-variant)">By: ' + escapeHtml(e.staff) + '</p>' : '';
-      return '<div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid var(--md-sys-color-primary)">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-1)">' +
+      let shapeKey = 'circle';
+      if (e.type === 'infraction') shapeKey = 'boom';
+      if (e.type === 'promotion') shapeKey = 'starFive';
+      if (e.type === 'demotion') shapeKey = 'wave';
+      if (e.type === 'shift_join') shapeKey = 'flower';
+      return '<div style="padding:var(--space-2);background:var(--md-sys-color-surface-dim);border-radius:var(--md-sys-shape-corner-small);border-left:4px solid var(--md-sys-color-primary);position:relative;overflow:hidden">' +
+        '<div style="position:absolute;right:-20px;bottom:-20px;opacity:0.08;width:80px;height:80px;pointer-events:none" class="audit-event-shape" data-shape="' + shapeKey + '"></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-1);position:relative;z-index:1">' +
           '<div>' +
             '<span class="badge badge-info">' + escapeHtml(formatType(e.type)) + '</span>' +
             '<span style="margin-left:var(--space-1);color:var(--md-sys-color-on-surface-variant);font-size:var(--md-sys-typescale-body-small-size)">' + formatDate(e.timestamp) + '</span>' +
           '</div>' +
           '<span class="body-small" style="color:var(--md-sys-color-on-surface-variant)">User: ' + escapeHtml(e.user) + '</span>' +
         '</div>' +
-        '<p class="body-medium" style="margin:var(--space-1) 0">' +
+        '<p class="body-medium" style="margin:var(--space-1) 0;position:relative;z-index:1">' +
           '<strong>' + escapeHtml(e.action) + '</strong>: ' + escapeHtml(e.details) +
         '</p>' +
         staffLine +
@@ -2089,6 +2138,16 @@ function auditLogPage({ guild, guildId, infractions, promotions, shifts, csrfTok
         'link.click();' +
         'URL.revokeObjectURL(url);' +
       '}' +
+      'window.addEventListener("DOMContentLoaded", function() {' +
+        'if (!window.SHAPES || !window.generateShapeSVG) return;' +
+        'const shapeCards = document.querySelectorAll(".audit-event-shape");' +
+        'shapeCards.forEach(card => {' +
+          'const shapeKey = card.getAttribute("data-shape");' +
+          'if (window.SHAPES[shapeKey]) {' +
+            'card.innerHTML = window.generateShapeSVG(shapeKey, { size: 80, className: "shape-audit-bg" });' +
+          '}' +
+        '});' +
+      '});' +
     '</script>';
 
   return content + '<div style="text-align:center;margin-top:var(--space-4)"><a href="/dashboard/' + escapeHtml(guildId) + '/staff" class="btn btn-text btn-standard">Back to Dashboard</a></div>';
