@@ -783,78 +783,53 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
   ${loaSection}
 
 <div class="glass-grid">
-    <div class="stat-shape-card" data-shape="circle" data-label="Active">
-      <div class="stat-card-background"></div>
-      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <clipPath id="clip-circle">
-            <path d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z"></path>
-          </clipPath>
-        </defs>
-        <path class="stat-card-border" d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z"></path>
+    <div class="stat-m3-card" data-shape="circle">
+      <svg class="m3-shape-fill" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+        <path d="M330 160C330 248.366 258.366 320 170 320C81.6344 320 9.99999 248.366 10 160C10 71.6344 81.6345 -7.72516e-06 170 0C258.366 7.72516e-06 330 71.6345 330 160Z" fill="currentColor"/>
       </svg>
-      <div class="stat-card-content" style="clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 0% 100%);">
-        <div class="stat-card-inner">
-          <div class="stat-value">${activeShifts.length}</div>
-          <div class="stat-unit">shifts</div>
-          <div class="stat-label">Active</div>
-        </div>
+      <div class="m3-card-text">
+        <div class="m3-value">${activeShifts.length}</div>
+        <div class="m3-label">Active</div>
       </div>
     </div>
 
-    <div class="stat-shape-card" data-shape="flower" data-label="Upcoming">
-      <div class="stat-card-background"></div>
-      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path class="stat-card-border" d="M 50 15 Q 60 20 65 10 Q 75 25 75 35 Q 80 45 90 45 Q 75 50 75 65 Q 75 75 65 90 Q 60 80 50 85 Q 40 80 35 90 Q 25 75 25 65 Q 20 50 10 45 Q 25 45 25 35 Q 25 25 35 10 Q 40 20 50 15 Z"></path>
+    <div class="stat-m3-card" data-shape="blob">
+      <svg class="m3-shape-fill" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+        <path d="M160 10C216.274 10 270 35.8629 293.301 76.6697C316.602 117.477 310.951 166.855 278.995 204.142C247.039 241.429 193.889 260 138 260C82.1116 260 28.9607 241.429 -2.99499 204.142C-34.9507 166.855 -40.6023 117.477 -17.3007 76.6697C5.99994 35.8629 103.726 10 160 10Z" fill="currentColor"/>
       </svg>
-      <div class="stat-card-content">
-        <div class="stat-card-inner">
-          <div class="stat-value">${upcomingShifts.length}</div>
-          <div class="stat-unit">shifts</div>
-          <div class="stat-label">Upcoming</div>
-        </div>
+      <div class="m3-card-text">
+        <div class="m3-value">${upcomingShifts.length}</div>
+        <div class="m3-label">Upcoming</div>
       </div>
     </div>
 
-    <div class="stat-shape-card" data-shape="boom" data-label="Completed">
-      <div class="stat-card-background"></div>
-      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path class="stat-card-border" d="M 50 10 L 57 40 L 90 10 L 60 50 L 90 90 L 57 60 L 50 90 L 43 60 L 10 90 L 40 50 L 10 10 L 43 40 Z"></path>
+    <div class="stat-m3-card" data-shape="starburst">
+      <svg class="m3-shape-fill" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <path d="M150 20L180 110L270 130L200 190L220 280L150 240L80 280L100 190L30 130L120 110Z" fill="currentColor"/>
       </svg>
-      <div class="stat-card-content">
-        <div class="stat-card-inner">
-          <div class="stat-value">${completedShifts.length}</div>
-          <div class="stat-unit">shifts</div>
-          <div class="stat-label">Completed</div>
-        </div>
+      <div class="m3-card-text">
+        <div class="m3-value">${completedShifts.length}</div>
+        <div class="m3-label">Completed</div>
       </div>
     </div>
 
-    <div class="stat-shape-card" data-shape="heart" data-label="Moderations">
-      <div class="stat-card-background"></div>
-      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path class="stat-card-border" d="M 50 85 C 20 65 5 50 5 35 C 5 20 15 10 25 10 C 35 10 45 18 50 28 C 55 18 65 10 75 10 C 85 10 95 20 95 35 C 95 50 80 65 50 85 Z"></path>
+    <div class="stat-m3-card" data-shape="diamond">
+      <svg class="m3-shape-fill" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <path d="M150 20L230 150L150 280L70 150Z" fill="currentColor"/>
       </svg>
-      <div class="stat-card-content">
-        <div class="stat-card-inner">
-          <div class="stat-value">${moderationCount || 0}</div>
-          <div class="stat-unit">actions</div>
-          <div class="stat-label">Moderations</div>
-        </div>
+      <div class="m3-card-text">
+        <div class="m3-value">${moderationCount || 0}</div>
+        <div class="m3-label">Moderations</div>
       </div>
     </div>
 
-    <div class="stat-shape-card" data-shape="starFive" data-label="This Week">
-      <div class="stat-card-background"></div>
-      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path class="stat-card-border" d="M 50 10 L 61 40 L 90 40 L 67 60 L 78 90 L 50 70 L 22 90 L 33 60 L 10 40 L 39 40 Z"></path>
+    <div class="stat-m3-card" data-shape="star">
+      <svg class="m3-shape-fill" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <path d="M150 30L180 120L270 120L200 180L230 270L150 210L70 270L100 180L30 120L120 120Z" fill="currentColor"/>
       </svg>
-      <div class="stat-card-content">
-        <div class="stat-card-inner">
-          <div class="stat-value">${(weeklyHours || 0).toFixed(1)}</div>
-          <div class="stat-unit">hours</div>
-          <div class="stat-label">This Week</div>
-        </div>
+      <div class="m3-card-text">
+        <div class="m3-value">${(weeklyHours || 0).toFixed(1)}</div>
+        <div class="m3-label">This Week</div>
       </div>
     </div>
   </div>
@@ -863,52 +838,39 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
 (function() {
   if (typeof gsap === 'undefined') return;
   
-  const cards = document.querySelectorAll('.stat-shape-card');
+  const cards = document.querySelectorAll('.stat-m3-card');
   
   cards.forEach(card => {
-    const svg = card.querySelector('.stat-card-svg');
-    const path = card.querySelector('.stat-card-border');
-    const content = card.querySelector('.stat-card-content');
-    const background = card.querySelector('.stat-card-background');
+    const svg = card.querySelector('.m3-shape-fill');
+    const text = card.querySelector('.m3-card-text');
     
-    if (!svg || !path) return;
+    if (!svg) return;
     
-    // Hover animation - shape morphs and glows
     card.addEventListener('mouseenter', function() {
-      gsap.to(path, {
-        duration: 0.6,
-        filter: 'drop-shadow(0 8px 24px rgba(216, 186, 250, 0.6))',
+      gsap.to(svg, {
+        duration: 0.5,
+        scale: 1.08,
+        filter: 'drop-shadow(0 12px 28px rgba(216, 186, 250, 0.7))',
         ease: 'back.out(1.2)'
       });
       
-      gsap.to(background, {
+      gsap.to(text, {
         duration: 0.4,
-        opacity: 0.15,
-        ease: 'power2.out'
-      });
-      
-      gsap.to(svg, {
-        duration: 0.5,
         scale: 1.05,
-        ease: 'elastic.out(1, 0.5)'
+        ease: 'back.out(1)'
       });
     });
     
     card.addEventListener('mouseleave', function() {
-      gsap.to(path, {
-        duration: 0.5,
-        filter: 'drop-shadow(0 4px 12px rgba(216, 186, 250, 0.3))',
-        ease: 'power2.out'
-      });
-      
-      gsap.to(background, {
-        duration: 0.4,
-        opacity: 0.08,
-        ease: 'power2.out'
-      });
-      
       gsap.to(svg, {
         duration: 0.4,
+        scale: 1,
+        filter: 'drop-shadow(0 6px 16px rgba(216, 186, 250, 0.4))',
+        ease: 'back.out(1)'
+      });
+      
+      gsap.to(text, {
+        duration: 0.3,
         scale: 1,
         ease: 'back.out(1)'
       });

@@ -5949,16 +5949,7 @@ pre code {
   transform: scale(1.05);
 }
 
-.shape-stat-glyph {
-  /* new shape cards - styles above */
-}
-
-.shape-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
+/* Removed - using .m3-shape-fill instead */
 
 .shape-morph {
   animation: shape-pulse 3s ease-in-out infinite;
@@ -6036,8 +6027,11 @@ body {
 }
 
 /* ---- Stat Card with Glass + Shape ---- */
-/* ---- Expressive Shape-Based Stat Cards ---- */
-.stat-shape-card {
+/* ---- Material Design 3 Expressive Shapes + Typography ---- */
+
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@100;300;400;500;600;700;800;900&display=swap');
+
+.stat-m3-card {
   position: relative;
   width: 140px;
   height: 140px;
@@ -6046,99 +6040,71 @@ body {
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  transition: all 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
 }
 
-.stat-card-background {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border-radius: 40px;
-  opacity: 0.08;
-  z-index: 0;
-  transition: opacity 240ms ease-out;
-}
-
-.stat-card-svg {
+.m3-shape-fill {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  color: var(--md-sys-color-primary);
+  filter: drop-shadow(0 6px 16px rgba(216, 186, 250, 0.4));
+  transition: filter 240ms ease-out, transform 240ms ease-out;
   z-index: 1;
 }
 
-.stat-card-border {
-  fill: none;
-  stroke: var(--md-sys-color-primary);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 4px 12px rgba(216, 186, 250, 0.3));
-  transition: filter 240ms ease-out;
-  opacity: 0.9;
-}
-
-.stat-card-content {
+.m3-card-text {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  padding: 16px;
-}
-
-.stat-card-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  text-align: center;
-  width: 100%;
+  gap: 4px;
+  z-index: 2;
+  transition: transform 240ms ease-out;
 }
 
-.stat-value {
+.m3-value {
   font-family: 'Google Sans Flex', system-ui, -apple-system;
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 36px;
+  font-weight: 800;
+  font-variation-settings: 'wght' 800;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: var(--md-sys-color-primary);
   margin: 0;
 }
 
-.stat-label {
-  font-family: 'Google Sans Flex', system-ui, -apple-system;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--md-sys-color-on-surface);
-  margin: 2px 0 0 0;
-  opacity: 0.8;
-}
-
-.stat-unit {
+.m3-label {
   font-family: 'Google Sans Flex', system-ui, -apple-system;
   font-size: 11px;
-  font-weight: 400;
-  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 500;
+  font-variation-settings: 'wght' 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--md-sys-color-on-surface);
   margin: 0;
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
-.stat-shape-card:hover .stat-card-border {
-  stroke-width: 2.5;
+/* Responsive text sizes */
+@media (max-width: 768px) {
+  .m3-value {
+    font-size: 32px;
+  }
+
+  .m3-label {
+    font-size: 10px;
+  }
 }
 
 /* ---- Glass Container Grid ---- */
 .glass-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 24px;
+  gap: 32px;
   margin-bottom: var(--space-4);
   padding: 0;
 }
@@ -6146,14 +6112,27 @@ body {
 @media (max-width: 768px) {
   .glass-grid {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 20px;
+    gap: 28px;
   }
 }
 
 @media (max-width: 640px) {
   .glass-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+  }
+
+  .stat-m3-card {
+    width: 120px;
+    height: 120px;
+  }
+
+  .m3-value {
+    font-size: 28px;
+  }
+
+  .m3-label {
+    font-size: 9px;
   }
 }
 
