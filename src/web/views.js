@@ -783,90 +783,135 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
   ${loaSection}
 
 <div class="glass-grid">
-    <div class="stat-glass-card" data-shape="circle">
-      <div class="stat-shape-container">
-        <div class="stat-shape" id="shape-active"></div>
+    <div class="stat-shape-card" data-shape="circle" data-label="Active">
+      <div class="stat-card-background"></div>
+      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="clip-circle">
+            <path d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z"></path>
+          </clipPath>
+        </defs>
+        <path class="stat-card-border" d="M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 Z"></path>
+      </svg>
+      <div class="stat-card-content" style="clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 0% 100%);">
+        <div class="stat-card-inner">
+          <div class="stat-value">${activeShifts.length}</div>
+          <div class="stat-unit">shifts</div>
+          <div class="stat-label">Active</div>
+        </div>
       </div>
-      <div class="stat-value">${activeShifts.length}</div>
-      <div class="stat-label">Active</div>
-      <div class="stat-unit">shifts</div>
     </div>
-    <div class="stat-glass-card" data-shape="flower">
-      <div class="stat-shape-container">
-        <div class="stat-shape" id="shape-upcoming"></div>
+
+    <div class="stat-shape-card" data-shape="flower" data-label="Upcoming">
+      <div class="stat-card-background"></div>
+      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="stat-card-border" d="M 50 15 Q 60 20 65 10 Q 75 25 75 35 Q 80 45 90 45 Q 75 50 75 65 Q 75 75 65 90 Q 60 80 50 85 Q 40 80 35 90 Q 25 75 25 65 Q 20 50 10 45 Q 25 45 25 35 Q 25 25 35 10 Q 40 20 50 15 Z"></path>
+      </svg>
+      <div class="stat-card-content">
+        <div class="stat-card-inner">
+          <div class="stat-value">${upcomingShifts.length}</div>
+          <div class="stat-unit">shifts</div>
+          <div class="stat-label">Upcoming</div>
+        </div>
       </div>
-      <div class="stat-value">${upcomingShifts.length}</div>
-      <div class="stat-label">Upcoming</div>
-      <div class="stat-unit">shifts</div>
     </div>
-    <div class="stat-glass-card" data-shape="boom">
-      <div class="stat-shape-container">
-        <div class="stat-shape" id="shape-completed"></div>
+
+    <div class="stat-shape-card" data-shape="boom" data-label="Completed">
+      <div class="stat-card-background"></div>
+      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="stat-card-border" d="M 50 10 L 57 40 L 90 10 L 60 50 L 90 90 L 57 60 L 50 90 L 43 60 L 10 90 L 40 50 L 10 10 L 43 40 Z"></path>
+      </svg>
+      <div class="stat-card-content">
+        <div class="stat-card-inner">
+          <div class="stat-value">${completedShifts.length}</div>
+          <div class="stat-unit">shifts</div>
+          <div class="stat-label">Completed</div>
+        </div>
       </div>
-      <div class="stat-value">${completedShifts.length}</div>
-      <div class="stat-label">Completed</div>
-      <div class="stat-unit">shifts</div>
     </div>
-    <div class="stat-glass-card" data-shape="heart">
-      <div class="stat-shape-container">
-        <div class="stat-shape" id="shape-moderations"></div>
+
+    <div class="stat-shape-card" data-shape="heart" data-label="Moderations">
+      <div class="stat-card-background"></div>
+      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="stat-card-border" d="M 50 85 C 20 65 5 50 5 35 C 5 20 15 10 25 10 C 35 10 45 18 50 28 C 55 18 65 10 75 10 C 85 10 95 20 95 35 C 95 50 80 65 50 85 Z"></path>
+      </svg>
+      <div class="stat-card-content">
+        <div class="stat-card-inner">
+          <div class="stat-value">${moderationCount || 0}</div>
+          <div class="stat-unit">actions</div>
+          <div class="stat-label">Moderations</div>
+        </div>
       </div>
-      <div class="stat-value">${moderationCount || 0}</div>
-      <div class="stat-label">Moderations</div>
-      <div class="stat-unit">actions</div>
     </div>
-    <div class="stat-glass-card" data-shape="starFive">
-      <div class="stat-shape-container">
-        <div class="stat-shape" id="shape-hours"></div>
+
+    <div class="stat-shape-card" data-shape="starFive" data-label="This Week">
+      <div class="stat-card-background"></div>
+      <svg class="stat-card-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="stat-card-border" d="M 50 10 L 61 40 L 90 40 L 67 60 L 78 90 L 50 70 L 22 90 L 33 60 L 10 40 L 39 40 Z"></path>
+      </svg>
+      <div class="stat-card-content">
+        <div class="stat-card-inner">
+          <div class="stat-value">${(weeklyHours || 0).toFixed(1)}</div>
+          <div class="stat-unit">hours</div>
+          <div class="stat-label">This Week</div>
+        </div>
       </div>
-      <div class="stat-value">${(weeklyHours || 0).toFixed(1)}</div>
-      <div class="stat-label">This Week</div>
-      <div class="stat-unit">hours</div>
     </div>
   </div>
 
 <script>
 (function() {
-  if (!window.SHAPES || !window.generateShapeSVG) return;
+  if (typeof gsap === 'undefined') return;
   
-  const cards = document.querySelectorAll('.stat-glass-card');
-  cards.forEach(card => {
-    const shapeKey = card.getAttribute('data-shape');
-    const shapeDiv = card.querySelector('.stat-shape');
-    if (shapeDiv && window.SHAPES[shapeKey]) {
-      const svg = window.generateShapeSVG(shapeKey, {
-        size: 100,
-        className: 'shape-stat-glyph',
-        style: 'color: var(--md-sys-color-primary); filter: drop-shadow(0 4px 12px rgba(216, 186, 250, 0.25))'
-      });
-      shapeDiv.innerHTML = svg;
-    }
-  });
+  const cards = document.querySelectorAll('.stat-shape-card');
   
-  // Hover animation
   cards.forEach(card => {
+    const svg = card.querySelector('.stat-card-svg');
+    const path = card.querySelector('.stat-card-border');
+    const content = card.querySelector('.stat-card-content');
+    const background = card.querySelector('.stat-card-background');
+    
+    if (!svg || !path) return;
+    
+    // Hover animation - shape morphs and glows
     card.addEventListener('mouseenter', function() {
-      const svg = this.querySelector('svg');
-      if (svg && typeof gsap !== 'undefined') {
-        gsap.to(svg, {
-          duration: 0.4,
-          scale: 1.2,
-          filter: 'drop-shadow(0 8px 20px rgba(216, 186, 250, 0.5))',
-          ease: 'elastic.out(1, 0.6)'
-        });
-      }
+      gsap.to(path, {
+        duration: 0.6,
+        filter: 'drop-shadow(0 8px 24px rgba(216, 186, 250, 0.6))',
+        ease: 'back.out(1.2)'
+      });
+      
+      gsap.to(background, {
+        duration: 0.4,
+        opacity: 0.15,
+        ease: 'power2.out'
+      });
+      
+      gsap.to(svg, {
+        duration: 0.5,
+        scale: 1.05,
+        ease: 'elastic.out(1, 0.5)'
+      });
     });
     
     card.addEventListener('mouseleave', function() {
-      const svg = this.querySelector('svg');
-      if (svg && typeof gsap !== 'undefined') {
-        gsap.to(svg, {
-          duration: 0.3,
-          scale: 1,
-          filter: 'drop-shadow(0 4px 12px rgba(216, 186, 250, 0.25))',
-          ease: 'power2.out'
-        });
-      }
+      gsap.to(path, {
+        duration: 0.5,
+        filter: 'drop-shadow(0 4px 12px rgba(216, 186, 250, 0.3))',
+        ease: 'power2.out'
+      });
+      
+      gsap.to(background, {
+        duration: 0.4,
+        opacity: 0.08,
+        ease: 'power2.out'
+      });
+      
+      gsap.to(svg, {
+        duration: 0.4,
+        scale: 1,
+        ease: 'back.out(1)'
+      });
     });
   });
 })();
