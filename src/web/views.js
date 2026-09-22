@@ -784,8 +784,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
 
 <div class="glass-grid">
     <div class="stat-m3-card" data-shape="circle">
-      <svg class="m3-shape-fill" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
-        <path d="M330 160C330 248.366 258.366 320 170 320C81.6344 320 9.99999 248.366 10 160C10 71.6344 81.6345 -7.72516e-06 170 0C258.366 7.72516e-06 330 71.6345 330 160Z" fill="currentColor"/>
+      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <circle cx="50" cy="50" r="45" fill="currentColor"/>
       </svg>
       <div class="m3-card-text">
         <div class="m3-value">${activeShifts.length}</div>
@@ -794,8 +794,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="blob">
-      <svg class="m3-shape-fill" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
-        <path d="M160 10C216.274 10 270 35.8629 293.301 76.6697C316.602 117.477 310.951 166.855 278.995 204.142C247.039 241.429 193.889 260 138 260C82.1116 260 28.9607 241.429 -2.99499 204.142C-34.9507 166.855 -40.6023 117.477 -17.3007 76.6697C5.99994 35.8629 103.726 10 160 10Z" fill="currentColor"/>
+      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <path d="M50 10C70 10 80 25 85 40C88 50 85 65 75 75C65 85 50 90 35 88C20 85 10 75 8 60C5 45 15 25 30 15C40 8 50 8 50 10Z" fill="currentColor"/>
       </svg>
       <div class="m3-card-text">
         <div class="m3-value">${upcomingShifts.length}</div>
@@ -804,8 +804,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="starburst">
-      <svg class="m3-shape-fill" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-        <path d="M150 20L180 110L270 130L200 190L220 280L150 240L80 280L100 190L30 130L120 110Z" fill="currentColor"/>
+      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <path d="M50 5L61 35L92 40L68 60L76 92L50 68L24 92L32 60L8 40L39 35Z" fill="currentColor"/>
       </svg>
       <div class="m3-card-text">
         <div class="m3-value">${completedShifts.length}</div>
@@ -814,8 +814,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="diamond">
-      <svg class="m3-shape-fill" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-        <path d="M150 20L230 150L150 280L70 150Z" fill="currentColor"/>
+      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <path d="M50 10L85 50L50 90L15 50Z" fill="currentColor"/>
       </svg>
       <div class="m3-card-text">
         <div class="m3-value">${moderationCount || 0}</div>
@@ -824,8 +824,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="star">
-      <svg class="m3-shape-fill" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-        <path d="M150 30L180 120L270 120L200 180L230 270L150 210L70 270L100 180L30 120L120 120Z" fill="currentColor"/>
+      <svg class="m3-shape-fill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <path d="M50 10L61 35L88 35L67 55L76 80L50 60L24 80L33 55L12 35L39 35Z" fill="currentColor"/>
       </svg>
       <div class="m3-card-text">
         <div class="m3-value">${(weeklyHours || 0).toFixed(1)}</div>
@@ -849,7 +849,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     card.addEventListener('mouseenter', function() {
       gsap.to(svg, {
         duration: 0.5,
-        scale: 1.08,
+        scale: 0.45,
         filter: 'drop-shadow(0 12px 28px rgba(216, 186, 250, 0.7))',
         ease: 'back.out(1.2)'
       });
@@ -864,7 +864,7 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     card.addEventListener('mouseleave', function() {
       gsap.to(svg, {
         duration: 0.4,
-        scale: 1,
+        scale: 0.4,
         filter: 'drop-shadow(0 6px 16px rgba(216, 186, 250, 0.4))',
         ease: 'back.out(1)'
       });

@@ -6052,6 +6052,8 @@ body {
   filter: drop-shadow(0 6px 16px rgba(216, 186, 250, 0.4));
   transition: filter 240ms ease-out, transform 240ms ease-out;
   z-index: 1;
+  transform: scale(0.4);
+  transform-origin: center;
 }
 
 .m3-card-text {
