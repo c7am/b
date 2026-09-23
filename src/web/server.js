@@ -26,6 +26,10 @@ function buildApp(client, config) {
     res.sendFile(path.join(__dirname, 'style.css'));
   });
 
+  app.get('/m3-shapes-morphing.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'm3-shapes-morphing.js'));
+  });
+
   app.use(session({
     store: buildSessionStore(),
     secret: config.sessionSecret,

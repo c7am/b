@@ -784,8 +784,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
 
 <div class="glass-grid">
     <div class="stat-m3-card" data-shape="active">
-      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="40" fill="currentColor"/>
+      <svg class="m3-shape-morphing" data-shape="active" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="morph-path" fill="currentColor" d="M50 10 C72.09 10 90 27.91 90 50 C90 72.09 72.09 90 50 90 C27.91 90 10 72.09 10 50 C10 27.91 27.91 10 50 10 Z"/>
       </svg>
       <div class="m3-card-content">
         <div class="m3-value">${activeShifts.length}</div>
@@ -794,8 +794,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="upcoming">
-      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 50C20 32.33 32.33 20 50 20C67.67 20 80 32.33 80 50C80 67.67 67.67 80 50 80C32.33 80 20 67.67 20 50Z" fill="currentColor"/>
+      <svg class="m3-shape-morphing" data-shape="upcoming" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="morph-path" fill="currentColor" d="M20 30 L80 30 C85.52 30 90 34.48 90 40 L90 60 C90 65.52 85.52 70 80 70 L20 70 C14.48 70 10 65.52 10 60 L10 40 C10 34.48 14.48 30 20 30 Z"/>
       </svg>
       <div class="m3-card-content">
         <div class="m3-value">${upcomingShifts.length}</div>
@@ -804,8 +804,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="completed">
-      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 15L61 39L88 44L70 60L76 88L50 72L24 88L30 60L12 44L39 39Z" fill="currentColor"/>
+      <svg class="m3-shape-morphing" data-shape="completed" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="morph-path" fill="currentColor" d="M50 15 L61 39 L88 44 L70 60 L76 88 L50 72 L24 88 L30 60 L12 44 L39 39 Z"/>
       </svg>
       <div class="m3-card-content">
         <div class="m3-value">${completedShifts.length}</div>
@@ -814,8 +814,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="moderations">
-      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 15C68.225 15 83 29.775 83 48V85C83 87.21 81.21 89 79 89H21C18.79 89 17 87.21 17 85V48C17 29.775 31.775 15 50 15Z" fill="currentColor"/>
+      <svg class="m3-shape-morphing" data-shape="moderations" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="morph-path" fill="currentColor" d="M50 15 C65 15 80 22 80 35 L80 55 C80 75 65 85 50 90 C35 85 20 75 20 55 L20 35 C20 22 35 15 50 15 Z"/>
       </svg>
       <div class="m3-card-content">
         <div class="m3-value">${moderationCount || 0}</div>
@@ -824,8 +824,8 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
     </div>
 
     <div class="stat-m3-card" data-shape="weekly">
-      <svg class="m3-shape-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 20C65.464 20 78 32.536 78 48C78 63.464 65.464 76 50 76C34.536 76 22 63.464 22 48C22 32.536 34.536 20 50 20Z" fill="currentColor"/>
+      <svg class="m3-shape-morphing" data-shape="weekly" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="morph-path" fill="currentColor" d="M50 15 C70 15 85 32.39 85 50 C85 67.61 70 85 50 85 C30 85 15 67.61 15 50 C15 32.39 30 15 50 15 Z"/>
       </svg>
       <div class="m3-card-content">
         <div class="m3-value">${(weeklyHours || 0).toFixed(1)}</div>
@@ -833,6 +833,20 @@ function staffDashboard({ guild, user, shifts, activeLoa, moderationCount, weekl
       </div>
     </div>
   </div>
+
+<script src="m3-shapes-morphing.js"></script>
+<script>
+(function() {
+  // Initialize morphing animations when DOM is ready
+  if (typeof initMorphingAnimations === 'function') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMorphingAnimations);
+    } else {
+      initMorphingAnimations();
+    }
+  }
+})();
+</script>
 
 
 
