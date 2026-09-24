@@ -30,6 +30,7 @@ function buildAuthRouter({ clientId, clientSecret, baseUrl }) {
       const adminGuildIds = guilds.filter(hasAdministrator).map((g) => g.id);
 
       req.session.user = { id: user.id, username: user.username };
+      req.session.accessToken = tokenData.access_token; // Store for React SPA API calls
       req.session.adminGuildIds = adminGuildIds;
       // Every guild Discord says this user belongs to, admin or not. Used
       // only to decide which guilds to list on the picker page; actual
@@ -41,6 +42,7 @@ function buildAuthRouter({ clientId, clientSecret, baseUrl }) {
       // Regenerate the CSRF token on every fresh login.
       req.session.csrfToken = crypto.randomBytes(16).toString('hex');
 
+      // For React SPA: redirect to React route, pass token via query (or rely on cookie-based session)
       res.redirect('/dashboard');
     } catch (err) {
       console.error('[web/auth] OAuth callback failed:', err);

@@ -15,13 +15,18 @@ function buildApp(client, config) {
   app.set('trust proxy', 1);
 
   app.use(express.urlencoded({ extended: false }));
-  // Every page's <link> tag requests /style.css directly (see views.js
-  // layout()). This used to be mounted at /static/style.css instead, a
-  // path nothing on any page ever actually requested, so every single
-  // page on the site has been loading with zero CSS applied: no Material
-  // Design 3 styling, no fonts, no colors, no layout, just raw unstyled
-  // browser HTML. That is almost certainly the real explanation behind
-  // the whole site looking "empty."
+  app.use(express.json());
+
+  // Serve React build as static files (if it exists)
+  const reactBuildPath = path.join(__dirname, '../../axiom-dashboard-react/dist');
+  try {
+    app.use(express.static(reactBuildPath));
+    console.log('[web] serving React build from', reactBuildPath);
+  } catch (err) {
+    console.warn('[web] React build not found, dashboard SPA will be unavailable');
+  }
+
+  // Legacy CSS (kept for compatibility)
   app.get('/style.css', (req, res) => {
     res.sendFile(path.join(__dirname, 'style.css'));
   });
@@ -43,18 +48,37 @@ function buildApp(client, config) {
     },
   }));
 
+  // Middleware to inject auth data as JSON
+  app.use((req, res, next) => {
+    if (req.session.user) {
+      res.locals.user = req.session.user;
+      res.locals.token = req.session.accessToken;
+    }
+    next();
+  });
+
   app.get('/', (req, res) => {
     if (req.session.user) return res.redirect('/dashboard');
     res.send(loginPage());
   });
 
-  // Public, no login required, same as any site's footer legal pages.
+  // Public pages
   app.get('/privacy', (req, res) => res.send(privacyPolicyPage()));
   app.get('/terms', (req, res) => res.send(termsOfServicePage()));
   app.get('/docs', (req, res) => res.send(docsPage()));
 
   app.use('/auth', buildAuthRouter(config));
   app.use('/dashboard', buildDashboardRouter(client));
+
+  // API routes for React SPA (new)
+  const apiRouter = require('./api')(client, config);
+  app.use('/api', apiRouter);
+
+  // SPA fallback: serve React index.html for any unmatched route
+  // (except /api and /auth which already have handlers)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(reactBuildPath, 'index.html'));
+  });
 
   return app;
 }
