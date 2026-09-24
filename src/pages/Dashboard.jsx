@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { useShiftStore } from '../stores/shiftStore';
 import { Layout } from '../components/Layout';
+import { ShapeCard } from '../components/ShapeCard';
 import '@m3e/react/card';
 import '@m3e/react/button';
 import '@m3e/react/shape';
@@ -82,13 +83,14 @@ export const DashboardPage = () => {
           }}
         >
           {statCards.map((card) => (
-            <m3e-card key={card.id} elevated>
+            <ShapeCard key={card.id} shape="8-leaf-clover">
               <div
                 style={{
                   padding: '16px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '8px',
+                  textAlign: 'center',
                 }}
               >
                 <div style={{ fontSize: '12px', opacity: 0.7 }}>
@@ -101,18 +103,19 @@ export const DashboardPage = () => {
                   {card.metric}
                 </div>
               </div>
-            </m3e-card>
+            </ShapeCard>
           ))}
         </div>
 
         {/* Shift Controls */}
-        <m3e-card elevated>
+        <ShapeCard shape="pill">
           <div
             style={{
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
+              width: '100%',
             }}
           >
             <h2 style={{ margin: '0', fontSize: '18px', fontWeight: '500' }}>
@@ -146,11 +149,11 @@ export const DashboardPage = () => {
               </div>
             )}
           </div>
-        </m3e-card>
+        </ShapeCard>
 
         {/* Recent Shifts Table */}
-        <m3e-card elevated>
-          <div style={{ padding: '16px' }}>
+        <ShapeCard shape="sunny">
+          <div style={{ padding: '16px', width: '100%' }}>
             <h2 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '500' }}>
               Recent Shifts
             </h2>
@@ -185,7 +188,7 @@ export const DashboardPage = () => {
               </table>
             )}
           </div>
-        </m3e-card>
+        </ShapeCard>
       </div>
     </Layout>
   );
