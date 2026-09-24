@@ -7,6 +7,8 @@ import '@m3e/react/button';
 import '@m3e/react/dialog';
 import '@m3e/react/form-field';
 import '@m3e/react/select';
+import '@m3e/react/search';
+import '@m3e/react/menu';
 
 const VIOLATION_TYPES = [
   { id: 'rdm', label: 'RDM', description: 'Random Death Match' },

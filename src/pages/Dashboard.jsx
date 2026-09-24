@@ -6,6 +6,9 @@ import { ShapeCard } from '../components/ShapeCard';
 import '@m3e/react/card';
 import '@m3e/react/button';
 import '@m3e/react/shape';
+import '@m3e/react/slider';
+import '@m3e/react/progress-indicator';
+import '@m3e/react/divider';
 
 export const DashboardPage = () => {
   const { user, accessToken } = useAuthStore();

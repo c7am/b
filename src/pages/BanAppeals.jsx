@@ -10,6 +10,8 @@ import '@m3e/react/autocomplete';
 import '@m3e/react/button';
 import '@m3e/react/dialog';
 import '@m3e/react/card';
+import '@m3e/react/breadcrumb';
+import '@m3e/react/tooltip';
 
 const APPEAL_REASONS = [
   { id: 'wrongful-ban', label: 'Wrongful Ban', description: 'I believe I was banned unfairly' },

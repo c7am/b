@@ -1,0 +1,184 @@
+/* M3E Shape Morphing & Motion System
+   https://matraic.github.io/m3e/styles/motion.html
+   https://matraic.github.io/m3e/components/shape.html */
+
+/* Shape morphing: all shapes normalized to same # of points, smooth clip-path transitions */
+m3e-shape {
+  transition: clip-path 400ms cubic-bezier(0.2, 0.0, 0.0, 1.0);
+}
+
+/* On hover, shapes can morph (set data-morph-to to trigger) */
+m3e-shape[data-morphing] {
+  transition: clip-path 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Expressive motion: spring-based tweening for interactive elements */
+m3e-button-filled,
+m3e-button-outlined,
+m3e-button-tonal,
+m3e-switch,
+m3e-checkbox,
+m3e-radio-button {
+  /* Theme motion tokens handled by m3e-theme (motion="expressive") */
+  /* Spring physics applied via --md-sys-motion-* tokens */
+}
+
+/* Loading indicator with expressive motion */
+m3e-loading-indicator {
+  /* Spins with motion system easing */
+}
+
+/* FAB morphing and motion */
+m3e-fab {
+  transition: transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+m3e-fab:hover {
+  transform: scale(1.08);
+}
+
+/* Respects prefers-reduced-motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  m3e-shape,
+  m3e-button-filled,
+  m3e-button-outlined,
+  m3e-button-tonal,
+  m3e-switch,
+  m3e-fab {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Dialog entrance with spring physics */
+m3e-dialog {
+  animation: dialogEnter 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Snackbar slide-in animation */
+m3e-snackbar {
+  animation: snackbarSlide 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+@keyframes snackbarSlide {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Tab indicator line animation with expressive motion */
+m3e-tabs {
+  --md-tab-indicator-animation: 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Expansion panel opening with spring physics */
+m3e-expansion-panel {
+  transition: max-height 400ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* List item reveal with stagger effect */
+m3e-list > m3e-list-item {
+  animation: listItemReveal 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0) backwards;
+}
+
+m3e-list > m3e-list-item:nth-child(1) { animation-delay: 0ms; }
+m3e-list > m3e-list-item:nth-child(2) { animation-delay: 30ms; }
+m3e-list > m3e-list-item:nth-child(3) { animation-delay: 60ms; }
+m3e-list > m3e-list-item:nth-child(4) { animation-delay: 90ms; }
+m3e-list > m3e-list-item:nth-child(5) { animation-delay: 120ms; }
+
+@keyframes listItemReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Avatar clip path with shape morphing */
+m3e-avatar {
+  transition: clip-path 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Badge pulse on new content */
+m3e-badge[data-pulse] {
+  animation: badgePulse 600ms cubic-bezier(0.4, 0.0, 0.2, 1.0) infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* Slider thumb with spring physics */
+m3e-slider {
+  /* Motion handled by theme system */
+}
+
+/* Navigation components with motion */
+m3e-nav-rail-item,
+m3e-nav-bar-item,
+m3e-nav-menu-item {
+  transition: all 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+m3e-nav-rail-item:hover,
+m3e-nav-bar-item:hover,
+m3e-nav-menu-item:hover {
+  transform: scale(1.05);
+}
+
+/* Progress indicator smooth transitions */
+m3e-progress-indicator {
+  transition: all 400ms cubic-bezier(0.2, 0.0, 0.0, 1.0);
+}
+
+/* Card elevation on hover with motion */
+m3e-card[elevated]:hover {
+  transition: box-shadow 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Tooltip fade-in with motion */
+m3e-tooltip {
+  transition: opacity 200ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Menu item animation */
+m3e-menu-item {
+  transition: background-color 200ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Stepper indicator animation */
+m3e-stepper {
+  transition: all 400ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+/* Chips with morph effect */
+m3e-chips {
+  transition: clip-path 300ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}

@@ -4,6 +4,10 @@ import { useTheme } from './ThemeProvider';
 import '@m3e/react/nav-rail';
 import '@m3e/react/toolbar';
 import '@m3e/react/icon-button';
+import '@m3e/react/snackbar';
+import '@m3e/react/tabs';
+import '@m3e/react/badge';
+import '@m3e/react/avatar';
 
 export const Layout = ({ children, currentPage }) => {
   const { user, signOut } = useAuthStore();

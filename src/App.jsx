@@ -7,6 +7,7 @@ import { SettingsPage } from './pages/Settings';
 import { ModerationPage } from './pages/Moderation';
 import '@m3e/react/theme';
 import './App.css';
+import './styles/m3e-morphing.css';
 
 function App() {
   const path = window.location.pathname;

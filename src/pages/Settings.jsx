@@ -7,6 +7,8 @@ import '@m3e/react/select';
 import '@m3e/react/switch';
 import '@m3e/react/form-field';
 import '@m3e/react/button';
+import '@m3e/react/chips';
+import '@m3e/react/skeleton';
 
 export const SettingsPage = () => {
   const { user, accessToken } = useAuthStore();
