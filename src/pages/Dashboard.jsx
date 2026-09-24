@@ -4,6 +4,7 @@ import { useShiftStore } from '../stores/shiftStore';
 import { Layout } from '../components/Layout';
 import '@m3e/react/card';
 import '@m3e/react/button';
+import '@m3e/react/shape';
 
 export const DashboardPage = () => {
   const { user, accessToken } = useAuthStore();

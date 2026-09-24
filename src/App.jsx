@@ -5,6 +5,7 @@ import { DashboardPage } from './pages/Dashboard';
 import { BanAppealsPage } from './pages/BanAppeals';
 import { SettingsPage } from './pages/Settings';
 import { ModerationPage } from './pages/Moderation';
+import '@m3e/react/theme';
 import './App.css';
 
 function App() {
@@ -30,9 +31,11 @@ function App() {
 
   return (
     <ThemeProvider>
-      <ProtectedRoute>
-        {getPage()}
-      </ProtectedRoute>
+      <m3e-theme color="#cba6f7" scheme="auto" motion="expressive" density="0">
+        <ProtectedRoute>
+          {getPage()}
+        </ProtectedRoute>
+      </m3e-theme>
     </ThemeProvider>
   );
 }

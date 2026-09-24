@@ -32,15 +32,9 @@ body:not(.dark) {
   --md-sys-color-tertiary-container: #ffe8e8;
 }
 
+/* M3E components use m3e-theme for shape system, not border-radius */
 m3e-card {
   width: 100%;
-  border-radius: 8px;
-}
-
-m3e-button-filled,
-m3e-button-outlined,
-m3e-button-tonal {
-  border-radius: 6px;
 }
 
 m3e-nav-rail {
