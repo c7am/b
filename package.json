@@ -9,7 +9,8 @@
     "dev": "nodemon src/index.js",
     "prepare-icons": "node scripts/prepare-icons.js",
     "upload-emojis": "node scripts/upload-emojis.js",
-    "generate-theme": "node scripts/generate-theme.mjs"
+    "generate-theme": "node scripts/generate-theme.mjs",
+    "build": "bash scripts/build-with-react.sh"
   },
   "keywords": [],
   "author": "",

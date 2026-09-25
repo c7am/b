@@ -1,0 +1,9 @@
+# Ignore React source (only dist needed)
+../axiom-dashboard-react/src
+../axiom-dashboard-react/public
+../axiom-dashboard-react/node_modules
+../axiom-dashboard-react/.git
+
+# Ignore other build artifacts
+*.tgz
+.DS_Store

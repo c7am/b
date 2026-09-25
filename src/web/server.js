@@ -18,15 +18,16 @@ function buildApp(client, config) {
   app.use(express.json());
 
   // Serve React build as static files
-  // Note: __dirname resolves at runtime based on Node's working directory
-  // When running in Render, use absolute path from sibling directory
+  // On Render: React build is copied to public/react during deployment
+  // Locally: set REACT_BUILD_PATH env var
   const reactBuildPath = process.env.REACT_BUILD_PATH || 
-    '/home/claude/axiom-dashboard-react/dist';
-  try {
+    path.join(__dirname, '../../public/react');
+  
+  if (require('fs').existsSync(reactBuildPath)) {
     app.use(express.static(reactBuildPath));
     console.log('[web] serving React build from', reactBuildPath);
-  } catch (err) {
-    console.warn('[web] React build not found at', reactBuildPath, '— SPA unavailable');
+  } else {
+    console.warn('[web] React build not found at', reactBuildPath);
   }
 
   // Legacy CSS (kept for compatibility)
