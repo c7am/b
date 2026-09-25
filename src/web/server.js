@@ -17,13 +17,16 @@ function buildApp(client, config) {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
 
-  // Serve React build as static files (if it exists)
-  const reactBuildPath = path.join(__dirname, '../../axiom-dashboard-react/dist');
+  // Serve React build as static files
+  // Note: __dirname resolves at runtime based on Node's working directory
+  // When running in Render, use absolute path from sibling directory
+  const reactBuildPath = process.env.REACT_BUILD_PATH || 
+    '/home/claude/axiom-dashboard-react/dist';
   try {
     app.use(express.static(reactBuildPath));
     console.log('[web] serving React build from', reactBuildPath);
   } catch (err) {
-    console.warn('[web] React build not found, dashboard SPA will be unavailable');
+    console.warn('[web] React build not found at', reactBuildPath, '— SPA unavailable');
   }
 
   // Legacy CSS (kept for compatibility)
