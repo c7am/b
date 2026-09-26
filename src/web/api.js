@@ -25,12 +25,12 @@ function buildApiRouter(client, config) {
   });
 
   // =========================================================================
-  // SHIFTS ENDPOINTS
+  // SHIFTS ENDPOINTS (personal timesheet tracking)
   // =========================================================================
   router.get('/shifts', requireAuth, async (req, res) => {
     try {
       const result = await query(
-        `SELECT * FROM shifts WHERE user_id = $1 ORDER BY started_at DESC LIMIT 50`,
+        `SELECT * FROM personal_shifts WHERE user_id = $1 ORDER BY started_at DESC LIMIT 50`,
         [req.session.user.id]
       );
       res.json(result.rows);
@@ -43,7 +43,7 @@ function buildApiRouter(client, config) {
   router.post('/shifts/start', requireAuth, async (req, res) => {
     try {
       const result = await query(
-        `INSERT INTO shifts (user_id, started_at, status) 
+        `INSERT INTO personal_shifts (user_id, started_at, status) 
          VALUES ($1, NOW(), 'active') 
          RETURNING *`,
         [req.session.user.id]
@@ -58,7 +58,7 @@ function buildApiRouter(client, config) {
   router.post('/shifts/:id/pause', requireAuth, async (req, res) => {
     try {
       const result = await query(
-        `UPDATE shifts SET status = 'paused' 
+        `UPDATE personal_shifts SET status = 'paused' 
          WHERE id = $1 AND user_id = $2 
          RETURNING *`,
         [req.params.id, req.session.user.id]
@@ -76,7 +76,7 @@ function buildApiRouter(client, config) {
   router.post('/shifts/:id/end', requireAuth, async (req, res) => {
     try {
       const result = await query(
-        `UPDATE shifts SET status = 'completed', ended_at = NOW() 
+        `UPDATE personal_shifts SET status = 'completed', ended_at = NOW() 
          WHERE id = $1 AND user_id = $2 
          RETURNING *`,
         [req.params.id, req.session.user.id]

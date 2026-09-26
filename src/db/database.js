@@ -151,6 +151,59 @@ async function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_shifts_guild_active ON shifts(guild_id, active);
     CREATE INDEX IF NOT EXISTS idx_shifts_time ON shifts(starts_at, ends_at);
 
+    -- React SPA personal shift tracking (timesheet-style start/pause/end)
+    CREATE TABLE IF NOT EXISTS personal_shifts (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      started_at TIMESTAMPTZ NOT NULL,
+      ended_at TIMESTAMPTZ,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_personal_shifts_user ON personal_shifts(user_id);
+    CREATE INDEX IF NOT EXISTS idx_personal_shifts_status ON personal_shifts(status);
+
+    -- Ban appeals for React SPA
+    CREATE TABLE IF NOT EXISTS appeals (
+      id SERIAL PRIMARY KEY,
+      created_by TEXT NOT NULL,
+      roblox_username TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      description TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_appeals_creator ON appeals(created_by);
+    CREATE INDEX IF NOT EXISTS idx_appeals_status ON appeals(status);
+
+    -- Guild configuration for React SPA settings page
+    CREATE TABLE IF NOT EXISTS guild_config (
+      id SERIAL PRIMARY KEY,
+      guild_id TEXT NOT NULL UNIQUE,
+      mod_role TEXT,
+      staff_role TEXT,
+      logs_channel TEXT,
+      appeals_enabled BOOLEAN NOT NULL DEFAULT true,
+      auto_mod BOOLEAN NOT NULL DEFAULT false,
+      dm_notifications BOOLEAN NOT NULL DEFAULT true,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_guild_config_guild_id ON guild_config(guild_id);
+
+    -- Moderation history for React SPA
+    CREATE TABLE IF NOT EXISTS moderations (
+      id SERIAL PRIMARY KEY,
+      target_user TEXT NOT NULL,
+      violation_type TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      moderator_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_moderations_target ON moderations(target_user);
+    CREATE INDEX IF NOT EXISTS idx_moderations_type ON moderations(violation_type);
+
     CREATE TABLE IF NOT EXISTS shift_members (
       id SERIAL PRIMARY KEY,
       shift_id INTEGER NOT NULL REFERENCES shifts(id) ON DELETE CASCADE,
