@@ -125,21 +125,15 @@ export const DashboardPage = () => {
               Shift Management
             </h2>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <m3e-button-filled
-                label="Start Shift"
-                onClick={handleStartShift}
+              <m3e-button variant="filled" onClick={handleStartShift}
                 disabled={!!currentShift}
-              />
-              <m3e-button-outlined
-                label="Pause Shift"
-                onClick={handlePauseShift}
+              >Start Shift</m3e-button>
+              <m3e-button variant="outlined" onClick={handlePauseShift}
                 disabled={!currentShift}
-              />
-              <m3e-button-tonal
-                label="End Shift"
-                onClick={handleEndShift}
+              >Pause Shift</m3e-button>
+              <m3e-button variant="tonal" onClick={handleEndShift}
                 disabled={!currentShift}
-              />
+              >End Shift</m3e-button>
             </div>
             {currentShift && (
               <div style={{ padding: '12px', backgroundColor: 'var(--md-sys-color-tertiary-container)', borderRadius: '8px' }}>

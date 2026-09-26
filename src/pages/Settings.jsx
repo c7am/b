@@ -73,7 +73,7 @@ export const SettingsPage = () => {
     <Layout currentPage="settings">
       <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {/* Server Configuration */}
-        <m3e-card elevated>
+        <m3e-card variant="elevated">
           <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h2 style={{ margin: '0', fontSize: '18px', fontWeight: '500' }}>
               Server Configuration
@@ -155,7 +155,7 @@ export const SettingsPage = () => {
         </m3e-card>
 
         {/* Feature Toggles */}
-        <m3e-card elevated>
+        <m3e-card variant="elevated">
           <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h2 style={{ margin: '0', fontSize: '18px', fontWeight: '500' }}>
               Feature Toggles
@@ -241,12 +241,12 @@ export const SettingsPage = () => {
         )}
 
         {/* Save Button */}
-        <m3e-button-filled
-          label={isSaving ? 'Saving...' : 'Save Settings'}
+        <m3e-button
+          variant="filled"
           onClick={handleSaveConfig}
           disabled={isSaving}
           style={{ width: '100%' }}
-        />
+        >{isSaving ? 'Saving...' : 'Save Settings'}</m3e-button>
       </div>
     </Layout>
   );

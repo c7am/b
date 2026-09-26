@@ -117,14 +117,14 @@ export const ModerationPage = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {/* Quick Moderate Button */}
         <div style={{ display: 'flex', gap: '12px' }}>
-          <m3e-button-filled
-            label="Quick Moderate"
+          <m3e-button
+            variant="filled"
             onClick={() => setShowQuickModerate(true)}
-          />
+          >Quick Moderate</m3e-button>
         </div>
 
         {/* Moderation History - M3E List - https://matraic.github.io/m3e/#/components/list.html */}
-        <m3e-card elevated>
+        <m3e-card variant="elevated">
           <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h2 style={{ margin: '0', fontSize: '18px', fontWeight: '500' }}>
               Moderation History
@@ -277,19 +277,17 @@ export const ModerationPage = () => {
               )}
             </div>
             <div slot="actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <m3e-button-outlined
-                label="Cancel"
+              <m3e-button
+                variant="outlined"
                 onClick={() => {
                   setShowQuickModerate(false);
                   setModerateError(null);
                 }}
                 disabled={isSubmitting}
-              />
-              <m3e-button-filled
-                label="Create Action"
-                onClick={handleQuickModerate}
+              >Cancel</m3e-button>
+              <m3e-button variant="filled" onClick={handleQuickModerate}
                 disabled={isSubmitting || !moderateTarget || !violationType}
-              />
+              >Create Action</m3e-button>
             </div>
           </m3e-dialog>
         )}

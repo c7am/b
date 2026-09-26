@@ -28,12 +28,10 @@ export const LoginPage = () => {
         </div>
       )}
 
-      <m3e-button-filled
-        label="Sign in with Discord"
-        onClick={handleSignIn}
+      <m3e-button variant="filled" onClick={handleSignIn}
         disabled={isLoading}
         style={{ '--md-sys-color-primary': '#5865F2' }}
-      />
+      >Sign in with Discord</m3e-button>
     </div>
   );
 };

@@ -12,7 +12,7 @@ export const ShapeCard = ({
   elevated = true,
   style = {},
 }) => (
-  <m3e-card elevated={elevated} style={style}>
+  <m3e-card variant={elevated ? "elevated" : "filled"} style={style}>
     <m3e-shape
       name={shape}
       style={{

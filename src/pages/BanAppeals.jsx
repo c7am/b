@@ -140,7 +140,7 @@ export const BanAppealsPage = () => {
 
         {/* Step 1: Authentication & Roblox Linking */}
         {step === 0 && (
-          <m3e-card elevated>
+          <m3e-card variant="elevated">
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h2 style={{ margin: '0', fontSize: '18px', fontWeight: '500' }}>
                 Step 1: Link Your Roblox Account
@@ -180,18 +180,16 @@ export const BanAppealsPage = () => {
                 </div>
               )}
 
-              <m3e-button-filled
-                label="Verify & Continue"
-                onClick={handleLinkRoblox}
+              <m3e-button variant="filled" onClick={handleLinkRoblox}
                 disabled={isSubmitting || !robloxUsername.trim()}
-              />
+              >Verify & Continue</m3e-button>
             </div>
           </m3e-card>
         )}
 
         {/* Step 2: Appeal Submission */}
         {step === 1 && (
-          <m3e-card elevated>
+          <m3e-card variant="elevated">
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h2 style={{ margin: '0', fontSize: '18px', fontWeight: '500' }}>
                 Step 2: Submit Your Appeal
@@ -282,16 +280,14 @@ export const BanAppealsPage = () => {
               )}
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <m3e-button-outlined
-                  label="Back"
+                <m3e-button
+                  variant="outlined"
                   onClick={() => setStep(0)}
                   disabled={isSubmitting}
-                />
-                <m3e-button-filled
-                  label="Review & Submit"
-                  onClick={handleSubmitAppeal}
+                >Back</m3e-button>
+                <m3e-button variant="filled" onClick={handleSubmitAppeal}
                   disabled={isSubmitting || !appealReason || !appealDescription.trim()}
-                />
+                >Review & Submit</m3e-button>
               </div>
             </div>
           </m3e-card>
@@ -299,7 +295,7 @@ export const BanAppealsPage = () => {
 
         {/* Step 3: Confirmation */}
         {step === 2 && (
-          <m3e-card elevated>
+          <m3e-card variant="elevated">
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>✓</div>
               <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '500' }}>
@@ -320,10 +316,8 @@ export const BanAppealsPage = () => {
                 <strong>Appeal ID:</strong> {Math.random().toString(36).substring(7).toUpperCase()}
               </div>
 
-              <m3e-button-filled
-                label="Submit Another Appeal"
-                onClick={handleReset}
-              />
+              <m3e-button variant="filled" onClick={handleReset}
+              >Submit Another Appeal</m3e-button>
             </div>
           </m3e-card>
         )}
@@ -358,16 +352,14 @@ export const BanAppealsPage = () => {
               </div>
             </div>
             <div slot="actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <m3e-button-outlined
-                label="Cancel"
+              <m3e-button
+                variant="outlined"
                 onClick={() => setShowConfirmDialog(false)}
                 disabled={isSubmitting}
-              />
-              <m3e-button-filled
-                label="Submit Appeal"
-                onClick={handleConfirmSubmit}
+              >Cancel</m3e-button>
+              <m3e-button variant="filled" onClick={handleConfirmSubmit}
                 disabled={isSubmitting}
-              />
+              >Submit Appeal</m3e-button>
             </div>
           </m3e-dialog>
         )}
