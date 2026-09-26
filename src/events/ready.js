@@ -6,6 +6,7 @@ module.exports = {
   name: Events.ClientReady,
   once: true,
   async execute(client) {
+    console.log('[ready.js] event fired');
     console.log(`\n[bot] ${client.user.tag} is online`);
 
     const TOKEN = process.env.DISCORD_TOKEN;

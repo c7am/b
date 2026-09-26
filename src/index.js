@@ -58,14 +58,18 @@ for (const file of eventFiles) {
 
 // Schema must exist before login
 async function main() {
+  console.log('[boot] initDatabase starting');
   await initDatabase();
+  console.log('[boot] initDatabase complete, requiring startWebServer');
   
   // Set up ready listener BEFORE login
   const { startWebServer } = require('./web/server');
+  console.log('[boot] startWebServer imported, registering ClientReady listener');
   let webServer = null;
   let webServerError = null;
   
   client.once(Events.ClientReady, () => {
+    console.log('[boot] ClientReady event handler fired');
     // Now that bot is connected, guild cache is populated
     // Start web server on first ready event
     if (!webServer) {
@@ -84,7 +88,9 @@ async function main() {
     }
   });
   
+  console.log('[boot] about to call client.login(TOKEN)');
   await client.login(TOKEN);
+  console.log('[boot] client.login() completed');
 }
 
 main().catch((err) => {
