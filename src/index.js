@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
+
+console.log('[app] AXIOM BOT v1.0 STARTING - FRESH BUILD SESSION 15');
+
 const { Client, Collection, GatewayIntentBits, Events } = require('discord.js');
 const { initDatabase } = require('./db/database');
 
