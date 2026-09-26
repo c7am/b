@@ -119,7 +119,11 @@ function startWebServer(client) {
   const baseUrl = WEB_BASE_URL || RENDER_EXTERNAL_URL;
 
   if (!baseUrl || !DISCORD_CLIENT_SECRET || !SESSION_SECRET) {
-    console.log('[web] WEB_BASE_URL (or RENDER_EXTERNAL_URL), DISCORD_CLIENT_SECRET, or SESSION_SECRET not set, dashboard disabled.');
+    console.error('[web] DASHBOARD STARTUP BLOCKED:');
+    if (!baseUrl) console.error('  - WEB_BASE_URL or RENDER_EXTERNAL_URL not set');
+    if (!DISCORD_CLIENT_SECRET) console.error('  - DISCORD_CLIENT_SECRET not set');
+    if (!SESSION_SECRET) console.error('  - SESSION_SECRET not set');
+    console.log('[web] Dashboard disabled, bot continues without it.');
     return null;
   }
 
