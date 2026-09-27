@@ -28,6 +28,12 @@ pool.on('error', (err) => {
   console.error('[db] unexpected error on idle client', err);
 });
 
+// Thin wrapper so callers don't need to import `pool` directly.
+// Same signature/return shape as pool.query: (text, params) => { rows, ... }
+async function query(text, params) {
+  return pool.query(text, params);
+}
+
 // ---------------------------------------------------------------------------
 // Schema. Run once at boot via initDatabase(), awaited before the bot logs in
 // or the web server starts, so nothing can query a table that doesn't exist
@@ -871,6 +877,7 @@ async function setInGameModStatus(guildId, discordUserId, isInGameMod) {
 
 module.exports = {
   pool,
+  query,
   initDatabase,
   addPromotion,
   addInfraction,

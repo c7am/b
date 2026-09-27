@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db/db');
+const { query } = require('../db/database');
 
 function buildApiRouter(client, config) {
   const router = express.Router();
