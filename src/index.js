@@ -94,6 +94,14 @@ async function main() {
   console.log('[boot] about to call client.login(TOKEN)');
   console.log('[boot] TOKEN present:', !!TOKEN, 'length:', TOKEN?.length || 0);
   
+  // Attach error handlers to catch network/auth failures
+  client.on('error', (err) => {
+    console.error('[discord.js error]', err.message);
+  });
+  client.on('warn', (msg) => {
+    console.warn('[discord.js warn]', msg);
+  });
+  
   try {
     const loginPromise = client.login(TOKEN);
     const timeoutPromise = new Promise((_, reject) =>
