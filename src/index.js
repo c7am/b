@@ -92,7 +92,20 @@ async function main() {
   });
   
   console.log('[boot] about to call client.login(TOKEN)');
-  await client.login(TOKEN);
+  console.log('[boot] TOKEN present:', !!TOKEN, 'length:', TOKEN?.length || 0);
+  
+  try {
+    const loginPromise = client.login(TOKEN);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Discord login timeout after 15s')), 15000)
+    );
+    await Promise.race([loginPromise, timeoutPromise]);
+    console.log('[boot] Discord client logged in successfully');
+  } catch (err) {
+    console.error('[boot] Discord client login failed:', err.message);
+    console.error('[boot] Token format check: starts with ', TOKEN?.substring(0, 20) || 'EMPTY');
+    process.exit(1);
+  }
   console.log('[boot] client.login() completed');
 }
 
