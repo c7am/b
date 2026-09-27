@@ -2,6 +2,12 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+// Node 18+ prefers IPv6 by default. If the host's IPv6 egress is broken
+// (silently dropped, not refused), outbound connections hang instead of
+// failing fast. Force IPv4 first to rule this out.
+const dns = require('node:dns');
+dns.setDefaultResultOrder('ipv4first');
+
 console.log('[app] AXIOM BOT v1.0 STARTING - FRESH BUILD SESSION 15');
 
 const { Client, Collection, GatewayIntentBits, Events } = require('discord.js');
@@ -101,6 +107,28 @@ async function main() {
   client.on('warn', (msg) => {
     console.warn('[discord.js warn]', msg);
   });
+
+  // Preflight: hit Discord's REST API directly before attempting login.
+  // This tells us whether we're dealing with a network-level hang (IPv6
+  // blackhole) or Discord actively rate-limiting Render's shared egress IPs.
+  console.log('[preflight] checking discord.com reachability...');
+  try {
+    const preflightStart = Date.now();
+    const res = await fetch('https://discord.com/api/v10/gateway', {
+      signal: AbortSignal.timeout(8000),
+    });
+    const elapsed = Date.now() - preflightStart;
+    console.log(`[preflight] status=${res.status} elapsed=${elapsed}ms retry-after=${res.headers.get('retry-after') || 'none'}`);
+    if (res.status === 429) {
+      const body = await res.text();
+      console.error('[preflight] RATE LIMITED by Discord (likely shared Render IP):', body);
+    } else if (res.ok) {
+      console.log('[preflight] Discord API reachable, proceeding to login');
+    }
+  } catch (err) {
+    console.error('[preflight] fetch to discord.com FAILED:', err.name, err.message, err.cause?.code || '');
+    console.error('[preflight] this points to a network-level issue (IPv6, DNS, or firewall), not auth');
+  }
   
   try {
     const loginPromise = client.login(TOKEN);
