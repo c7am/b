@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// UNUSED legacy client. It targets a bearer-token flow that the backend does not have,
+// and its /auth/me and /auth/signout paths do not exist there. The app authenticates with
+// the Express session cookie and calls fetch directly (see src/stores and src/pages).
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 export const api = {
   // Auth endpoints
