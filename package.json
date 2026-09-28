@@ -10,7 +10,8 @@
     "prepare-icons": "node scripts/prepare-icons.js",
     "upload-emojis": "node scripts/upload-emojis.js",
     "generate-theme": "node scripts/generate-theme.mjs",
-    "build": "bash scripts/build-with-react.sh"
+    "build": "bash scripts/build-with-react.sh",
+    "smoke": "node scripts/smoke-routes.js && node scripts/smoke-authz.js"
   },
   "keywords": [],
   "author": "",
