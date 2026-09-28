@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db/database');
+const { canManageStaff } = require('../utils/permissions');
 
 function buildApiRouter(client, config) {
   const router = express.Router();
@@ -10,6 +11,53 @@ function buildApiRouter(client, config) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     next();
+  };
+
+  // Guild access is checked live against the bot's own guild cache with the same
+  // canManageStaff rule the slash commands and the legacy dashboard use (the
+  // configured Staff Manage role, or the Discord Manage Roles permission). The
+  // OAuth-time snapshot in the session is never used for authorization, since a
+  // user can lose a role after logging in.
+  async function isStaffIn(userId, guildId) {
+    const guild = client.guilds.cache.get(guildId);
+    if (!guild) return false;
+    try {
+      const member = await guild.members.fetch(userId);
+      return await canManageStaff(member, guildId);
+    } catch {
+      return false;
+    }
+  }
+
+  const requireGuildAdmin = async (req, res, next) => {
+    try {
+      const { guildId } = req.params;
+      if (!client.guilds.cache.has(guildId)) {
+        return res.status(404).json({ error: 'This bot is not in that server.' });
+      }
+      if (!(await isStaffIn(req.session.user.id, guildId))) {
+        return res.status(403).json({ error: 'Requires the Staff Manage role or Manage Roles permission in that server.' });
+      }
+      next();
+    } catch (err) {
+      console.error('[api] guild access check failed:', err);
+      res.status(500).json({ error: 'Access check failed' });
+    }
+  };
+
+  // For endpoints not tied to one guild (the moderations table has no guild_id
+  // column yet): the user must be staff in at least one server the bot is in.
+  const requireStaff = async (req, res, next) => {
+    try {
+      const candidates = (req.session.memberGuildIds || []).filter((id) => client.guilds.cache.has(id));
+      for (const guildId of candidates) {
+        if (await isStaffIn(req.session.user.id, guildId)) return next();
+      }
+      res.status(403).json({ error: 'Requires the Staff Manage role or Manage Roles permission in a server the bot is in.' });
+    } catch (err) {
+      console.error('[api] staff check failed:', err);
+      res.status(500).json({ error: 'Access check failed' });
+    }
   };
 
   // =========================================================================
@@ -146,7 +194,7 @@ function buildApiRouter(client, config) {
   // =========================================================================
   // CONFIG/SETTINGS ENDPOINTS
   // =========================================================================
-  router.get('/config/:guildId', requireAuth, async (req, res) => {
+  router.get('/config/:guildId', requireAuth, requireGuildAdmin, async (req, res) => {
     try {
       const result = await query(
         `SELECT * FROM guild_config WHERE guild_id = $1`,
@@ -162,7 +210,7 @@ function buildApiRouter(client, config) {
     }
   });
 
-  router.patch('/config/:guildId', requireAuth, async (req, res) => {
+  router.patch('/config/:guildId', requireAuth, requireGuildAdmin, async (req, res) => {
     const { modRole, staffRole, logsChannel, appeals, autoMod, dmNotifications } = req.body;
 
     try {
@@ -186,10 +234,11 @@ function buildApiRouter(client, config) {
   // =========================================================================
   // MODERATIONS ENDPOINTS
   // =========================================================================
-  router.get('/moderations', requireAuth, async (req, res) => {
+  router.get('/moderations', requireAuth, requireStaff, async (req, res) => {
     try {
       const result = await query(
-        `SELECT * FROM moderations ORDER BY created_at DESC LIMIT 100`
+        `SELECT * FROM moderations WHERE moderator_id = $1 ORDER BY created_at DESC LIMIT 100`,
+        [req.session.user.id]
       );
       res.json(result.rows);
     } catch (err) {
@@ -198,7 +247,7 @@ function buildApiRouter(client, config) {
     }
   });
 
-  router.post('/moderations', requireAuth, async (req, res) => {
+  router.post('/moderations', requireAuth, requireStaff, async (req, res) => {
     const { target, type, reason } = req.body;
     if (!target || !type || !reason) {
       return res.status(400).json({ error: 'Missing required fields' });

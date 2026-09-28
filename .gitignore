@@ -7,4 +7,5 @@ src/generated/icons.json
 assets/icons-raw/
 assets/icons-png/
 
-public/react
+# public/react is committed on purpose: Render only runs npm install and the
+# frontend source lives in a separate checkout. See scripts/build-with-react.sh.

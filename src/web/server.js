@@ -23,7 +23,8 @@ function buildApp(client, config) {
   const reactBuildPath = process.env.REACT_BUILD_PATH || 
     path.join(__dirname, '../../public/react');
   
-  if (require('fs').existsSync(reactBuildPath)) {
+  const hasReactBuild = require('fs').existsSync(reactBuildPath);
+  if (hasReactBuild) {
     app.use(express.static(reactBuildPath));
     console.log('[web] serving React build from', reactBuildPath);
   } else {
@@ -72,15 +73,32 @@ function buildApp(client, config) {
   app.get('/docs', (req, res) => res.send(docsPage()));
 
   app.use('/auth', buildAuthRouter(config));
-  app.use('/dashboard', buildDashboardRouter(client));
+
+  // Route ownership once a React build is deployed: React owns the bare
+  // /dashboard route (where the OAuth callback lands). The legacy Handlebars
+  // dashboard keeps everything under /dashboard/:guildId/*, and its guild
+  // picker moves to /legacy so staff can still reach those pages. Without a
+  // React build the legacy router keeps /dashboard exactly as before.
+  const legacyRouter = buildDashboardRouter(client);
+  if (hasReactBuild) {
+    app.get('/dashboard', (req, res) => {
+      res.sendFile(path.join(reactBuildPath, 'index.html'));
+    });
+    app.use('/legacy', legacyRouter);
+  }
+  app.use('/dashboard', legacyRouter);
 
   // API routes for React SPA (new)
   const apiRouter = require('./api')(client, config);
   app.use('/api', apiRouter);
+  // An unknown API path must be a JSON 404, never the SPA shell, otherwise
+  // fetch().json() on a typo'd endpoint dies with a confusing HTML parse error.
+  app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
-  // SPA fallback: serve React index.html for any unmatched route
-  // (except /api and /auth which already have handlers)
-  app.get('*', (req, res) => {
+  // SPA fallback: hand every other GET to React, which routes on the client.
+  // Unknown /auth/* paths fall through to a plain 404 for the same reason as /api.
+  app.get('*', (req, res, next) => {
+    if (!hasReactBuild || req.path.startsWith('/auth/')) return next();
     res.sendFile(path.join(reactBuildPath, 'index.html'));
   });
 
