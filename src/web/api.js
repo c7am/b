@@ -63,12 +63,22 @@ function buildApiRouter(client, config) {
   // =========================================================================
   // AUTH ENDPOINTS
   // =========================================================================
-  router.get('/auth/me', requireAuth, (req, res) => {
+  router.get('/auth/me', requireAuth, async (req, res) => {
+    // Live-checked, not the OAuth-time snapshot: guilds the bot is actually in
+    // where this user currently passes canManageStaff. Settings and any future
+    // guild picker should use this, not adminGuildIds (a stale Discord
+    // ADMINISTRATOR-bit snapshot taken at login).
+    const candidates = (req.session.memberGuildIds || []).filter((id) => client.guilds.cache.has(id));
+    const manageableGuildIds = [];
+    for (const guildId of candidates) {
+      if (await isStaffIn(req.session.user.id, guildId)) manageableGuildIds.push(guildId);
+    }
     res.json({
       id: req.session.user.id,
       username: req.session.user.username,
       adminGuildIds: req.session.adminGuildIds || [],
       memberGuildIds: req.session.memberGuildIds || [],
+      manageableGuildIds,
     });
   });
 

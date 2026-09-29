@@ -62,6 +62,18 @@ let failed = 0;
   r = await call('u1', [], 'GET', '/api/shifts');                                             t('GET /api/shifts scoped to caller', r.status === 200 && r.calls[0].params[0] === 'u1', `(params: ${JSON.stringify(r.calls[0] && r.calls[0].params)})`);
   r = await call('u1', [], 'GET', '/api/appeals');                                            t('GET /api/appeals scoped to caller', r.status === 200 && r.calls[0].params[0] === 'u1');
 
+  console.log('\n### /api/auth/me manageableGuildIds (live-checked, not the OAuth snapshot)');
+  const meBody = async (user, guilds) => {
+    const r = await fetch(base + '/api/auth/me', { headers: { 'x-user': user, 'x-guilds': JSON.stringify(guilds) } });
+    return r.json();
+  };
+  let me = await meBody('staff1', ['g1', 'g2']);
+  t('staff in g1 only -> manageableGuildIds = [g1]', JSON.stringify(me.manageableGuildIds) === JSON.stringify(['g1']), `(got ${JSON.stringify(me.manageableGuildIds)})`);
+  me = await meBody('plain1', ['g1', 'g2']);
+  t('plain member of both -> manageableGuildIds = []', JSON.stringify(me.manageableGuildIds) === JSON.stringify([]), `(got ${JSON.stringify(me.manageableGuildIds)})`);
+  me = await meBody('staff1', ['g1', 'g2', 'g-bot-not-in']);
+  t('a guild the bot is not in is dropped, not 500', JSON.stringify(me.manageableGuildIds) === JSON.stringify(['g1']), `(got ${JSON.stringify(me.manageableGuildIds)})`);
+
   srv.close();
   console.log(failed ? `\n${failed} FAILED` : '\nALL AUTHZ CHECKS PASSED');
   process.exit(failed ? 1 : 0);
