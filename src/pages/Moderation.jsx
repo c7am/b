@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '../stores/authStore';
-import { api } from '../lib/api';
 import { Layout } from '../components/Layout';
 import '@m3e/react/card';
 import '@m3e/react/button';
@@ -24,9 +22,9 @@ const VIOLATION_TYPES = [
 ];
 
 export const ModerationPage = () => {
-  const { user, accessToken } = useAuthStore();
   const [moderations, setModerations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [showQuickModerate, setShowQuickModerate] = useState(false);
   const [moderateTarget, setModerateTarget] = useState('');
   const [violationType, setViolationType] = useState('');
@@ -34,37 +32,37 @@ export const ModerationPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [moderateError, setModerateError] = useState(null);
 
-  // Mock fetch moderations on load
   useEffect(() => {
-    // In production: const data = await api.moderation.getModerations(accessToken);
-    setModerations([
-      {
-        id: 1,
-        target: 'Player123',
-        type: 'RDM',
-        reason: 'Killed without reason',
-        moderator: 'Mod#1234',
-        timestamp: new Date(Date.now() - 3600000),
-      },
-      {
-        id: 2,
-        target: 'BadPlayer99',
-        type: 'Spam',
-        reason: 'Chat spam',
-        moderator: user.username,
-        timestamp: new Date(Date.now() - 7200000),
-      },
-      {
-        id: 3,
-        target: 'RogueMember',
-        type: 'Disrespect',
-        reason: 'Staff disrespect',
-        moderator: 'Admin#5678',
-        timestamp: new Date(Date.now() - 86400000),
-      },
-    ]);
-    setIsLoading(false);
-  }, [accessToken, user.username]);
+    let cancelled = false;
+    fetch('/api/moderations')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load moderation history');
+        return res.json();
+      })
+      .then((rows) => {
+        if (cancelled) return;
+        // moderations columns are snake_case; the list renders camelCase fields.
+        setModerations(
+          rows.map((r) => ({
+            id: r.id,
+            target: r.target_user,
+            type: r.violation_type,
+            reason: r.reason,
+            moderator: r.moderator_id,
+            timestamp: new Date(r.created_at),
+          }))
+        );
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleQuickModerate = async () => {
     if (!moderateTarget.trim() || !violationType) {
@@ -82,7 +80,7 @@ export const ModerationPage = () => {
         reason: violationReason,
       };
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/moderations`, {
+      const res = await fetch('/api/moderations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(modAction),
@@ -133,6 +131,10 @@ export const ModerationPage = () => {
             {isLoading ? (
               <div style={{ fontSize: '14px', opacity: 0.6, padding: '16px', textAlign: 'center' }}>
                 Loading moderations...
+              </div>
+            ) : loadError ? (
+              <div style={{ fontSize: '14px', color: '#f24822', padding: '16px', textAlign: 'center' }}>
+                {loadError}
               </div>
             ) : moderations.length === 0 ? (
               <div style={{ fontSize: '14px', opacity: 0.6, padding: '16px', textAlign: 'center' }}>

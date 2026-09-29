@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/authStore';
-import { api } from '../lib/api';
 import { Layout } from '../components/Layout';
 import '@m3e/react/card';
 import '@m3e/react/select';
@@ -11,32 +10,69 @@ import '@m3e/react/chips';
 import '@m3e/react/skeleton';
 
 export const SettingsPage = () => {
-  const { user, accessToken } = useAuthStore();
+  const { user } = useAuthStore();
+  // Live-checked servers this user can actually manage (see /api/auth/me).
+  // NOT adminGuildIds: that is a stale Discord-permission snapshot from OAuth
+  // login and does not match how the API itself authorizes these endpoints.
+  const manageableGuildIds = user?.manageableGuildIds || [];
+  const [selectedGuildId, setSelectedGuildId] = useState(null);
   const [config, setConfig] = useState({
     modRole: '',
     staffRole: '',
     logsChannel: '',
-    appeals: false,
+    appeals: true,
     autoMod: false,
     dmNotifications: true,
   });
+  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Mock fetch config on load
+  // Default to the first manageable server once the list is known. If there is
+  // more than one, the picker below lets the user switch.
   useEffect(() => {
-    // In production: const data = await api.settings.getServerConfig(accessToken, user.guildId);
-    // For now, use mock defaults
-    setConfig({
-      modRole: 'mod',
-      staffRole: 'staff',
-      logsChannel: 'modlogs',
-      appeals: true,
-      autoMod: false,
-      dmNotifications: true,
-    });
-  }, [accessToken, user.id]);
+    if (selectedGuildId === null && manageableGuildIds.length > 0) {
+      setSelectedGuildId(manageableGuildIds[0]);
+    }
+  }, [manageableGuildIds, selectedGuildId]);
+
+  useEffect(() => {
+    if (!selectedGuildId) {
+      setIsLoadingConfig(false);
+      return;
+    }
+    let cancelled = false;
+    setIsLoadingConfig(true);
+    setLoadError(null);
+    fetch(`/api/config/${selectedGuildId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load settings for this server');
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        // guild_config columns are snake_case; the form state is camelCase.
+        setConfig({
+          modRole: data.mod_role || '',
+          staffRole: data.staff_role || '',
+          logsChannel: data.logs_channel || '',
+          appeals: data.appeals_enabled ?? true,
+          autoMod: data.auto_mod ?? false,
+          dmNotifications: data.dm_notifications ?? true,
+        });
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingConfig(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedGuildId]);
 
   const handleConfigChange = (key, value) => {
     setConfig((prev) => ({ ...prev, [key]: value }));
@@ -45,15 +81,13 @@ export const SettingsPage = () => {
   };
 
   const handleSaveConfig = async () => {
+    if (!selectedGuildId) return;
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
 
     try {
-      // Get guildId from URL or use a default for testing
-      const guildId = user?.adminGuildIds?.[0] || 'test-guild';
-
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/config/${guildId}`, {
+      const res = await fetch(`/api/config/${selectedGuildId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
@@ -72,6 +106,54 @@ export const SettingsPage = () => {
   return (
     <Layout currentPage="settings">
       <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {manageableGuildIds.length === 0 && (
+          <div style={{ fontSize: '14px', opacity: 0.7, padding: '16px', textAlign: 'center' }}>
+            You are not staff in any server this bot is in.
+          </div>
+        )}
+
+        {manageableGuildIds.length > 1 && (
+          <div>
+            <label style={{ fontSize: '12px', opacity: 0.7, display: 'block', marginBottom: '8px' }}>
+              Server
+            </label>
+            <select
+              value={selectedGuildId || ''}
+              onChange={(e) => setSelectedGuildId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '4px',
+                border: '1px solid var(--md-sys-color-outline)',
+                fontSize: '14px',
+                backgroundColor: 'var(--md-sys-color-surface)',
+                color: 'var(--md-sys-color-on-surface)',
+              }}
+            >
+              {manageableGuildIds.map((id) => (
+                <option key={id} value={id}>{id}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {loadError && (
+          <div
+            style={{
+              color: '#f24822',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(242, 72, 34, 0.1)',
+              fontSize: '13px',
+            }}
+          >
+            {loadError}
+          </div>
+        )}
+
+        {/* One skeleton per top-level card below; loaded reveals the real content. */}
+        {/* https://matraic.github.io/m3e/components/skeleton.html */}
+        <m3e-skeleton loaded={!isLoadingConfig} shape="rounded" aria-busy={isLoadingConfig}>
         {/* Server Configuration */}
         <m3e-card variant="elevated">
           <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -210,6 +292,7 @@ export const SettingsPage = () => {
             </div>
           </div>
         </m3e-card>
+        </m3e-skeleton>
 
         {/* Status Messages */}
         {saveError && (
@@ -244,7 +327,7 @@ export const SettingsPage = () => {
         <m3e-button
           variant="filled"
           onClick={handleSaveConfig}
-          disabled={isSaving}
+          disabled={isSaving || isLoadingConfig || !selectedGuildId}
           style={{ width: '100%' }}
         >{isSaving ? 'Saving...' : 'Save Settings'}</m3e-button>
       </div>
